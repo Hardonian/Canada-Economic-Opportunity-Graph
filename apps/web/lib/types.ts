@@ -31,6 +31,16 @@ export type LifecycleStage =
   | "PAUSED"
   | "CANCELLED";
 
+export type ConfidenceLevel =
+  | "VERIFIED"
+  | "SUPPORTED"
+  | "REPORTED"
+  | "INFERRED"
+  | "CONFLICTED"
+  | "UNKNOWN"
+  | "STALE"
+  | "RETRACTED";
+
 export interface Project {
   id: string;
   slug: string;
