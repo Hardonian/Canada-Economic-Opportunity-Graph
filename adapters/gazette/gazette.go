@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -119,19 +120,15 @@ func NewGazetteAdapter(province, fixturePath string) *GazetteAdapter {
 	}
 }
 
-// NewLiveGazetteAdapter creates an opt-in live adapter (future implementation).
+// NewLiveGazetteAdapter creates an opt-in live adapter.
 func NewLiveGazetteAdapter(province string, client *http.Client) (*GazetteAdapter, error) {
-	return &GazetteAdapter{
-		province: strings.ToUpper(province),
-		client:   client,
-		health: adapters.SourceHealth{
-			AdapterName:    fmt.Sprintf("%s_%s", adapterName, strings.ToLower(province)),
-			Tier:           domain.SourceTier1,
-			Status:         string(domain.StatusHealthy),
-			RateLimitState: "AVAILABLE",
-			Mode:           "LIVE",
-		},
-	}, nil
+	adapter := NewGazetteAdapter(province, "")
+	if client != nil {
+		adapter.client = client
+	}
+	adapter.health.Mode = "LIVE"
+	adapter.health.RateLimitState = "AVAILABLE"
+	return adapter, nil
 }
 
 func (a *GazetteAdapter) Name() string                   { return fmt.Sprintf("%s_%s", adapterName, strings.ToLower(a.province)) }
@@ -146,8 +143,46 @@ func (a *GazetteAdapter) Fetch(ctx context.Context) ([]byte, error) {
 	a.health.LastAttempt = time.Now().UTC()
 	
 	if a.endpoints != nil && len(a.endpoints) > 0 && a.fixturePath == "" {
-		// Live mode - not fully implemented, return fixture instead
-		// TODO: Implement live scraping for gazette APIs
+		// Live mode: fetch from authoritative provincial/federal gazette endpoint
+		client := a.client
+		if client == nil {
+			client = &http.Client{Timeout: 30 * time.Second}
+		}
+		var fetchErr error
+		for _, endpoint := range a.endpoints {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+			if err != nil {
+				fetchErr = err
+				continue
+			}
+			req.Header.Set("User-Agent", "CanadaOpportunityGraph-GazetteScraper/1.0 (+https://github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph)")
+			req.Header.Set("Accept", "application/json, text/html, application/xhtml+xml, */*")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				fetchErr = err
+				continue
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode == http.StatusOK {
+				data, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes))
+				if err == nil && len(data) > 0 {
+					a.fetchedAt = time.Now().UTC()
+					a.health.LastSuccess = a.fetchedAt
+					a.health.Status = string(domain.StatusHealthy)
+					a.health.LastError = ""
+					return data, nil
+				}
+				fetchErr = err
+			} else {
+				fetchErr = fmt.Errorf("unexpected status code %d from %s", resp.StatusCode, endpoint)
+			}
+		}
+		if fetchErr != nil {
+			a.fail(fetchErr)
+			return nil, fmt.Errorf("live gazette fetch failed: %w", fetchErr)
+		}
 	}
 	
 	data, err := adapters.ReadBoundedFile(a.fixturePath, maxResponseBytes)

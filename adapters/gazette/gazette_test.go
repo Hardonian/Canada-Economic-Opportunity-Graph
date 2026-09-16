@@ -1,6 +1,9 @@
 package gazette
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
@@ -138,3 +141,35 @@ func TestGazettePublisher(t *testing.T) {
 		}
 	}
 }
+
+func TestLiveGazetteAdapter(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(onFixture))
+	}))
+	defer server.Close()
+
+	adapter, err := NewLiveGazetteAdapter("ON", server.Client())
+	if err != nil {
+		t.Fatalf("NewLiveGazetteAdapter: %v", err)
+	}
+	adapter.endpoints = []string{server.URL}
+
+	data, err := adapter.Fetch(context.Background())
+	if err != nil {
+		t.Fatalf("Fetch() error = %v", err)
+	}
+	if string(data) != onFixture {
+		t.Fatalf("Fetch() got unexpected data")
+	}
+
+	result, err := adapter.Parse(data)
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+	if len(result.Projects) != 1 {
+		t.Fatalf("expected 1 project, got %d", len(result.Projects))
+	}
+}
+
