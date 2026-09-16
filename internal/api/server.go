@@ -23,6 +23,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/forecast"
 	graphqlhandler "github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/graphql"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/indicators"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/matching"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/publication"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/readiness"
@@ -94,6 +95,8 @@ type Server struct {
 	adapterRegistry  *adaptersandbox.Registry
 	attStore         *verifier.AttestationStore
 	verifierNet      *verifier.Network
+	kpiFeedEngine    *indicators.LiveFeedEngine
+	kpiEvaluator     *indicators.ProjectEvaluator
 }
 
 func NewServer(store database.Store) *Server {
@@ -127,6 +130,8 @@ func NewServerWithOptions(store database.Store, options Options) (*Server, error
 		adapterRegistry:  options.AdapterRegistry,
 		attStore:         options.VerifierStore,
 		verifierNet:      options.VerifierNetwork,
+		kpiFeedEngine:    indicators.NewLiveFeedEngine(),
+		kpiEvaluator:     indicators.NewProjectEvaluator(),
 	}
 	for _, origin := range options.AllowedOrigins {
 		origin = strings.TrimSpace(origin)
@@ -456,6 +461,13 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/export/geojson", s.handleExportGeoJSON)
 	s.mux.HandleFunc("GET /api/v1/export/stac/{id}", s.handleExportSTAC)
 	s.mux.HandleFunc("GET /api/v1/filings/recent", s.handleFilingsRecent)
+
+	// KPI & Live Indicator Analytics
+	s.mux.HandleFunc("GET /api/v1/kpis", s.handleKPIList)
+	s.mux.HandleFunc("GET /api/v1/kpis/feeds", s.handleKPIFeeds)
+	s.mux.HandleFunc("GET /api/v1/kpis/project/{id}", s.handleKPIProject)
+	s.mux.HandleFunc("GET /api/v1/kpis/summary", s.handleKPISummary)
+	s.mux.HandleFunc("GET /api/v1/kpis/snapshot", s.handleKPISnapshot)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

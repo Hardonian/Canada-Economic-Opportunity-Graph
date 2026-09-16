@@ -23,6 +23,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/filings"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/gridphysics"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/indicators"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/memoexport"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/nationalplanning"
@@ -54,6 +55,8 @@ func main() {
 		handleFinance(os.Args[2:])
 	case "filings":
 		handleFilings(os.Args[2:])
+	case "kpi", "indicators":
+		handleKPI(os.Args[2:])
 	case "cegs":
 		handleCEGS(os.Args[2:])
 	case "search":
@@ -95,6 +98,10 @@ func printUsage() {
 	fmt.Println("  cog finance simulate <id|slug> [--runs N] Run stochastic 10k Monte Carlo project cash flow model")
 	fmt.Println("  cog finance cleantax <id|slug>         Calculate Clean Economy ITCs & CCfD underwriting")
 	fmt.Println("  cog filings <stream|ea|amendments>     Stream real-time regulatory filings & tender amendments")
+	fmt.Println("  cog kpi list                           Display registered Canadian KPI & indicator definitions")
+	fmt.Println("  cog kpi show <id|slug>                 Display 8-pillar project KPI scorecard and gap analysis")
+	fmt.Println("  cog kpi feeds                          Stream live market ticks and commodity indicators")
+	fmt.Println("  cog kpi snapshot                       Export canonical KPI snapshot")
 	fmt.Println("  cog planning optimize [--obj <type>]   Run Sovereign Capital Allocation Optimizer")
 	fmt.Println("  cog planning wargame [--shock <type>]  Run geopolitical macro shock stress-testing")
 	fmt.Println("  cog planning labor [--prov <prov>]     Display Red Seal craft labor collision report")
@@ -1049,6 +1056,100 @@ func handleFilings(args []string) {
 	default:
 		fmt.Printf("Unknown filings command: %s\n", sub)
 		fmt.Println("Usage: cog filings <stream|ea|amendments>")
+	}
+}
+
+func handleKPI(args []string) {
+	if len(args) == 0 {
+		fmt.Println("Usage: cog kpi <list|show|feeds|snapshot> [args]")
+		return
+	}
+
+	sub := args[0]
+	switch sub {
+	case "list":
+		defs := indicators.CanonicalRegistry()
+		fmt.Println("=== Canada Sovereign KPI & Indicator Taxonomy ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "CODE\tCATEGORY\tNAME\tTARGET\tUNIT\tFREQUENCY")
+		for _, d := range defs {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%.1f\t%s\t%s\n",
+				d.Code, d.Category, d.Name, d.TargetBenchmark, d.Unit, d.UpdateFrequency)
+		}
+		w.Flush()
+
+	case "show":
+		if len(args) < 2 {
+			fmt.Println("Usage: cog kpi show <id|slug>")
+			return
+		}
+		target := args[1]
+		store := getSeededStore()
+		ctx := context.Background()
+
+		proj, err := store.GetProject(ctx, target)
+		if err != nil || proj == nil {
+			proj, _ = store.GetProjectBySlug(ctx, target)
+		}
+
+		if proj == nil {
+			fmt.Printf("Project %q not found.\n", target)
+			return
+		}
+
+		evaluator := indicators.NewProjectEvaluator()
+		scorecard := evaluator.Evaluate(proj)
+
+		fmt.Printf("=== Project KPI Intelligence Scorecard ===\n")
+		fmt.Printf("Project:       %s (%s)\n", scorecard.ProjectName, scorecard.ProjectSlug)
+		fmt.Printf("Sector:        %s | Province: %s | Stage: %s\n", scorecard.Sector, scorecard.Province, scorecard.CurrentStage)
+		fmt.Printf("Overall KPI:   %.1f / 100\n", scorecard.OverallKPIRating)
+		fmt.Printf("Audit Hash:    %s\n\n", scorecard.AuditHash)
+
+		for _, p := range scorecard.Pillars {
+			fmt.Printf("[%s] Score: %.1f/100 (%s)\n", p.Title, p.Score, p.Health)
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			fmt.Fprintln(w, "  METRIC\tOBSERVED\tTARGET\tRANK\tNOTES")
+			for _, m := range p.Metrics {
+				fmt.Fprintf(w, "  %s\t%.2f %s\t%.2f %s\t%s\t%s\n",
+					m.Name, m.ObservedValue, m.Unit, m.TargetBenchmark, m.Unit, m.PerformanceRank, m.Notes)
+			}
+			w.Flush()
+			fmt.Println()
+		}
+
+		if len(scorecard.CriticalActionGaps) > 0 {
+			fmt.Println("CRITICAL ACTION GAPS:")
+			for _, gap := range scorecard.CriticalActionGaps {
+				fmt.Printf("  • %s\n", gap)
+			}
+		}
+
+	case "feeds":
+		engine := indicators.NewLiveFeedEngine()
+		ticks := engine.GetLatestTicks()
+		fmt.Println("=== Real-Time Commodity & Macro Indicator Feeds ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "CODE\tNAME\tVALUE\tUNIT\tCHANGE\tDIR\tSOURCE")
+		for _, t := range ticks {
+			fmt.Fprintf(w, "%s\t%s\t%.2f\t%s\t%+.2f (%.2f%%)\t%s\t%s\n",
+				t.MetricCode, t.Name, t.Value, t.Unit, t.ChangeAbsolute, t.ChangePercent, t.Direction, t.Source)
+		}
+		w.Flush()
+
+	case "snapshot":
+		engine := indicators.NewLiveFeedEngine()
+		snapshot, err := engine.GenerateSnapshot()
+		if err != nil {
+			fmt.Printf("Error generating snapshot: %v\n", err)
+			return
+		}
+		data, _ := json.MarshalIndent(snapshot, "", "  ")
+		fmt.Println(string(data))
+
+	default:
+		fmt.Printf("Unknown kpi subcommand: %s\n", sub)
+		fmt.Println("Usage: cog kpi <list|show|feeds|snapshot>")
 	}
 }
 

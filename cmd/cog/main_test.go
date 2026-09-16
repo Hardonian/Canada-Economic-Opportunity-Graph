@@ -139,3 +139,34 @@ func TestCLIFilings(t *testing.T) {
 		t.Fatalf("expected tender amendments, got: %s", outAmend)
 	}
 }
+
+func TestCLIKPI(t *testing.T) {
+	outList := captureStdout(func() {
+		handleKPI([]string{"list"})
+	})
+	if !strings.Contains(outList, "Canada Sovereign KPI & Indicator Taxonomy") || !strings.Contains(outList, "ESG.GHG.INTENSITY.SCOPE1_2") {
+		t.Fatalf("expected KPI list, got: %s", outList)
+	}
+
+	outFeeds := captureStdout(func() {
+		handleKPI([]string{"feeds"})
+	})
+	if !strings.Contains(outFeeds, "Real-Time Commodity & Macro Indicator Feeds") || !strings.Contains(outFeeds, "COMMODITY.WCS_WTI.DIFF.USD_BBL") {
+		t.Fatalf("expected KPI feeds, got: %s", outFeeds)
+	}
+
+	outSnapshot := captureStdout(func() {
+		handleKPI([]string{"snapshot"})
+	})
+	if !strings.Contains(outSnapshot, "cegs-kpi-v1.0") || !strings.Contains(outSnapshot, "audit_hash") {
+		t.Fatalf("expected KPI snapshot JSON, got: %s", outSnapshot)
+	}
+
+	outShow := captureStdout(func() {
+		handleKPI([]string{"show", "darlington-new-nuclear-project-unit-1"})
+	})
+	if !strings.Contains(outShow, "Project KPI Intelligence Scorecard") || !strings.Contains(outShow, "ESG & Lifecycle Decarbonization") {
+		t.Fatalf("expected KPI scorecard for Darlington, got: %s", outShow)
+	}
+}
+
