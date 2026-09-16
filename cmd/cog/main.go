@@ -17,8 +17,14 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/documentintelligence"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/earthobs"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/econometrics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/gridphysics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/nationalplanning"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/risk"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ubo"
 )
 
 func main() {
@@ -31,6 +37,8 @@ func main() {
 	switch cmd {
 	case "help", "-h", "--help":
 		printUsage()
+	case "planning":
+		handlePlanning(os.Args[2:])
 	case "cegs":
 		handleCEGS(os.Args[2:])
 	case "search":
@@ -59,10 +67,21 @@ func printUsage() {
 	fmt.Println("\nUsage:")
 	fmt.Println("  cog search <query>                     Search projects and infrastructure assets")
 	fmt.Println("  cog project show <id|slug>             Display investor-grade project profile")
+	fmt.Println("  cog project mrio <id|slug>             Display StatCan input-output macro multipliers")
+	fmt.Println("  cog project flyvbjerg <id|slug>        Display Bayesian cost & schedule overrun hazard curve")
+	fmt.Println("  cog project ubo <id|slug>              Display Ultimate Beneficial Ownership & ICA screening")
+	fmt.Println("  cog project grid <id|slug>             Display electrical grid hosting capacity feasibility")
+	fmt.Println("  cog project earthobs <id|slug>         Display satellite SAR and optical ground-truth telemetry")
+	fmt.Println("  cog planning optimize [--obj <type>]   Run Sovereign Capital Allocation Optimizer")
+	fmt.Println("  cog planning wargame [--shock <type>]  Run geopolitical macro shock stress-testing")
+	fmt.Println("  cog planning labor [--prov <prov>]     Display Red Seal craft labor collision report")
+	fmt.Println("  cog extract cards <file>               Extract restricted portfolio cards from text")
+	fmt.Println("  cog extract ni43101 <file>             Extract NI 43-101 mining reserves & economic metrics")
+	fmt.Println("  cog extract waterfall <file>           Extract capital stack financing waterfall & WACC")
+	fmt.Println("  cog extract iaac <file>                Extract IAAC Decision Statement conditions & legal risk")
 	fmt.Println("  cog changes [--since 7d|30d]           List recent momentum signals and milestones")
 	fmt.Println("  cog rankings <dimension>               Rank projects (buildability, investability, etc.)")
 	fmt.Println("  cog export project <id> [--format json|md|cegs] Export dossier with provenance")
-	fmt.Println("  cog extract <file> [--source <id>]     Extract restricted portfolio cards from text")
 	fmt.Println("  cog cegs validate <file>               Validate document against CEGS 0.1 standard")
 	fmt.Println("  cog cegs inspect <file>                Inspect CEGS document & evidence trust profile")
 	fmt.Println("  cog cegs diff <old.json> <new.json>    Semantic diff between two CEGS states")
@@ -207,30 +226,136 @@ func handleSearch(args []string) {
 	w.Flush()
 }
 
+func findProject(ctx context.Context, store database.Store, id string) (*domain.Project, error) {
+	proj, err := store.GetProject(ctx, id)
+	if err == nil && proj != nil {
+		return proj, nil
+	}
+	proj, err = store.GetProjectBySlug(ctx, id)
+	if err == nil && proj != nil {
+		return proj, nil
+	}
+	return nil, fmt.Errorf("project not found: %s", id)
+}
+
 func handleProject(args []string) {
-	if len(args) < 2 || args[0] != "show" {
-		fmt.Println("Usage: cog project show <id|slug>")
+	if len(args) < 2 {
+		fmt.Println("Usage: cog project <show|mrio|flyvbjerg|ubo|grid|earthobs> <id|slug>")
 		return
 	}
+	action := strings.ToLower(args[0])
 	id := args[1]
 	store := getSeededStore()
 	ctx := context.Background()
 
-	bundle, err := export.ExportProjectBundle(ctx, store, id)
+	proj, err := findProject(ctx, store, id)
 	if err != nil {
-		proj, err2 := store.GetProjectBySlug(ctx, id)
-		if err2 != nil {
-			fmt.Printf("Project not found: %s\n", id)
-			return
-		}
-		bundle, err = export.ExportProjectBundle(ctx, store, proj.ID)
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	switch action {
+	case "show":
+		bundle, err := export.ExportProjectBundle(ctx, store, proj.ID)
 		if err != nil {
 			fmt.Printf("Error exporting project: %v\n", err)
 			return
 		}
-	}
+		fmt.Println(bundle.ToMarkdown())
 
-	fmt.Println(bundle.ToMarkdown())
+	case "mrio":
+		impact := econometrics.NewMRIOEngine().CalculateEconomicImpact(proj)
+		fmt.Printf("=== StatCan Input-Output Macro Multipliers: %s ===\n", proj.Name)
+		fmt.Printf("Project ID:            %s\n", proj.ID)
+		fmt.Printf("Tracked CAPEX:         $%d CAD\n", impact.CapexCAD)
+		fmt.Printf("Direct GDP Impact:     $%d CAD\n", impact.DirectGDPCAD)
+		fmt.Printf("Indirect Supply GDP:   $%d CAD\n", impact.IndirectGDPCAD)
+		fmt.Printf("Induced Wage GDP:      $%d CAD\n", impact.InducedGDPCAD)
+		fmt.Printf("Total GDP Generated:   $%d CAD (%.2fx Multiplier)\n", impact.TotalGDPCAD, impact.TotalMultipler)
+		fmt.Printf("Person-Years of Jobs:  %d FTE\n", impact.PersonYearsJobs)
+		fmt.Println("Fiscal Tax Returns:")
+		fmt.Printf("  Federal Tax:         $%d CAD\n", impact.FederalTaxCAD)
+		fmt.Printf("  Provincial Tax:      $%d CAD\n", impact.ProvincialTaxCAD)
+		fmt.Printf("  Municipal Tax:       $%d CAD\n", impact.MunicipalTaxCAD)
+		fmt.Printf("  Total Fiscal Return: $%d CAD\n", impact.TotalFiscalReturn)
+		fmt.Printf("Model Version:         %s\n", impact.ModelVersion)
+		fmt.Printf("Audit Hash:            %s\n", impact.AuditHash)
+
+	case "flyvbjerg":
+		forecast := risk.NewEvaluator().ForecastProject(proj)
+		fmt.Printf("=== Bayesian Reference Class Overrun Analysis: %s ===\n", proj.Name)
+		fmt.Printf("Sector Benchmark:      %s (Sample size: %d projects)\n", forecast.Sector, forecast.HistoricalSampleSize)
+		fmt.Printf("Expected Cost Overrun: +%.1f%%\n", forecast.ExpectedCostOverrunPct)
+		fmt.Printf("Expected Delay:        +%d months\n", forecast.ExpectedDelayMonths)
+		if forecast.RemoteGeographyPenalty > 0 {
+			fmt.Printf("Remote Penalty:        +%.1f%% (Arctic / Remote Corridor)\n", forecast.RemoteGeographyPenalty*100)
+		}
+		if forecast.TechNoveltyPenalty > 0 {
+			fmt.Printf("Tech Novelty Penalty:  +%.1f%% (FOAK / SMR / Novel Process)\n", forecast.TechNoveltyPenalty*100)
+		}
+		fmt.Println("\nHazard Distribution Quantiles:")
+		for _, pt := range forecast.Percentiles {
+			fmt.Printf("  %-16s Cost: +%5.1f%% | Schedule: +%2d mo | Expected CAPEX: $%d CAD\n",
+				pt.Percentile, pt.CostOverrunPct, pt.ScheduleDelayMonths, pt.ExpectedTotalCapexCAD)
+		}
+		fmt.Printf("\nAudit Hash:            %s\n", forecast.AuditHash)
+
+	case "ubo":
+		screening := ubo.NewEvaluator().ScreenProject(proj, nil)
+		fmt.Printf("=== Sovereign Screening & ICA National Security Review: %s ===\n", proj.Name)
+		fmt.Printf("Proponent:             %s (ID: %s)\n", screening.ProponentName, screening.ProponentID)
+		fmt.Printf("Investment Canada Act: %s\n", screening.ICARisk)
+		fmt.Printf("Domestic Control:      %.1f%%\n", screening.DomesticControlShare*100)
+		fmt.Printf("FTA Partner Share:     %.1f%%\n", screening.FTAPartnerShare*100)
+		fmt.Printf("Non-FTA Foreign Share: %.1f%%\n", screening.NonFTAShare*100)
+		fmt.Printf("Foreign SOE Share:     %.1f%%\n", screening.SOEExposurePercent*100)
+		fmt.Printf("Critical Mineral Flag: %t\n", screening.CriticalMineralFlag)
+		fmt.Printf("Dual-Use Sovereignty:  %t\n", screening.DualUseSovereignty)
+		if len(screening.NationalSecurityNotes) > 0 {
+			fmt.Println("National Security Notes:")
+			for _, n := range screening.NationalSecurityNotes {
+				fmt.Printf("  - %s\n", n)
+			}
+		}
+		fmt.Printf("Audit Hash:            %s\n", screening.AuditHash)
+
+	case "grid":
+		assessment := gridphysics.NewEngine().AssessProject(proj)
+		fmt.Printf("=== Electrical Grid Feasibility & Interconnect: %s ===\n", proj.Name)
+		fmt.Printf("System Operator:       %s\n", assessment.Operator)
+		fmt.Printf("Estimated Load / Gen:  %.1f MW (Voltage: %d kV)\n", assessment.EstimatedLoadOrGenMW, assessment.InterconnectVoltageKV)
+		fmt.Printf("Grid Feasibility Score:%.1f / 100\n", assessment.GridFeasibilityScore)
+		fmt.Printf("Clean Power Purity:    %.1f%% (Hydro / Nuclear)\n", assessment.CleanPowerPurityPct)
+		fmt.Printf("Queue Estimated Delay: %d months\n", assessment.QueueEstimatedMonths)
+		fmt.Printf("Substation Headroom:   %.1f MW\n", assessment.SubstationHeadroomMW)
+		fmt.Printf("Dedicated Substation:  %t\n", assessment.DedicatedSubstationNeeded)
+		fmt.Printf("Reinforcement CAPEX:   $%d CAD\n", assessment.ReinforcementCostCAD)
+		if len(assessment.InterconnectNotes) > 0 {
+			fmt.Println("Grid Engineering Notes:")
+			for _, n := range assessment.InterconnectNotes {
+				fmt.Printf("  - %s\n", n)
+			}
+		}
+		fmt.Printf("Audit Hash:            %s\n", assessment.AuditHash)
+
+	case "earthobs":
+		dossier := earthobs.NewEvaluator().CorroborateProject(proj, nil)
+		fmt.Printf("=== Satellite Ground-Truth & SAR Corroboration: %s ===\n", proj.Name)
+		fmt.Printf("Claimed Stage:         %s\n", dossier.ClaimedStage)
+		fmt.Printf("Corroboration Status:  %s\n", dossier.CorroborationStatus)
+		fmt.Printf("Physical Progress:     %.1f / 100\n", dossier.PhysicalProgressScore)
+		fmt.Printf("Earthworks Confirmed:  %t (Copernicus Sentinel-1 SAR)\n", dossier.EarthworksConfirmed)
+		fmt.Printf("Structures Confirmed:  %t (RCS Radar Cross-Section)\n", dossier.StructuresConfirmed)
+		if !dossier.LastSatellitePass.IsZero() {
+			fmt.Printf("Last Satellite Pass:   %s\n", dossier.LastSatellitePass.Format("2006-01-02"))
+		}
+		fmt.Printf("Telemetry Summary:     %s\n", dossier.TelemetrySummary)
+		fmt.Printf("Audit Hash:            %s\n", dossier.AuditHash)
+
+	default:
+		fmt.Printf("Unknown project action: %s\n", action)
+		fmt.Println("Available actions: show, mrio, flyvbjerg, ubo, grid, earthobs")
+	}
 }
 
 func handleChanges(args []string) {
