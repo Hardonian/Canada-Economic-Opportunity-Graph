@@ -13,14 +13,18 @@ func captureStdout(f func()) string {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
+	outC := make(chan string)
+	go func() {
+		var buf bytes.Buffer
+		_, _ = io.Copy(&buf, r)
+		outC <- buf.String()
+	}()
+
 	f()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = old
-
-	var buf bytes.Buffer
-	io.Copy(&buf, r)
-	return buf.String()
+	return <-outC
 }
 
 func TestCLISyndication(t *testing.T) {
