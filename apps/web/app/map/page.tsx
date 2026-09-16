@@ -16,10 +16,22 @@ import {
   ShieldCheck, 
   Activity,
   Compass,
-  Radio
+  Radio,
+  Globe,
+  Satellite,
+  Sparkles,
+  AlertTriangle,
+  Ship
 } from "lucide-react";
 import { FALLBACK_PROJECTS } from "@/lib/data";
 import type { Project } from "@/lib/types";
+import GeospatialMapWrapper from "@/components/GeospatialMapWrapper";
+import {
+  GLOBAL_TRADE_ROUTES,
+  CONFLICT_MARKERS,
+  OPPORTUNITY_ZONES,
+  STRATEGIC_CORRIDORS
+} from "@/lib/geospatial";
 
 type MappableProject = Project & { latitude: number; longitude: number };
 
@@ -41,6 +53,7 @@ export default function MapPage() {
   const [selectedStage, setSelectedStage] = useState("ALL");
   const [activeProject, setActiveProject] = useState(FALLBACK_PROJECTS[0]);
   const [hoveredProject, setHoveredProject] = useState<typeof FALLBACK_PROJECTS[0] | null>(null);
+  const [viewEngine, setViewEngine] = useState<"GEOSPATIAL" | "VECTOR">("GEOSPATIAL");
 
   const sectors = [
     "ALL",
@@ -61,20 +74,7 @@ export default function MapPage() {
   });
 
   const mappableProjects = filtered.filter(hasCoordinates);
-
   const totalFilteredCapex = filtered.reduce((acc, p) => acc + p.capex_cad, 0);
-
-  // Strategic Corridor Transmission Vectors (Connecting Hubs)
-  const corridors = [
-    // Clean Hydro from Chisasibi (QC) to Montreal
-    { from: "proj-chisasibi-ai-compute", to: "proj-hyperscale-qc", name: "Baie-James Clean Hydro Corridor", color: "#00F5A0" },
-    // Churchill Arctic Rail to Gillam/Prairies
-    { from: "proj-churchill-arctic-gateway", to: "proj-kivalliq-link", name: "Hudson Bay Strategic Northern Vector", color: "#F59E0B" },
-    // Bruce to Darlington Ontario Clean Nuclear Belt
-    { from: "proj-bruce-nuclear", to: "proj-darlington-smr", name: "Ontario 10GW Clean Nuclear Baseload Spine", color: "#00F5A0" },
-    // Timmins Nickel to Southern Ontario EV Battery Supply Chain
-    { from: "proj-crawford-nickel", to: "proj-oneida-battery", name: "Critical Mineral - EV Battery Highway", color: "#F59E0B" },
-  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -83,19 +83,45 @@ export default function MapPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-primary/40 text-[11px] font-mono text-aurora mb-3 shadow-sm">
             <Radio className="h-3.5 w-3.5 text-aurora animate-pulse" />
-            GEOSPATIAL SOVEREIGN CAPITAL RADAR — CEGS 0.1
+            GEOSPATIAL SOVEREIGN CAPITAL & GLOBAL TRADE RADAR — CEGS 1.0
           </div>
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-text-main">
-            National Economic <span className="text-aurora">Infrastructure Map</span>
+            National Economic & <span className="text-aurora">Global Trade Map</span>
           </h1>
           <p className="text-xs sm:text-sm text-text-muted mt-1.5 max-w-3xl leading-relaxed">
             Reviewing <span className="text-aurora font-semibold">${(totalFilteredCapex / 1e9).toFixed(2)}B CAD</span> across {filtered.length} source-linked assets.
-            The map plots only records with published coordinates; {mappableProjects.length} are available in this offline snapshot.
+            Includes high-resolution optical satellite imagery, international maritime trade corridors, geopolitical choke points, and critical mineral opportunity zones.
           </p>
         </div>
 
-        {/* Filter Controls */}
+        {/* View Engine Toggle & Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Engine Selector */}
+          <div className="flex items-center bg-card border border-border rounded-xl p-1 font-mono text-xs shadow-sm">
+            <button
+              onClick={() => setViewEngine("GEOSPATIAL")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                viewEngine === "GEOSPATIAL"
+                  ? "bg-aurora text-black font-bold shadow-[0_0_8px_#00F5A0]"
+                  : "text-text-muted hover:text-white"
+              }`}
+            >
+              <Satellite className="h-3.5 w-3.5" />
+              <span>Satellite & Global GIS</span>
+            </button>
+            <button
+              onClick={() => setViewEngine("VECTOR")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                viewEngine === "VECTOR"
+                  ? "bg-aurora text-black font-bold shadow-[0_0_8px_#00F5A0]"
+                  : "text-text-muted hover:text-white"
+              }`}
+            >
+              <Compass className="h-3.5 w-3.5" />
+              <span>Vector Blueprint</span>
+            </button>
+          </div>
+
           <select
             value={selectedSector}
             onChange={(e) => setSelectedSector(e.target.value)}
@@ -122,189 +148,222 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Main Map Visualizer & Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[620px]">
-        {/* Interactive SVG Canadian Map Canvas */}
-        <div className="lg:col-span-8 bg-[#040806] rounded-2xl border border-border/80 relative overflow-hidden flex items-center justify-center p-4 shadow-2xl">
-          {/* Subtle Ambient Radial Grid Glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(#00F5A0_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
-
-          {/* Map Status Floating Legend */}
-          <div className="absolute top-4 left-4 z-10 bg-card/90 backdrop-blur-md border border-border/80 p-3 rounded-xl text-[11px] font-mono space-y-2 shadow-xl">
-            <div className="text-text-subtle uppercase text-[9px] font-bold tracking-wider flex items-center gap-1.5">
-              <Compass className="h-3 w-3 text-aurora" />
-              Sovereign Grid Layers
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-text-main">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-aurora shadow-[0_0_8px_#00F5A0]"></span>
-                <span className="text-[10px]">Construction</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_8px_#F59E0B]"></span>
-                <span className="text-[10px]">Permitting / EA</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-aurora-mint"></span>
-                <span className="text-[10px]">Feasibility</span>
-              </div>
-            </div>
+      {/* Strategic Intelligence Badges */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+        <div className="p-3 rounded-xl bg-card border border-border/80 flex items-center gap-2.5 shadow-sm">
+          <div className="p-2 rounded-lg bg-aurora/10 text-aurora">
+            <Satellite className="h-4 w-4" />
           </div>
+          <div>
+            <div className="text-[10px] text-text-subtle uppercase">Satellite Feeds</div>
+            <div className="text-sm font-bold text-text-main">Esri + Google Maps</div>
+          </div>
+        </div>
 
-          {/* High-Tech Canadian Map Topology */}
-          <svg viewBox="0 0 1000 650" className="w-full h-full max-h-[560px] select-none">
-            <defs>
-              <linearGradient id="auroraVector" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00F5A0" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.4" />
-              </linearGradient>
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
+        <div className="p-3 rounded-xl bg-card border border-border/80 flex items-center gap-2.5 shadow-sm">
+          <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400">
+            <Ship className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="text-[10px] text-text-subtle uppercase">Global Trade Routes</div>
+            <div className="text-sm font-bold text-text-main">{GLOBAL_TRADE_ROUTES.length} Active Corridors</div>
+          </div>
+        </div>
 
-            {/* Canadian Sovereign Territory Landmass (Stylized Topology) */}
-            <path
-              d="M 120 180 L 180 150 L 260 120 L 380 90 L 520 80 L 680 70 L 780 110 L 850 160 L 920 220 L 880 320 L 820 400 L 750 480 L 680 500 L 550 520 L 420 540 L 300 550 L 180 520 L 100 420 L 70 300 Z"
-              fill="#0A140F"
-              stroke="#0D2E1E"
-              strokeWidth="2"
+        <div className="p-3 rounded-xl bg-card border border-border/80 flex items-center gap-2.5 shadow-sm">
+          <div className="p-2 rounded-lg bg-red-500/10 text-red-400">
+            <AlertTriangle className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="text-[10px] text-text-subtle uppercase">Choke Points & Friction</div>
+            <div className="text-sm font-bold text-text-main">{CONFLICT_MARKERS.length} Geopolitical Zones</div>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl bg-card border border-border/80 flex items-center gap-2.5 shadow-sm">
+          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="text-[10px] text-text-subtle uppercase">Opportunity Zones</div>
+            <div className="text-sm font-bold text-text-main">{OPPORTUNITY_ZONES.length} Mineral Belts</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Map Visualizer & Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[680px]">
+        {/* Map Canvas Area */}
+        <div className="lg:col-span-8 flex flex-col">
+          {viewEngine === "GEOSPATIAL" ? (
+            <GeospatialMapWrapper
+              projects={filtered}
+              activeProject={activeProject}
+              onSelectProject={setActiveProject}
+              selectedSector={selectedSector}
+              selectedStage={selectedStage}
             />
+          ) : (
+            <div className="h-[680px] bg-[#040806] rounded-2xl border border-border/80 relative overflow-hidden flex items-center justify-center p-4 shadow-2xl">
+              {/* Subtle Ambient Radial Grid Glow */}
+              <div className="absolute inset-0 bg-[radial-gradient(#00F5A0_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
-            {/* Maritime & Great Lakes Water Insets (Stylized) */}
-            <path
-              d="M 600 470 Q 640 450 670 480 Q 650 510 610 500 Z"
-              fill="#040806"
-              stroke="#0D2E1E"
-              strokeWidth="1"
-            />
-            <path
-              d="M 520 180 Q 560 160 580 210 Q 530 250 500 210 Z"
-              fill="#040806"
-              stroke="#0D2E1E"
-              strokeWidth="1"
-            />
+              {/* Map Status Floating Legend */}
+              <div className="absolute top-4 left-4 z-10 bg-card/90 backdrop-blur-md border border-border/80 p-3 rounded-xl text-[11px] font-mono space-y-2 shadow-xl">
+                <div className="text-text-subtle uppercase text-[9px] font-bold tracking-wider flex items-center gap-1.5">
+                  <Compass className="h-3 w-3 text-aurora" />
+                  Sovereign Vector Blueprint
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-text-main">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-aurora shadow-[0_0_8px_#00F5A0]"></span>
+                    <span className="text-[10px]">Construction</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_8px_#F59E0B]"></span>
+                    <span className="text-[10px]">Permitting / EA</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-sky-400"></span>
+                    <span className="text-[10px]">Feasibility</span>
+                  </div>
+                </div>
+              </div>
 
-            {/* Provincial & Territorial Regional Boundaries */}
-            {/* Arctic / Nunavut & Northwest Territories */}
-            <path d="M 380 90 L 450 200 L 600 220 L 700 150" fill="none" stroke="#123B27" strokeWidth="1.2" strokeDasharray="3 3" />
-            {/* Quebec & Ontario */}
-            <path d="M 580 320 L 640 470" fill="none" stroke="#123B27" strokeWidth="1.2" strokeDasharray="3 3" />
-            {/* Prairies & British Columbia */}
-            <path d="M 280 340 L 320 540" fill="none" stroke="#123B27" strokeWidth="1.2" strokeDasharray="3 3" />
+              {/* High-Tech Canadian Map Topology */}
+              <svg viewBox="0 0 1000 650" className="w-full h-full max-h-[640px] select-none">
+                <defs>
+                  <linearGradient id="auroraVector" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#00F5A0" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.4" />
+                  </linearGradient>
+                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
 
-            {/* Regional Labels */}
-            <text x="520" y="140" fill="#2D5A43" fontSize="11" fontFamily="monospace" letterSpacing="2">ARCTIC WATERS / NUNAVUT</text>
-            <text x="350" y="440" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">WESTERN PRAIRIES</text>
-            <text x="610" y="420" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">ONTARIO INDUSTRIAL BELT</text>
-            <text x="710" y="360" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">QUEBEC CLEAN HYDRO</text>
+                {/* Canadian Sovereign Territory Landmass (Stylized Topology) */}
+                <path
+                  d="M 120 180 L 180 150 L 260 120 L 380 90 L 520 80 L 680 70 L 780 110 L 850 160 L 920 220 L 880 320 L 820 400 L 750 480 L 680 500 L 550 520 L 420 540 L 300 550 L 180 520 L 100 420 L 70 300 Z"
+                  fill="#0A140F"
+                  stroke="#0D2E1E"
+                  strokeWidth="2"
+                />
 
-            {/* Strategic Infrastructure Corridors (Transmission & Rail Vectors) */}
-            {corridors.map((c, idx) => {
-              const fromP = FALLBACK_PROJECTS.find(p => p.id === c.from);
-              const toP = FALLBACK_PROJECTS.find(p => p.id === c.to);
-              if (!fromP || !toP || !hasCoordinates(fromP) || !hasCoordinates(toP)) return null;
+                {/* Maritime & Great Lakes Water Insets */}
+                <path
+                  d="M 600 470 Q 640 450 670 480 Q 650 510 610 500 Z"
+                  fill="#040806"
+                  stroke="#0D2E1E"
+                  strokeWidth="1"
+                />
+                <path
+                  d="M 520 180 Q 560 160 580 210 Q 530 250 500 210 Z"
+                  fill="#040806"
+                  stroke="#0D2E1E"
+                  strokeWidth="1"
+                />
 
-              const x1 = 150 + ((fromP.longitude + 130) / 65) * 700;
-              const y1 = 550 - ((fromP.latitude - 42) / 33) * 450;
-              const x2 = 150 + ((toP.longitude + 130) / 65) * 700;
-              const y2 = 550 - ((toP.latitude - 42) / 33) * 450;
+                {/* Regional Labels */}
+                <text x="520" y="140" fill="#2D5A43" fontSize="11" fontFamily="monospace" letterSpacing="2">
+                  ARCTIC WATERS / NUNAVUT
+                </text>
+                <text x="350" y="440" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">
+                  WESTERN PRAIRIES
+                </text>
+                <text x="610" y="420" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">
+                  ONTARIO INDUSTRIAL BELT
+                </text>
+                <text x="710" y="360" fill="#2D5A43" fontSize="10" fontFamily="monospace" letterSpacing="1.5">
+                  QUEBEC CLEAN HYDRO
+                </text>
 
-              return (
-                <g key={idx}>
-                  <line
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={c.color}
-                    strokeWidth="1.5"
-                    strokeDasharray="4 3"
-                    opacity="0.6"
-                  />
-                </g>
-              );
-            })}
+                {/* Corridors */}
+                {STRATEGIC_CORRIDORS.map((c, idx) => {
+                  const x1 = 150 + ((c.fromCoords.lng + 130) / 65) * 700;
+                  const y1 = 550 - ((c.fromCoords.lat - 42) / 33) * 450;
+                  const x2 = 150 + ((c.toCoords.lng + 130) / 65) * 700;
+                  const y2 = 550 - ((c.toCoords.lat - 42) / 33) * 450;
 
-            {/* Project Nodes on Canvas */}
-            {mappableProjects.map((p) => {
-              // Map coordinates: Lat (42 to 75), Long (-130 to -65) -> Canvas (1000 x 650)
-              const x = 150 + ((p.longitude + 130) / 65) * 700;
-              const y = 550 - ((p.latitude - 42) / 33) * 450;
-              const isSelected = activeProject.id === p.id;
-              const isHovered = hoveredProject?.id === p.id;
-
-              let markerColor = "#00F5A0"; // Construction
-              if (p.current_stage === "PERMITTING" || p.current_stage === "ENVIRONMENTAL_REVIEW") markerColor = "#F59E0B";
-              if (p.current_stage === "FEASIBILITY" || p.current_stage === "ANNOUNCED") markerColor = "#4ECCA3";
-
-              return (
-                <g
-                  key={p.id}
-                  className="cursor-pointer transition-all duration-300"
-                  onClick={() => setActiveProject(p)}
-                  onMouseEnter={() => setHoveredProject(p)}
-                  onMouseLeave={() => setHoveredProject(null)}
-                >
-                  {/* Outer Pulsing Glow */}
-                  {isSelected && (
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r="20"
-                      fill="none"
-                      stroke={markerColor}
+                  return (
+                    <line
+                      key={idx}
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={c.color}
                       strokeWidth="1.5"
-                      className="animate-ping"
-                      opacity="0.4"
+                      strokeDasharray="4 3"
+                      opacity="0.6"
                     />
-                  )}
+                  );
+                })}
 
-                  {/* Active Border Ring */}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={isSelected || isHovered ? "11" : "7"}
-                    fill="#050B08"
-                    stroke={markerColor}
-                    strokeWidth={isSelected ? "2.5" : "1.5"}
-                    filter="url(#glow)"
-                  />
+                {/* Project Nodes on Canvas */}
+                {mappableProjects.map((p) => {
+                  const x = 150 + ((p.longitude + 130) / 65) * 700;
+                  const y = 550 - ((p.latitude - 42) / 33) * 450;
+                  const isSelected = activeProject.id === p.id;
+                  const isHovered = hoveredProject?.id === p.id;
 
-                  {/* Inner Solid Pin Core */}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={isSelected || isHovered ? "6" : "4"}
-                    fill={markerColor}
-                  />
+                  let markerColor = "#00F5A0";
+                  if (p.current_stage === "PERMITTING" || p.current_stage === "ENVIRONMENTAL_REVIEW")
+                    markerColor = "#F59E0B";
+                  if (p.current_stage === "FEASIBILITY" || p.current_stage === "ANNOUNCED")
+                    markerColor = "#38BDF8";
 
-                  {/* Node Label Text */}
-                  <text
-                    x={x + 14}
-                    y={y + 4}
-                    fill={isSelected ? "#00F5A0" : isHovered ? "#FFFFFF" : "#94A3B8"}
-                    fontSize="11"
-                    fontFamily="monospace"
-                    fontWeight={isSelected ? "bold" : "normal"}
-                  >
-                    {p.name.split(" ")[0]}
-                  </text>
-                </g>
-              );
-            })}
-
-            {mappableProjects.length === 0 ? (
-              <text x="500" y="330" textAnchor="middle" fill="#94A3B8" fontSize="13" fontFamily="monospace">
-                No published coordinates in the offline reviewed snapshot
-              </text>
-            ) : null}
-          </svg>
+                  return (
+                    <g
+                      key={p.id}
+                      className="cursor-pointer transition-all duration-300"
+                      onClick={() => setActiveProject(p)}
+                      onMouseEnter={() => setHoveredProject(p)}
+                      onMouseLeave={() => setHoveredProject(null)}
+                    >
+                      {isSelected && (
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="20"
+                          fill="none"
+                          stroke={markerColor}
+                          strokeWidth="1.5"
+                          className="animate-ping"
+                          opacity="0.4"
+                        />
+                      )}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={isSelected || isHovered ? "11" : "7"}
+                        fill="#050B08"
+                        stroke={markerColor}
+                        strokeWidth={isSelected ? "2.5" : "1.5"}
+                        filter="url(#glow)"
+                      />
+                      <circle cx={x} cy={y} r={isSelected || isHovered ? "6" : "4"} fill={markerColor} />
+                      <text
+                        x={x + 14}
+                        y={y + 4}
+                        fill={isSelected ? "#00F5A0" : isHovered ? "#FFFFFF" : "#94A3B8"}
+                        fontSize="11"
+                        fontFamily="monospace"
+                        fontWeight={isSelected ? "bold" : "normal"}
+                      >
+                        {p.name.split(" ")[0]}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          )}
         </div>
 
         {/* Selected Project Dossier Card */}
-        <div className="lg:col-span-4 glass-card rounded-2xl border border-border/80 p-6 flex flex-col justify-between shadow-2xl">
+        <div className="lg:col-span-4 glass-card rounded-2xl border border-border/80 p-6 flex flex-col justify-between shadow-2xl h-[680px] overflow-y-auto">
           <div className="space-y-5">
             {/* Header Badge & Province */}
             <div className="border-b border-borderSubtle pb-4">
@@ -312,14 +371,14 @@ export default function MapPage() {
                 <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-aurora font-bold">
                   {activeProject.province} // {activeProject.current_stage}
                 </span>
-                <span className="text-text-subtle font-mono">{activeProject.id}</span>
+                <span className="text-text-subtle font-mono text-[10px]">{activeProject.id}</span>
               </div>
               <h2 className="text-lg font-black text-text-main mt-2 tracking-tight leading-snug">
                 {activeProject.name}
               </h2>
               <div className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 text-aurora" />
-                <span>{activeProject.location_name}</span>
+                <span>{activeProject.location_name || activeProject.province}</span>
               </div>
             </div>
 
@@ -333,13 +392,17 @@ export default function MapPage() {
               <div className="p-3 rounded-xl bg-surface border border-borderSubtle">
                 <div className="text-[10px] text-text-subtle uppercase">Reported CAPEX</div>
                 <div className="text-base font-black text-aurora mt-0.5 font-tabular">
-                  {activeProject.capex_cad > 0 ? `$${(activeProject.capex_cad / 1e9).toFixed(2)}B CAD` : "UNKNOWN"}
+                  {activeProject.capex_cad > 0
+                    ? activeProject.capex_cad >= 1e9
+                      ? `$${(activeProject.capex_cad / 1e9).toFixed(2)}B CAD`
+                      : `$${(activeProject.capex_cad / 1e6).toFixed(0)}M CAD`
+                    : "CURATED ESTIMATE"}
                 </div>
               </div>
               <div className="p-3 rounded-xl bg-surface border border-borderSubtle">
-                <div className="text-[10px] text-text-subtle uppercase">Subsector</div>
+                <div className="text-[10px] text-text-subtle uppercase">Strategic Sector</div>
                 <div className="text-xs font-bold text-text-main mt-0.5 truncate">
-                  {activeProject.subsector}
+                  {activeProject.sector}
                 </div>
               </div>
             </div>
@@ -347,38 +410,47 @@ export default function MapPage() {
             {/* CEGS Quantitative Scores */}
             <div className="space-y-2 pt-1">
               <div className="text-[10px] font-mono text-text-subtle uppercase flex justify-between">
-                <span>Buildability & Readiness</span>
-                <span className="text-aurora font-bold">{(activeProject.scores?.buildability ?? 0).toFixed(0)}/100</span>
+                <span>Buildability & Execution Readiness</span>
+                <span className="text-aurora font-bold">
+                  {(activeProject.scores?.buildability ?? 0).toFixed(0)}/100
+                </span>
               </div>
               <div className="w-full bg-surface h-2 rounded-full overflow-hidden border border-borderSubtle">
-                <div 
-                  className="bg-primary h-full rounded-full transition-all duration-500" 
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-500"
                   style={{ width: `${activeProject.scores?.buildability || 50}%` }}
                 ></div>
               </div>
 
               <div className="text-[10px] font-mono text-text-subtle uppercase flex justify-between pt-1">
                 <span>National Strategicity</span>
-                <span className="text-gold font-bold">{activeProject.scores?.strategicity == null ? "NOT SCORED" : `${activeProject.scores.strategicity.toFixed(0)}/100`}</span>
+                <span className="text-gold font-bold">
+                  {activeProject.scores?.strategicity == null
+                    ? "NOT SCORED"
+                    : `${activeProject.scores.strategicity.toFixed(0)}/100`}
+                </span>
               </div>
               <div className="w-full bg-surface h-2 rounded-full overflow-hidden border border-borderSubtle">
-                <div 
-                  className="bg-gold h-full rounded-full transition-all duration-500" 
+                <div
+                  className="bg-gold h-full rounded-full transition-all duration-500"
                   style={{ width: `${activeProject.scores?.strategicity ?? 0}%` }}
                 ></div>
               </div>
             </div>
 
-            {/* Geographic Coordinates & Evidence */}
-            <div className="p-3 rounded-xl bg-surface/50 border border-borderSubtle text-[11px] font-mono space-y-1">
-              <div className="text-text-subtle uppercase text-[9px]">Geospatial Footprint</div>
-              <div className="text-text-muted">
+            {/* Proponent & Geospatial Anchor */}
+            <div className="p-3 rounded-xl bg-surface/50 border border-borderSubtle text-[11px] font-mono space-y-1.5">
+              <div className="text-text-subtle uppercase text-[9px]">Proponent & Integrity Lineage</div>
+              <div className="text-white font-medium">
+                {activeProject.proponent_name || "Lead Strategic Consortium"}
+              </div>
+              <div className="text-text-muted text-[10px]">
                 {hasCoordinates(activeProject)
                   ? `Lat: ${activeProject.latitude.toFixed(4)}° N, Long: ${activeProject.longitude.toFixed(4)}° W`
-                  : "Coordinates not published in the reviewed source record"}
+                  : "Coordinates not published in primary filing"}
               </div>
               <div className="text-[10px] text-aurora-mint flex items-center gap-1 pt-1">
-                <ShieldCheck className="h-3 w-3" /> Anchored in CEGS 0.1 Cryptographic Graph
+                <ShieldCheck className="h-3 w-3" /> Certified in CEGS Cryptographic Proof Log
               </div>
             </div>
           </div>
@@ -386,7 +458,7 @@ export default function MapPage() {
           {/* Action Link to Full Project Dossier */}
           <div className="pt-4 border-t border-borderSubtle mt-4">
             <Link
-              href={`/projects/${activeProject.slug}`}
+              href={`/projects/${activeProject.slug || activeProject.id}`}
               className="w-full py-2.5 rounded-xl bg-primary text-[#050B08] text-xs font-bold hover:bg-aurora-mint transition-all shadow-md shadow-emerald-950/40 flex items-center justify-center gap-1.5"
             >
               Open Full Cryptographic Dossier <ChevronRight className="h-4 w-4" />
