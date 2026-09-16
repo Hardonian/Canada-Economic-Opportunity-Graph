@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
   Activity,
+  BarChart3,
   Calculator,
   Coins,
   Compass,
@@ -47,6 +48,7 @@ export default function Navbar() {
     { href: "/briefing", label: lang === "en" ? "Executive Brief" : "Note exécutive", icon: Landmark, badge: lang === "en" ? "ANALYSIS" : "ANALYSE" },
     { href: "/briefing/memo", label: lang === "en" ? "Cabinet Memo" : "Mémoire Cabinet", icon: FileText },
     { href: "/", label: lang === "en" ? "Capital Radar" : "Radar du capital", icon: Radar },
+    { href: "/analytics", label: lang === "en" ? "KPI Analytics" : "Analytique KPI", icon: BarChart3, badge: "LIVE" },
     { href: "/syndication", label: lang === "en" ? "Syndication & PPA" : "Syndication et PPA", icon: Coins, badge: "NEW" },
     { href: "/corridors", label: lang === "en" ? "Corridors & Ports" : "Couloirs et ports", icon: Compass },
     { href: "/finance", label: lang === "en" ? "Project Finance & Tax" : "Finances et taxes", icon: Calculator },

@@ -540,6 +540,13 @@ const compactSignals = events.map((ev) => {
 
 compactSources.sort((a, b) => a.publisher_name.localeCompare(b.publisher_name) || a.name.localeCompare(b.name));
 
+const kpiSnapshot = {
+  version: "cegs-kpi-v1.0",
+  generated_at: new Date().toISOString(),
+  definitions_count: 32,
+  description: "Canadian Sovereign KPI & Indicator Taxonomy across 8 strategic clusters",
+};
+
 await mkdir(outputDirectory, { recursive: true });
 await Promise.all([
   writeFile(resolve(outputDirectory, "projects.snapshot.json"), `${JSON.stringify(compactProjects)}\n`),
@@ -548,6 +555,8 @@ await Promise.all([
   writeFile(resolve(outputDirectory, "manifest.snapshot.json"), `${JSON.stringify(manifest)}\n`),
   writeFile(resolve(outputDirectory, "procurements.snapshot.json"), `${JSON.stringify(procurements)}\n`),
   writeFile(resolve(outputDirectory, "signals.snapshot.json"), `${JSON.stringify(compactSignals)}\n`),
+  writeFile(resolve(outputDirectory, "kpi-metrics.snapshot.json"), `${JSON.stringify(kpiSnapshot)}\n`),
 ]);
 
-console.log(`Generated web snapshot: ${compactProjects.length} projects, ${evidence.length} evidence records, ${tradeMetrics.length} trade metrics, ${compactSources.length} canonical source records, ${procurements.length} procurements, ${compactSignals.length} signals.`);
+console.log(`Generated web snapshot: ${compactProjects.length} projects, ${evidence.length} evidence records, ${tradeMetrics.length} trade metrics, ${compactSources.length} canonical source records, ${procurements.length} procurements, ${compactSignals.length} signals, KPI snapshot bundled.`);
+

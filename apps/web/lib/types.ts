@@ -332,3 +332,125 @@ export interface FilingsResponse {
   recent_amendments: TenderAmendment[];
   total_count: number;
 }
+
+export type KPICategory =
+  | "ESG_DECARBONIZATION"
+  | "INDIGENOUS_EQUITY"
+  | "CAPITAL_VELOCITY"
+  | "SUPPLY_CHAIN_CONTENT"
+  | "GRID_PHYSICS"
+  | "REGULATORY_SPEED"
+  | "LABOR_SKILLS"
+  | "COMMODITY_MACRO";
+
+export interface KPIDefinition {
+  code: string;
+  name: string;
+  category: KPICategory;
+  description: string;
+  unit: string;
+  preferred_direction: "HIGHER_BETTER" | "LOWER_BETTER" | "NEUTRAL";
+  target_benchmark: number;
+  benchmark_unit: string;
+  benchmark_label: string;
+  statutory_basis: string;
+  publisher: string;
+  update_frequency: string;
+  is_live_feed: boolean;
+}
+
+export interface KPIObservation {
+  id: string;
+  metric_code: string;
+  metric_name: string;
+  category: KPICategory;
+  scope: string;
+  project_id?: string;
+  value: number;
+  unit: string;
+  reference_period: string;
+  observed_at: string;
+  source_url: string;
+  publisher: string;
+  confidence: ConfidenceLevel;
+  content_hash: string;
+  evidence_id?: string;
+}
+
+export interface ProjectMetricAssessment {
+  code: string;
+  name: string;
+  category: KPICategory;
+  observed_value: number;
+  unit: string;
+  target_benchmark: number;
+  variance: number;
+  performance_rank: "SUPERIOR" | "ON_TARGET" | "NEEDS_IMPROVEMENT" | "CRITICAL_GAP";
+  score_normalized: number;
+  confidence: ConfidenceLevel;
+  notes: string;
+  source: string;
+}
+
+export interface PillarScore {
+  category: KPICategory;
+  title: string;
+  score: number;
+  health: "EXEMPLARY" | "HEALTHY" | "ATTENTION_REQUIRED" | "HIGH_RISK";
+  metrics: ProjectMetricAssessment[];
+  key_findings: string[];
+}
+
+export interface ProjectKPIScorecard {
+  project_id: string;
+  project_slug: string;
+  project_name: string;
+  sector: Sector;
+  province: string;
+  current_stage: LifecycleStage;
+  total_capex_cad: number;
+  overall_kpi_rating: number;
+  pillars: PillarScore[];
+  critical_action_gaps: string[];
+  audit_hash: string;
+  evaluated_at: string;
+}
+
+export interface LiveFeedTick {
+  sequence_id: number;
+  metric_code: string;
+  name: string;
+  category: KPICategory;
+  value: number;
+  unit: string;
+  change_absolute: number;
+  change_percent: number;
+  direction: "UP" | "DOWN" | "FLAT";
+  source: string;
+  timestamp: string;
+  hash: string;
+}
+
+export interface MacroKPISummary {
+  national_emissions_abatement_mt: number;
+  average_indigenous_equity_pct: number;
+  total_ilgp_allocated_cad: number;
+  national_spend_run_rate_cad_mo: number;
+  average_domestic_content_pct: number;
+  average_grid_queue_wait_months: number;
+  average_iaac_review_duration_mo: number;
+  national_red_seal_deficit_fte: number;
+  active_feed_ticks_count: number;
+  latest_commodity_ticks: LiveFeedTick[];
+  generated_at: string;
+}
+
+export interface KPISnapshot {
+  version: string;
+  generated_at: string;
+  definitions: KPIDefinition[];
+  observations: KPIObservation[];
+  macro_summary: MacroKPISummary;
+  audit_hash: string;
+}
+
