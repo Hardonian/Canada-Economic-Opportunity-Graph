@@ -10,7 +10,11 @@ import (
 	"time"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/bankofcanada"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/cmhc_housing"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/federal_contracts"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/global_trade"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/lobbyist_registry"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/nrcan_major_projects"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/official"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/api"
@@ -37,6 +41,10 @@ func main() {
 		nrcan_major_projects.NewNRCanAdapter("data/fixtures/nrcan_mpi_2025.json"),
 		official.NewAdapter(""),
 		global_trade.NewFromEnv(),
+		bankofcanada.NewBoCAdapter(""),
+		federal_contracts.NewFederalContractsAdapter(""),
+		lobbyist_registry.NewLobbyistRegistryAdapter(""),
+		cmhc_housing.NewCMHCHousingAdapter(""),
 	}
 
 	// Wrap with production middleware (retry, circuit-breaker, cache, dedup,

@@ -1,0 +1,81 @@
+{
+  "source": "Open.Canada Federal Contracts (>CDN $10K)",
+  "source_url": "https://search.open.canada.ca/contracts/?contract_value_from=10000",
+  "license": "Open Government Licence – Canada",
+  "retrieved_at": "2026-09-15T00:00:00Z",
+  "effective_at": "2026-09-14T00:00:00Z",
+  "dataset_vintage": "2026-Q3",
+  "schema_version": "open-canada-contracts-v1",
+  "contracts": [
+    {
+      "contract_id": "OC-2026-001",
+      "vendor_name": "AtkinsRéalis",
+      "vendor_location": "Montréal, QC",
+      "buyer_department": "Department of National Defence",
+      "buyer_department_fr": "Ministère de la Défense nationale",
+      "description": "Engineering services for Arctic surveillance infrastructure modernization",
+      "description_fr": "Services d'ingénierie pour la modernisation de l'infrastructure de surveillance de l'Arctique",
+      "contract_value_cad": 24500000,
+      "award_date": "2026-07-15",
+      "sector": "Defence & Arctic",
+      "procurement_category": "Services",
+      "source_url": "https://search.open.canada.ca/contracts/?contract_id=OC-2026-001"
+    },
+    {
+      "contract_id": "OC-2026-002",
+      "vendor_name": "Hatch Ltd.",
+      "vendor_location": "Mississauga, ON",
+      "buyer_department": "Natural Resources Canada",
+      "buyer_department_fr": "Ressources naturelles Canada",
+      "description": "Critical minerals processing facility — feasibility engineering study",
+      "description_fr": "Usine de traitement des minéraux critiques — étude d'ingénierie de faisabilité",
+      "contract_value_cad": 8600000,
+      "award_date": "2026-08-02",
+      "sector": "Mining & Metals",
+      "procurement_category": "Services",
+      "source_url": "https://search.open.canada.ca/contracts/?contract_id=OC-2026-002"
+    },
+    {
+      "contract_id": "OC-2026-003",
+      "vendor_name": "Brookfield Asset Management",
+      "vendor_location": "Toronto, ON",
+      "buyer_department": "Canada Infrastructure Bank",
+      "buyer_department_fr": "Banque de l'infrastructure du Canada",
+      "description": "Advisory services for Indigenous-led equity participation in major projects",
+      "description_fr": "Services-conseils pour la participation au capital dirigée par les Autochtones dans les grands projets",
+      "contract_value_cad": 4750000,
+      "award_date": "2026-06-28",
+      "sector": "Infrastructure",
+      "procurement_category": "Advisory",
+      "source_url": "https://search.open.canada.ca/contracts/?contract_id=OC-2026-003"
+    },
+    {
+      "contract_id": "OC-2026-004",
+      "vendor_name": "Stantec Inc.",
+      "vendor_location": "Edmonton, AB",
+      "buyer_department": "Crown-Indigenous Relations and Northern Affairs Canada",
+      "buyer_department_fr": "Relations Couronne-Autochtones et Affaires du Nord Canada",
+      "description": "Northern housing-enabling infrastructure assessment — Nunavut and Northwest Territories",
+      "description_fr": "Évaluation de l'infrastructure habilitante du logement nordique — Nunavut et Territoires du Nord-Ouest",
+      "contract_value_cad": 6300000,
+      "award_date": "2026-08-22",
+      "sector": "Housing-Enabling Infrastructure",
+      "procurement_category": "Services",
+      "source_url": "https://search.open.canada.ca/contracts/?contract_id=OC-2026-004"
+    },
+    {
+      "contract_id": "OC-2026-005",
+      "vendor_name": "WSP Canada",
+      "vendor_location": "Montréal, QC",
+      "buyer_department": "Transport Canada",
+      "buyer_department_fr": "Transports Canada",
+      "description": "Port of Churchill expansion — environmental and engineering assessment",
+      "description_fr": "Expansion du port de Churchill — évaluation environnementale et technique",
+      "contract_value_cad": 12400000,
+      "award_date": "2026-09-03",
+      "sector": "Transportation & Ports",
+      "procurement_category": "Services",
+      "source_url": "https://search.open.canada.ca/contracts/?contract_id=OC-2026-005"
+    }
+  ]
+}

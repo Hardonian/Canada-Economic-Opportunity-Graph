@@ -1,0 +1,71 @@
+{
+  "source": "Canada Mortgage and Housing Corporation (CMHC) — Housing Market Indicators",
+  "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data",
+  "license": "Open Government Licence – Canada",
+  "retrieved_at": "2026-09-15T00:00:00Z",
+  "effective_at": "2026-09-14T00:00:00Z",
+  "dataset_vintage": "2026-Q3",
+  "schema_version": "cmhc-housing-v1",
+  "indicators": [
+    {
+      "indicator_code": "STARTS-CAN",
+      "indicator_name": "Total Housing Starts — Canada (SAAR)",
+      "indicator_name_fr": "Mises en chantier totales — Canada (DDMA)",
+      "geography": "CAN",
+      "value": 244000,
+      "unit": "units_saar",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    },
+    {
+      "indicator_code": "STARTS-ON",
+      "indicator_name": "Housing Starts — Ontario",
+      "indicator_name_fr": "Mises en chantier — Ontario",
+      "geography": "CA-ON",
+      "value": 78000,
+      "unit": "units_saar",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    },
+    {
+      "indicator_code": "STARTS-QC",
+      "indicator_name": "Housing Starts — Quebec",
+      "indicator_name_fr": "Mises en chantier — Québec",
+      "geography": "CA-QC",
+      "value": 51000,
+      "unit": "units_saar",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    },
+    {
+      "indicator_code": "STARTS-BC",
+      "indicator_name": "Housing Starts — British Columbia",
+      "indicator_name_fr": "Mises en chantier — Colombie-Britannique",
+      "geography": "CA-BC",
+      "value": 47000,
+      "unit": "units_saar",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    },
+    {
+      "indicator_code": "VACANCY-CAN",
+      "indicator_name": "Rental Vacancy Rate — Canada",
+      "indicator_name_fr": "Taux d'inoccupation locative — Canada",
+      "geography": "CAN",
+      "value": 2.1,
+      "unit": "percent",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    },
+    {
+      "indicator_code": "RENT-2BR-CAN",
+      "indicator_name": "Average 2-Bedroom Rent — Canada",
+      "indicator_name_fr": "Loyer moyen 2 chambres — Canada",
+      "geography": "CAN",
+      "value": 1450,
+      "unit": "CAD_per_month",
+      "reference_period": "2026-08",
+      "source_url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/tables"
+    }
+  ]
+}

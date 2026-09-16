@@ -1,0 +1,67 @@
+{
+  "source": "Office of the Commissioner of Lobbying of Canada — Active Lobbyist Registrations",
+  "source_url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/vwByLrdsrch?lang=E",
+  "license": "Open Government Licence – Canada",
+  "retrieved_at": "2026-09-15T00:00:00Z",
+  "effective_at": "2026-09-14T00:00:00Z",
+  "dataset_vintage": "2026-Q3",
+  "schema_version": "lobbyist-registry-v1",
+  "registrations": [
+    {
+      "registration_id": "LOB-2026-001",
+      "registrant_name": "Canadian Nuclear Association",
+      "registrant_type": "Industry Association",
+      "client_organization": null,
+      "subject_matters": ["Nuclear energy policy", "SMR deployment", "Regulatory modernization"],
+      "subject_matters_fr": ["Politique de l'énergie nucléaire", "Déploiement des petits réacteurs modulaires", "Modernisation réglementaire"],
+      "designated_public_office_holder": false,
+      "active": true,
+      "registration_date": "2026-04-15",
+      "last_amended": "2026-08-30",
+      "sector_focus": "Nuclear & Clean Power",
+      "source_url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/vwByLrdsrch?lang=E&rgsId=LOB-2026-001"
+    },
+    {
+      "registration_id": "LOB-2026-002",
+      "registrant_name": "Mining Association of Canada",
+      "registrant_type": "Industry Association",
+      "client_organization": null,
+      "subject_matters": ["Critical minerals strategy", "Indigenous participation in mining", "Permitting reform"],
+      "subject_matters_fr": ["Stratégie sur les minéraux critiques", "Participation autochtone dans le secteur minier", "Réforme du régime de permis"],
+      "designated_public_office_holder": false,
+      "active": true,
+      "registration_date": "2026-03-22",
+      "last_amended": "2026-09-10",
+      "sector_focus": "Mining & Metals",
+      "source_url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/vwByLrdsrch?lang=E&rgsId=LOB-2026-002"
+    },
+    {
+      "registration_id": "LOB-2026-003",
+      "registrant_name": "Canadian Association of Petroleum Producers",
+      "registrant_type": "Industry Association",
+      "client_organization": null,
+      "subject_matters": ["Carbon pricing", "Methane regulations", "Pipeline approval"],
+      "subject_matters_fr": ["Tarification du carbone", "Réglementation du méthane", "Approbation des pipelines"],
+      "designated_public_office_holder": false,
+      "active": true,
+      "registration_date": "2026-05-10",
+      "last_amended": "2026-09-05",
+      "sector_focus": "Energy & Fuels",
+      "source_url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/vwByLrdsrch?lang=E&rgsId=LOB-2026-003"
+    },
+    {
+      "registration_id": "LOB-2026-004",
+      "registrant_name": "Canadian Manufacturers & Exporters",
+      "registrant_type": "Industry Association",
+      "client_organization": null,
+      "subject_matters": ["Industrial carbon pricing", "Buy Canadian procurement", "Trade diversification"],
+      "subject_matters_fr": ["Tarification industrielle du carbone", "Approvisionnement Acheter canadien", "Diversification des échanges"],
+      "designated_public_office_holder": false,
+      "active": true,
+      "registration_date": "2026-02-08",
+      "last_amended": "2026-08-15",
+      "sector_focus": "Industrial & Manufacturing",
+      "source_url": "https://lobbycanada.gc.ca/app/secure/ocl/lrs/do/vwByLrdsrch?lang=E&rgsId=LOB-2026-004"
+    }
+  ]
+}
