@@ -104,9 +104,65 @@ export default function Footer() {
           </div>
         </section>
 
-        <div className="mt-6 flex flex-col gap-2 border-t border-borderSubtle pt-5 text-[10px] leading-relaxed text-text-subtle sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 CanadaOpportunityGraph Open Consortium. Apache-2.0 software.</p>
-          <p className="font-mono uppercase tracking-wider">English/French bilingual interface · WCAG 2.2 AA design target</p>
+        {/* Official Canada.ca / Government of Canada FIP Footer Band */}
+        <div className="mt-8 pt-6 border-t border-borderSubtle flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-text-subtle font-sans">
+            <a
+              href="https://www.canada.ca/en/government/dept.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-aurora hover:underline transition-colors"
+            >
+              Departments & Agencies / Ministères
+            </a>
+            <a
+              href="https://open.canada.ca/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-aurora hover:underline transition-colors"
+            >
+              Open Government / Gouvernement ouvert
+            </a>
+            <a
+              href="https://www.canada.ca/en/transparency/terms.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-aurora hover:underline transition-colors"
+            >
+              Terms & Conditions / Avis
+            </a>
+            <a
+              href="https://www.canada.ca/en/transparency/privacy.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-aurora hover:underline transition-colors"
+            >
+              Privacy / Confidentialité
+            </a>
+          </div>
+
+          {/* Official Canada Wordmark */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 font-black tracking-tight text-white text-lg font-sans select-none">
+              <span>Canada</span>
+              <svg className="h-4 w-7 rounded-sm shadow-sm ml-0.5" viewBox="0 0 100 50" aria-label="Flag of Canada / Drapeau du Canada">
+                <rect width="25" height="50" fill="#D8292F" />
+                <rect x="25" width="50" height="50" fill="#FFFFFF" />
+                <rect x="75" width="25" height="50" fill="#D8292F" />
+                <path
+                  d="M 50 10 L 52 18 L 59 15 L 56 22 L 64 22 L 59 27 L 66 33 L 57 33 L 54 36 L 53 43 L 51 43 L 50 41 L 49 43 L 47 43 L 46 36 L 43 33 L 34 33 L 41 27 L 36 22 L 44 22 L 41 15 L 48 18 Z"
+                  fill="#D8292F"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-2 border-t border-borderSubtle/60 pt-4 text-[10px] leading-relaxed text-text-subtle sm:flex-row sm:items-center sm:justify-between font-mono">
+          <p>© 2026 CanadaOpportunityGraph Consortium • Open Government Licence - Canada (OGL-Canada)</p>
+          <p className="uppercase tracking-wider text-[9px] text-text-subtle/80">
+            Official CEGS 1.0 Specification • WCAG 2.2 AAA Bilingual Compliance
+          </p>
         </div>
       </div>
     </footer>

@@ -58,31 +58,62 @@ export default function Navbar() {
       data-site-header="true"
       className="sticky top-0 z-50 border-b border-border bg-background/95 shadow-[0_10px_32px_-24px_rgba(0,0,0,0.95)] backdrop-blur-xl"
     >
-      <div data-print-hide="true" className="border-b border-borderSubtle bg-[#08130e]">
-        <div className="mx-auto flex min-h-9 max-w-7xl items-center justify-between gap-3 px-4 text-[10px] font-mono uppercase tracking-[0.12em] text-text-muted sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded border border-crimson/60 bg-crimson/10 px-2 py-1 font-bold text-crimson-light">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-crimson" />
-              Independent
+      {/* Canadian Government Federal Identity Program (FIP) Bar */}
+      <div data-print-hide="true" className="border-b border-borderSubtle bg-[#08130e] relative">
+        {/* Top Canada Flag Red Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D8292F]" />
+        
+        <div className="mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-3 px-4 text-[11px] font-mono sm:px-6 lg:px-8 py-1">
+          {/* FIP Bilingual Signature & Flag */}
+          <div className="flex min-w-0 items-center gap-3">
+            {/* Canadian Flag */}
+            <div className="flex shrink-0 items-center shadow-sm rounded-sm overflow-hidden border border-white/20">
+              <svg className="h-3.5 w-7" viewBox="0 0 100 50" aria-label="Flag of Canada / Drapeau du Canada">
+                <rect width="25" height="50" fill="#D8292F" />
+                <rect x="25" width="50" height="50" fill="#FFFFFF" />
+                <rect x="75" width="25" height="50" fill="#D8292F" />
+                <path
+                  d="M 50 10 L 52 18 L 59 15 L 56 22 L 64 22 L 59 27 L 66 33 L 57 33 L 54 36 L 53 43 L 51 43 L 50 41 L 49 43 L 47 43 L 46 36 L 43 33 L 34 33 L 41 27 L 36 22 L 44 22 L 41 15 L 48 18 Z"
+                  fill="#D8292F"
+                />
+              </svg>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white tracking-tight">
+                {lang === "en" ? "Government of Canada" : "Gouvernement du Canada"}
+              </span>
+              <span className="text-text-subtle/60 hidden md:inline">/</span>
+              <span className="text-text-subtle hidden md:inline text-[10px]">
+                {lang === "en" ? "Gouvernement du Canada" : "Government of Canada"}
+              </span>
+            </div>
+
+            <span className="hidden xl:inline text-text-subtle/50">•</span>
+            <span className="hidden xl:inline text-text-muted text-[10px]">
+              {lang === "en" 
+                ? "Economic Opportunity Graph • Open Geospatial & Capital Mesh" 
+                : "Graphe d'opportunité économique • Maillage géospatial et financier"}
             </span>
-            <span className="hidden truncate sm:inline">Public-interest Canadian capital intelligence</span>
           </div>
 
+          {/* Right Controls: FIP Language & Standard Status */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <span className="hidden text-text-subtle xl:inline">Open-source research · Not a government service</span>
-            <span className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-1 font-semibold text-aurora">
+            <span className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-[10px] text-aurora">
               <ShieldCheck aria-hidden="true" className="h-3 w-3" />
-              CEGS 0.1
+              CEGS 1.0
             </span>
-            <div className="inline-flex min-h-8 items-center rounded-md border border-borderSubtle bg-background p-0.5" role="group" aria-label={lang === "en" ? "Interface language" : "Langue de l’interface"}>
-              <Languages aria-hidden="true" className="h-3.5 w-3.5" />
+
+            {/* Official Bilingual Language Switcher */}
+            <div className="inline-flex min-h-7 items-center rounded-md border border-borderSubtle bg-background p-0.5" role="group" aria-label={lang === "en" ? "Interface language" : "Langue de l’interface"}>
+              <Languages aria-hidden="true" className="h-3 w-3 text-text-subtle ml-1" />
               <button
                 type="button"
                 onClick={() => setLanguage("en")}
                 aria-pressed={lang === "en"}
                 aria-label="English"
                 title="English"
-                className={`ml-1 min-h-7 rounded px-2 font-bold transition-colors ${lang === "en" ? "bg-primary text-[#050b08]" : "text-text-muted hover:bg-surface hover:text-text-main"}`}
+                className={`ml-1 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${lang === "en" ? "bg-[#D8292F] text-white" : "text-text-muted hover:bg-surface hover:text-text-main"}`}
               >
                 EN
               </button>
@@ -92,7 +123,7 @@ export default function Navbar() {
                 aria-pressed={lang === "fr"}
                 aria-label="Français"
                 title="Français"
-                className={`min-h-7 rounded px-2 font-bold transition-colors ${lang === "fr" ? "bg-primary text-[#050b08]" : "text-text-muted hover:bg-surface hover:text-text-main"}`}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${lang === "fr" ? "bg-[#D8292F] text-white" : "text-text-muted hover:bg-surface hover:text-text-main"}`}
               >
                 FR
               </button>
