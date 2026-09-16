@@ -42,6 +42,7 @@ type Store interface {
 	GetProject(ctx context.Context, id string) (*domain.Project, error)
 	GetProjectBySlug(ctx context.Context, slug string) (*domain.Project, error)
 	ListProjects(ctx context.Context, filter ProjectFilter) ([]*domain.Project, int, error)
+	ListProjectsInBounds(ctx context.Context, minLat, maxLat, minLng, maxLng float64, limit int) ([]*domain.Project, error)
 
 	SaveEntity(ctx context.Context, e *domain.Entity) error
 	GetEntity(ctx context.Context, id string) (*domain.Entity, error)

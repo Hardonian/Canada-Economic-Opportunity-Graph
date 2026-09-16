@@ -292,6 +292,38 @@ func (m *MemoryStore) ListProjects(ctx context.Context, filter ProjectFilter) ([
 	return result[offset:end], total, nil
 }
 
+// ListProjectsInBounds returns projects located within the bounding box [minLat, maxLat] and [minLng, maxLng].
+func (m *MemoryStore) ListProjectsInBounds(ctx context.Context, minLat, maxLat, minLng, maxLng float64, limit int) ([]*domain.Project, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var result []*domain.Project
+	for _, p := range m.projects {
+		if p.Latitude == nil || p.Longitude == nil {
+			continue
+		}
+		lat := *p.Latitude
+		lng := *p.Longitude
+		if lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng {
+			result = append(result, p)
+		}
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].CapexCAD > result[j].CapexCAD
+	})
+
+	if limit > 0 && len(result) > limit {
+		result = result[:limit]
+	}
+
+	return result, nil
+}
+
 func (m *MemoryStore) SaveEntity(ctx context.Context, e *domain.Entity) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
