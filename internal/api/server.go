@@ -1648,7 +1648,7 @@ func optionalNonNegativeInt64(raw string) (int64, error) {
 	return value, nil
 }
 
-func writeError(w http.ResponseWriter, r *http.Request, status int, code, message string) {
+func writeError(w http.ResponseWriter, _ *http.Request, status int, code, message string) {
 	writeJSON(w, status, map[string]any{
 		"error":      map[string]string{"code": code, "message": message},
 		"request_id": w.Header().Get("X-Request-ID"),

@@ -389,7 +389,7 @@ func handleProject(args []string) {
 	}
 }
 
-func handleChanges(args []string) {
+func handleChanges(_ []string) {
 	store := getSeededStore()
 	signals, _ := store.ListSignals(context.Background(), 30*24*time.Hour, 15)
 
@@ -433,9 +433,10 @@ func handleExport(args []string) {
 	exportMode := strings.ToLower(args[0])
 	id := args[1]
 	format := "json"
-	if exportMode == "memo" {
+	switch exportMode {
+	case "memo":
 		format = "memo"
-	} else if exportMode == "geojson" {
+	case "geojson":
 		format = "geojson"
 	}
 

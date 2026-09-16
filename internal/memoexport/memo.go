@@ -53,10 +53,11 @@ func (g *MemoGenerator) GenerateCabinetMemo(project *domain.Project, memoType Me
 
 	caveat := "PROTECTED B // CABINET CONFIDENTIAL"
 	recipient := "Cabinet Committee on Economy, Inclusion and Climate"
-	if memoType == MemoTypeInvestmentComm {
+	switch memoType {
+	case MemoTypeInvestmentComm:
 		caveat = "COMMERCIALLY CONFIDENTIAL // PRIVILEGED INVESTMENT COMMITTEE BRIEF"
 		recipient = "Chief Investment Officer & Global Infrastructure Investment Committee"
-	} else if memoType == MemoTypeTreasuryBoard {
+	case MemoTypeTreasuryBoard:
 		caveat = "PROTECTED B // TREASURY BOARD PRESIDENTIAL REVIEW"
 		recipient = "Treasury Board of Canada Secretariat (TBS)"
 	}
@@ -72,8 +73,7 @@ func (g *MemoGenerator) GenerateCabinetMemo(project *domain.Project, memoType Me
 	stratRationale := fmt.Sprintf("Classified within the %s sovereign strategic mandate. Supports domestic supply chain retention, bilateral USMCA resilience, and critical infrastructure readiness under the Federal Canadian Economic Sovereignty Framework.",
 		project.Sector)
 
-	finExposure := fmt.Sprintf("Recommended capital structure targets 35%% sponsor equity, 15%% concessionary catalytic debt via the Canada Infrastructure Bank (CIB), 10%% Indigenous equity syndication under the $5B Federal Indigenous Loan Guarantee Program (ILGP), and 40%% commercial senior debt syndication. Estimated private capital crowding-in multiplier of 2.8x.",
-	)
+	finExposure := "Recommended capital structure targets 35% sponsor equity, 15% concessionary catalytic debt via the Canada Infrastructure Bank (CIB), 10% Indigenous equity syndication under the $5B Federal Indigenous Loan Guarantee Program (ILGP), and 40% commercial senior debt syndication. Estimated private capital crowding-in multiplier of 2.8x."
 
 	indigTreaty := fmt.Sprintf("Project right-of-way traverses traditional treaty territories in %s. Statutory Duty to Consult requires formal Early Engagement, revenue-sharing agreements, and First Nations equity co-ownership guarantees prior to Final Investment Decision (FID).",
 		project.Province)
@@ -93,22 +93,28 @@ func (g *MemoGenerator) GenerateCabinetMemo(project *domain.Project, memoType Me
 	sb.WriteString("---\n\n")
 
 	sb.WriteString("## 1. Executive Summary\n")
-	sb.WriteString(execSummary + "\n\n")
+	sb.WriteString(execSummary)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("## 2. Strategic Rationale & Economic Sovereignty Mandate\n")
-	sb.WriteString(stratRationale + "\n\n")
+	sb.WriteString(stratRationale)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("## 3. Financial Exposure & Capital Stack Co-Investment Architecture\n")
-	sb.WriteString(finExposure + "\n\n")
+	sb.WriteString(finExposure)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("## 4. Indigenous Co-Ownership & Duty to Consult\n")
-	sb.WriteString(indigTreaty + "\n\n")
+	sb.WriteString(indigTreaty)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("## 5. Geopolitical Stress-Testing & Supply-Chain Hardening\n")
-	sb.WriteString(geoRisk + "\n\n")
+	sb.WriteString(geoRisk)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("## 6. Recommended Ministerial Action\n")
-	sb.WriteString(recAction + "\n\n")
+	sb.WriteString(recAction)
+	sb.WriteString("\n\n")
 
 	sb.WriteString("---\n")
 	sb.WriteString("*Generated deterministically by CanadaOpportunityGraph (COG) Decision Engine with SHA-256 cryptographic provenance.*  \n")
