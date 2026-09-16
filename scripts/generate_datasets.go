@@ -14,6 +14,7 @@ import (
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/bankofcanada"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/canadabuys"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/cmhc_housing"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/federal_contracts"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/global_trade"
@@ -40,6 +41,7 @@ func main() {
 		official.NewAdapter("data/fixtures/official_records.json"),
 		global_trade.NewAdapter("data/fixtures/world_bank_trade_canada.json"),
 		bankofcanada.NewBoCAdapter(""),
+		canadabuys.NewCanadaBuysAdapter(""),
 		federal_contracts.NewFederalContractsAdapter(""),
 		lobbyist_registry.NewLobbyistRegistryAdapter(""),
 		cmhc_housing.NewCMHCHousingAdapter(""),

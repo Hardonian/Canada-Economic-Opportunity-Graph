@@ -25,6 +25,11 @@ type rawCanadaBuysTender struct {
 	LinkedProjectSlug string   `json:"linked_project_slug"`
 }
 
+// canadaBuysDatasetURL is the publisher-controlled open data endpoint the
+// tender records are normalized from. Evidence cites the dataset, not the
+// individual notice page, so the source census stays one record per source.
+const canadaBuysDatasetURL = "https://canadabuys.canada.ca/opendata/pub/openTenderNotice-ouvertAvisAppelOffres.csv"
+
 type CanadaBuysAdapter struct {
 	fixturePath string
 	health      adapters.SourceHealth
@@ -92,7 +97,7 @@ func (a *CanadaBuysAdapter) Parse(data []byte) (*adapters.IngestionResult, error
 
 		evidence := &domain.Evidence{
 			ID:                 evID,
-			SourceURL:          rec.SourceURL,
+			SourceURL:          canadaBuysDatasetURL,
 			Publisher:          "CanadaBuys / Public Services and Procurement Canada",
 			SourceTier:         domain.SourceTier1,
 			Visibility:         domain.VisibilityPublicAttribution,

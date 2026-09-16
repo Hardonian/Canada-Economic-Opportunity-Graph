@@ -186,6 +186,21 @@ const sourceProfiles = {
     licence: "Open Government Licence - Canada",
     coverage: "FEDERAL_LOBBYING_DISCLOSURE",
   },
+  "CanadaBuys / Public Services and Procurement Canada": {
+    name: "CanadaBuys open tender notices",
+    publisherId: "publisher:ca:canadabuys",
+    jurisdiction: "CA",
+    geography: ["CA"],
+    family: "OPEN_DATA_PORTAL",
+    accessMethod: "BULK_DOWNLOAD",
+    contentType: "text/csv",
+    subjects: ["public procurement", "tender notices", "open opportunities", "open data"],
+    sectors: ["all tracked economic sectors"],
+    languages: ["en-CA", "fr-CA"],
+    frequency: "DAILY",
+    licence: "Open Government Licence - Canada",
+    coverage: "FEDERAL_TENDER_NOTICES",
+  },
 };
 
 const registeredTradeSources = [
