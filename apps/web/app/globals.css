@@ -172,9 +172,11 @@ body {
   content: "";
 }
 
-* {
-  scrollbar-color: var(--border-strong) var(--background);
-  scrollbar-width: thin;
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-color: var(--border-strong) var(--background);
+    scrollbar-width: thin;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -332,7 +334,7 @@ body {
   width: 256px !important;
   height: 256px !important;
   image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: pixelated;
 }
 
 .leaflet-pane {
@@ -378,6 +380,7 @@ body {
   font-size: 11px !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
   padding: 6px 10px !important;
 }
@@ -393,6 +396,7 @@ body {
   border: 1px solid #1e3a2b !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   backdrop-filter: blur(12px) !important;
 }
 

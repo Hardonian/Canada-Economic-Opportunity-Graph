@@ -5,9 +5,13 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
   Activity,
+  Calculator,
+  Coins,
+  Compass,
   Cpu,
   Database,
   FileCode2,
+  FileText,
   FolderGit2,
   Globe2,
   Landmark,
@@ -41,7 +45,11 @@ export default function Navbar() {
 
   const navItems = [
     { href: "/briefing", label: lang === "en" ? "Executive Brief" : "Note exécutive", icon: Landmark, badge: lang === "en" ? "ANALYSIS" : "ANALYSE" },
+    { href: "/briefing/memo", label: lang === "en" ? "Cabinet Memo" : "Mémoire Cabinet", icon: FileText },
     { href: "/", label: lang === "en" ? "Capital Radar" : "Radar du capital", icon: Radar },
+    { href: "/syndication", label: lang === "en" ? "Syndication & PPA" : "Syndication et PPA", icon: Coins, badge: "NEW" },
+    { href: "/corridors", label: lang === "en" ? "Corridors & Ports" : "Couloirs et ports", icon: Compass },
+    { href: "/finance", label: lang === "en" ? "Project Finance & Tax" : "Finances et taxes", icon: Calculator },
     { href: "/planning", label: lang === "en" ? "Planning" : "Planification", icon: Target },
     { href: "/projects", label: lang === "en" ? "Projects" : "Projets", icon: FolderGit2 },
     { href: "/map", label: lang === "en" ? "Geospatial Map" : "Carte géospatiale", icon: MapPin },

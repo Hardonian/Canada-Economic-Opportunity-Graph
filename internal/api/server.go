@@ -333,7 +333,7 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
-		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/"))
+		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/"))
 	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
@@ -441,6 +441,21 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/export/project/{id}", s.handleExportProject)
 	s.mux.HandleFunc("GET /api/v1/cegs/projects/{id}", s.handleCEGSProject)
 	s.mux.HandleFunc("GET /api/v1/cegs/export", s.handleCEGSExport)
+
+	// Phase 6: Syndication, Corridors, Project Finance & Cabinet Suite
+	s.mux.HandleFunc("GET /api/v1/syndication/investors", s.handleSyndicationInvestors)
+	s.mux.HandleFunc("GET /api/v1/syndication/match/{id}", s.handleSyndicationMatch)
+	s.mux.HandleFunc("GET /api/v1/offtake", s.handleOfftakeAgreements)
+	s.mux.HandleFunc("GET /api/v1/corridors/route", s.handleCorridorRoute)
+	s.mux.HandleFunc("POST /api/v1/corridors/route", s.handleCorridorRoute)
+	s.mux.HandleFunc("GET /api/v1/logistics/ports", s.handleLogisticsPorts)
+	s.mux.HandleFunc("GET /api/v1/finance/dcf/{id}", s.handleFinanceDCF)
+	s.mux.HandleFunc("GET /api/v1/finance/montecarlo/{id}", s.handleFinanceMonteCarlo)
+	s.mux.HandleFunc("POST /api/v1/finance/montecarlo/{id}", s.handleFinanceMonteCarlo)
+	s.mux.HandleFunc("GET /api/v1/export/memo/{id}", s.handleExportMemo)
+	s.mux.HandleFunc("GET /api/v1/export/geojson", s.handleExportGeoJSON)
+	s.mux.HandleFunc("GET /api/v1/export/stac/{id}", s.handleExportSTAC)
+	s.mux.HandleFunc("GET /api/v1/filings/recent", s.handleFilingsRecent)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

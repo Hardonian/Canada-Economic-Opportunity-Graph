@@ -17,13 +17,17 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/documentintelligence"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/corridor"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/earthobs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/econometrics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/gridphysics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/memoexport"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/nationalplanning"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/projectfinance"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/risk"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/syndication"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ubo"
 )
 
@@ -39,6 +43,14 @@ func main() {
 		printUsage()
 	case "planning":
 		handlePlanning(os.Args[2:])
+	case "syndication":
+		handleSyndication(os.Args[2:])
+	case "offtake":
+		handleOfftake(os.Args[2:])
+	case "corridor":
+		handleCorridor(os.Args[2:])
+	case "finance":
+		handleFinance(os.Args[2:])
 	case "cegs":
 		handleCEGS(os.Args[2:])
 	case "search":
@@ -72,6 +84,13 @@ func printUsage() {
 	fmt.Println("  cog project ubo <id|slug>              Display Ultimate Beneficial Ownership & ICA screening")
 	fmt.Println("  cog project grid <id|slug>             Display electrical grid hosting capacity feasibility")
 	fmt.Println("  cog project earthobs <id|slug>         Display satellite SAR and optical ground-truth telemetry")
+	fmt.Println("  cog syndication match <id|slug>        Match institutional capital syndication & Maple 8 allocators")
+	fmt.Println("  cog syndication indigenous [name]      Model multi-nation First Nation linear equity syndicate & ILGP")
+	fmt.Println("  cog offtake list [proj-id]             Display commercial offtake & long-term clean power PPAs")
+	fmt.Println("  cog corridor route [options]           Simulate linear Right-of-Way (RoW) geotechnical impedance")
+	fmt.Println("  cog corridor port [port_id]            Display strategic gateway multi-modal rail logistics")
+	fmt.Println("  cog finance simulate <id|slug> [--runs N] Run stochastic 10k Monte Carlo project cash flow model")
+	fmt.Println("  cog finance cleantax <id|slug>         Calculate Clean Economy ITCs & CCfD underwriting")
 	fmt.Println("  cog planning optimize [--obj <type>]   Run Sovereign Capital Allocation Optimizer")
 	fmt.Println("  cog planning wargame [--shock <type>]  Run geopolitical macro shock stress-testing")
 	fmt.Println("  cog planning labor [--prov <prov>]     Display Red Seal craft labor collision report")
@@ -81,7 +100,9 @@ func printUsage() {
 	fmt.Println("  cog extract iaac <file>                Extract IAAC Decision Statement conditions & legal risk")
 	fmt.Println("  cog changes [--since 7d|30d]           List recent momentum signals and milestones")
 	fmt.Println("  cog rankings <dimension>               Rank projects (buildability, investability, etc.)")
-	fmt.Println("  cog export project <id> [--format json|md|cegs] Export dossier with provenance")
+	fmt.Println("  cog export project <id> [--format json|md|cegs|memo|geojson] Export dossier with provenance")
+	fmt.Println("  cog export memo <id>                   Export Privy Council Office Memorandum to Cabinet")
+	fmt.Println("  cog export geojson <id>                Export OGC GeoJSON FeatureCollection")
 	fmt.Println("  cog cegs validate <file>               Validate document against CEGS 0.1 standard")
 	fmt.Println("  cog cegs inspect <file>                Inspect CEGS document & evidence trust profile")
 	fmt.Println("  cog cegs diff <old.json> <new.json>    Semantic diff between two CEGS states")
@@ -90,10 +111,20 @@ func printUsage() {
 
 func getSeededStore() database.Store {
 	store := database.NewMemoryStore()
+	fixturePath := "data/fixtures/nrcan_mpi_2025.json"
+	officialPath := ""
+	tradePath := ""
+	if _, err := os.Stat(fixturePath); os.IsNotExist(err) {
+		if _, err := os.Stat("../../" + fixturePath); err == nil {
+			fixturePath = "../../" + fixturePath
+			officialPath = "../../data/fixtures/official_records.json"
+			tradePath = "../../data/fixtures/world_bank_trade_canada.json"
+		}
+	}
 	adapterList := []adapters.Adapter{
-		nrcan_major_projects.NewNRCanAdapter("data/fixtures/nrcan_mpi_2025.json"),
-		official.NewAdapter(""),
-		global_trade.NewAdapter(""),
+		nrcan_major_projects.NewNRCanAdapter(fixturePath),
+		official.NewAdapter(officialPath),
+		global_trade.NewAdapter(tradePath),
 	}
 	p := ingestion.NewPipeline(store, adapterList)
 	if _, err := p.Run(context.Background()); err != nil {
@@ -395,15 +426,22 @@ func handleRankings(args []string) {
 }
 
 func handleExport(args []string) {
-	if len(args) < 2 || args[0] != "project" {
-		fmt.Println("Usage: cog export project <id|slug> [--format json|md|cegs]")
+	if len(args) < 2 {
+		fmt.Println("Usage: cog export <project|memo|geojson> <id|slug> [--format json|md|cegs|memo|geojson]")
 		return
 	}
+	exportMode := strings.ToLower(args[0])
 	id := args[1]
 	format := "json"
+	if exportMode == "memo" {
+		format = "memo"
+	} else if exportMode == "geojson" {
+		format = "geojson"
+	}
+
 	for i, arg := range args {
 		if arg == "--format" && i+1 < len(args) {
-			format = args[i+1]
+			format = strings.ToLower(args[i+1])
 		}
 	}
 
@@ -419,20 +457,37 @@ func handleExport(args []string) {
 		}
 	}
 
-	bundle, err := export.ExportProjectBundle(ctx, store, proj.ID)
-	if err != nil {
-		fmt.Printf("Export error: %v\n", err)
-		return
-	}
-
 	switch format {
+	case "memo":
+		memoGen := memoexport.NewMemoGenerator()
+		memo := memoGen.GenerateCabinetMemo(proj, memoexport.MemoTypeCabinetMC)
+		fmt.Println(memo.MarkdownContent)
+	case "geojson":
+		fc := memoexport.ExportGeoJSON([]*domain.Project{proj})
+		out, _ := json.MarshalIndent(fc, "", "  ")
+		fmt.Println(string(out))
 	case "md", "markdown":
+		bundle, err := export.ExportProjectBundle(ctx, store, proj.ID)
+		if err != nil {
+			fmt.Printf("Export error: %v\n", err)
+			return
+		}
 		fmt.Println(bundle.ToMarkdown())
 	case "cegs":
+		bundle, err := export.ExportProjectBundle(ctx, store, proj.ID)
+		if err != nil {
+			fmt.Printf("Export error: %v\n", err)
+			return
+		}
 		cegsProj, _ := bundle.ToCEGSExport()
 		out, _ := json.MarshalIndent(cegsProj, "", "  ")
 		fmt.Println(string(out))
 	default:
+		bundle, err := export.ExportProjectBundle(ctx, store, proj.ID)
+		if err != nil {
+			fmt.Printf("Export error: %v\n", err)
+			return
+		}
 		out, _ := json.MarshalIndent(bundle, "", "  ")
 		fmt.Println(string(out))
 	}
@@ -653,4 +708,272 @@ func handlePlanning(args []string) {
 		fmt.Println("Usage: cog planning <optimize|wargame|labor>")
 	}
 }
+
+func handleSyndication(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: cog syndication <match|indigenous> [args...]")
+		return
+	}
+	sub := strings.ToLower(args[0])
+	store := getSeededStore()
+	ctx := context.Background()
+
+	switch sub {
+	case "match":
+		if len(args) < 2 {
+			fmt.Println("Usage: cog syndication match <id|slug>")
+			return
+		}
+		id := args[1]
+		proj, err := store.GetProject(ctx, id)
+		if err != nil {
+			proj, err = store.GetProjectBySlug(ctx, id)
+			if err != nil {
+				fmt.Printf("Project not found: %s\n", id)
+				return
+			}
+		}
+		matcher := syndication.NewMatcher(nil)
+		consortium := matcher.MatchProject(proj)
+		fmt.Printf("=== Institutional Syndication Consortium: %s ===\n", consortium.ProjectName)
+		fmt.Printf("Total CAPEX:                $%d CAD\n", consortium.TotalCapexCAD)
+		fmt.Printf("Recommended Equity Tranche: $%d CAD\n", consortium.EquityTrancheCAD)
+		fmt.Printf("Recommended Debt Tranche:   $%d CAD\n", consortium.DebtTrancheCAD)
+		fmt.Printf("Crown Concession (CIB/CGF): $%d CAD\n", consortium.CrownConcessionCAD)
+		fmt.Printf("Indigenous Equity (ILGP):   $%d CAD\n", consortium.IndigenousEquityCAD)
+		fmt.Printf("Private Crowding-In Ratio:  %.2fx\n", consortium.PrivateCrowdingInRatio)
+		fmt.Printf("Audit Hash:                 %s\n\n", consortium.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "INVESTOR\tCLASS\tSCORE\tTRANCHE\tPROPOSED TICKET\tRATIONALE")
+		for _, m := range consortium.Matches {
+			fmt.Fprintf(w, "%s\t%s\t%.1f\t%s\t$%d\t%s\n",
+				m.Investor.Name, m.Investor.Class, m.MatchScore, m.RecommendedTranche, m.ProposedTicketCAD, m.Rationale)
+		}
+		w.Flush()
+
+	case "indigenous":
+		name := "Ring of Fire Northern Access Road & Transmission Corridor"
+		if len(args) >= 2 {
+			name = strings.Join(args[1:], " ")
+		}
+		syndicate := syndication.BuildMultiNationSyndicate(name, 1_200_000_000, []struct {
+			Name      string
+			Territory string
+			KM        float64
+		}{
+			{Name: "Marten Falls First Nation", Territory: "Treaty 9 Unceded Anishinaabe", KM: 140.0},
+			{Name: "Webequie First Nation", Territory: "Treaty 9 Traditional Territory", KM: 110.0},
+			{Name: "Neskantaga First Nation", Territory: "Treaty 9 Watershed Stewardship", KM: 60.0},
+			{Name: "Nibinamik First Nation", Territory: "Treaty 9 Traditional Boreal", KM: 40.0},
+		})
+
+		fmt.Printf("=== Multi-Nation Indigenous Equity Syndicate: %s ===\n", syndicate.CorridorProjectName)
+		fmt.Printf("Total Corridor Length:      %.1f km\n", syndicate.TotalCorridorKM)
+		fmt.Printf("Total Equity Value:         $%d CAD\n", syndicate.TotalEquityValueCAD)
+		fmt.Printf("Federal ILGP Debt Guarantee: $%d CAD\n", syndicate.FederalILGPGreaterCAD)
+		fmt.Printf("Interest Spread Savings:    %d bps\n", syndicate.BlendedInterestSpreadBps)
+		fmt.Printf("Total Annual Dividends:     $%d CAD / yr\n", syndicate.TotalAnnualDividendsCAD)
+		fmt.Printf("Total 30-Year Wealth Gen:   $%d CAD\n", syndicate.Total30YearWealthCAD)
+		fmt.Printf("Audit Hash:                 %s\n\n", syndicate.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "COMMUNITY\tTERRITORY\tKM\tEQUITY %\tGUARANTEED DEBT\tANNUAL DIVIDEND\t30-YR WEALTH")
+		for _, p := range syndicate.Participants {
+			fmt.Fprintf(w, "%s\t%s\t%.1f km\t%.1f%%\t$%d\t$%d\t$%d\n",
+				p.BandCouncilName, p.TreatyOrTerritory, p.CorridorKilometers, p.EquitySharePercent, p.GuaranteedDebtCAD, p.AnnualDividendCAD, p.Cumulative30YrCAD)
+		}
+		w.Flush()
+
+	default:
+		fmt.Printf("Unknown syndication command: %s\n", sub)
+		fmt.Println("Usage: cog syndication <match|indigenous>")
+	}
+}
+
+func handleOfftake(args []string) {
+	offtakes := syndication.CanonicalOfftakeAgreements()
+	targetProj := ""
+	if len(args) > 0 && args[0] != "list" {
+		targetProj = strings.ToLower(args[0])
+	} else if len(args) > 1 && args[0] == "list" {
+		targetProj = strings.ToLower(args[1])
+	}
+
+	fmt.Println("=== Commercial Offtake & Clean Power Purchase Agreements (PPAs) ===")
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "AGREEMENT ID\tPROJECT\tOFFTAKER / BUYER\tRATING\tCOMMODITY\tVOLUME\tTERM\tANNUAL VALUE")
+	for _, o := range offtakes {
+		if targetProj != "" && !strings.Contains(strings.ToLower(o.ProjectID), targetProj) && !strings.Contains(strings.ToLower(o.ID), targetProj) {
+			continue
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%d yrs\t$%d CAD\n",
+			o.ID, o.ProjectID, o.BuyerName, o.BuyerCreditRating, o.Commodity, o.VolumeAnnualMetric, o.TermYears, o.AnnualContractValueCAD)
+	}
+	w.Flush()
+}
+
+func handleCorridor(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: cog corridor <route|port> [args...]")
+		return
+	}
+	sub := strings.ToLower(args[0])
+
+	switch sub {
+	case "route":
+		origin := corridor.CorridorPoint{Name: "Prince George", Latitude: 53.9171, Longitude: -122.7497, ElevationMeters: 575}
+		dest := corridor.CorridorPoint{Name: "Port of Prince Rupert", Latitude: 54.3150, Longitude: -130.3208, ElevationMeters: 10}
+		infraType := corridor.TypeHVDCTransmission
+
+		for i := 1; i < len(args); i++ {
+			switch args[i] {
+			case "--type", "--mode":
+				if i+1 < len(args) {
+					switch strings.ToLower(args[i+1]) {
+					case "pipeline", "h2", "hydrogen":
+						infraType = corridor.TypeHydrogenPipeline
+					case "rail":
+						infraType = corridor.TypeArcticHeavyRail
+					case "co2":
+						infraType = corridor.TypeCO2Pipeline
+					case "road":
+						infraType = corridor.TypeAllWeatherRoad
+					default:
+						infraType = corridor.TypeHVDCTransmission
+					}
+					i++
+				}
+			case "--origin":
+				if i+1 < len(args) {
+					origin.Name = args[i+1]
+					i++
+				}
+			case "--dest":
+				if i+1 < len(args) {
+					dest.Name = args[i+1]
+					i++
+				}
+			}
+		}
+
+		router := corridor.NewRoutingEngine()
+		eval := router.EvaluateCorridor(origin, dest, infraType)
+
+		fmt.Printf("=== Linear Right-of-Way (RoW) Pathfinding Evaluation ===\n")
+		fmt.Printf("Corridor ID:          %s\n", eval.CorridorID)
+		fmt.Printf("Type:                 %s\n", eval.Type)
+		fmt.Printf("Origin -> Dest:       %s -> %s\n", eval.OriginName, eval.DestinationName)
+		fmt.Printf("Total Length:         %.1f km\n", eval.TotalLengthKM)
+		fmt.Printf("Estimated Capex:      $%d CAD\n", eval.TotalEstimatedCapexCAD)
+		fmt.Printf("Schedule Duration:    %d months\n", eval.EstimatedScheduleMonths)
+		fmt.Printf("Impedance Index:      %.1f\n", eval.ImpedanceIndex)
+		fmt.Printf("Permafrost Hazard:    %.0f%%\n", eval.Sensitivity.PermafrostThawHazardScore*100)
+		fmt.Printf("Caribou Overlap:      %.1f km\n", eval.Sensitivity.CaribouRangeIntersectKM)
+		fmt.Printf("Wetland Crossings:    %d\n", eval.Sensitivity.WetlandCrossingCount)
+		fmt.Printf("Audit Hash:           %s\n\n", eval.AuditHash)
+
+	case "port":
+		gateways := corridor.CanonicalGateways()
+		target := ""
+		if len(args) > 1 {
+			target = strings.ToLower(args[1])
+		}
+
+		fmt.Println("=== Strategic Maritime Gateways & Multi-Modal Rail Logistics ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "GATEWAY\tPORT NAME\tPROV\tRAIL\tTHROUGHPUT\tVESSEL DWELL\tRAIL DWELL\tBERTH %\tSTATUS")
+		for _, g := range gateways {
+			if target != "" && !strings.Contains(strings.ToLower(string(g.GatewayID)), target) && !strings.Contains(strings.ToLower(g.PortName), target) {
+				continue
+			}
+			rails := strings.Join(g.Class1RailConnections, "/")
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%.1f Mt\t%.1f hrs\t%.1f hrs\t%.1f%%\t%s\n",
+				g.GatewayID, g.PortName, g.Province, rails, g.AnnualThroughputMNTonnes, g.AverageVesselDwellHours, g.AverageRailcarDwellHours, g.BerthCapacityUtilizationPercent, g.ActiveBottleneckStatus)
+		}
+		w.Flush()
+
+	default:
+		fmt.Printf("Unknown corridor command: %s\n", sub)
+		fmt.Println("Usage: cog corridor <route|port>")
+	}
+}
+
+func handleFinance(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: cog finance <simulate|cleantax> <id|slug> [options]")
+		return
+	}
+	sub := strings.ToLower(args[0])
+	if len(args) < 2 {
+		fmt.Printf("Usage: cog finance %s <id|slug> [options]\n", sub)
+		return
+	}
+	id := args[1]
+	store := getSeededStore()
+	ctx := context.Background()
+
+	proj, err := store.GetProject(ctx, id)
+	if err != nil {
+		proj, err = store.GetProjectBySlug(ctx, id)
+		if err != nil {
+			fmt.Printf("Project not found: %s\n", id)
+			return
+		}
+	}
+
+	switch sub {
+	case "simulate":
+		runs := 10000
+		for i := 2; i < len(args); i++ {
+			if args[i] == "--runs" && i+1 < len(args) {
+				fmt.Sscanf(args[i+1], "%d", &runs)
+				i++
+			}
+		}
+		sim := projectfinance.NewFinanceSimulator()
+		res := sim.RunSimulation(proj, runs)
+
+		fmt.Printf("=== Stochastic Project Finance Monte Carlo Simulation: %s ===\n", res.ProjectName)
+		fmt.Printf("Iterations Executed:     %d\n", res.IterationsRun)
+		fmt.Printf("Baseline CAPEX:          $%d CAD\n", res.BaselineCapexCAD)
+		fmt.Printf("Synthetic Credit Rating: %s (Investment Grade: %t)\n", res.SyntheticCreditRating, res.InvestmentGrade)
+		fmt.Printf("Probability of Default:  %.2f%%\n", res.ProbabilityOfDefaultPct)
+		fmt.Printf("Audit Hash:              %s\n\n", res.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "METRIC\tMEAN\tP10 (DOWNSIDE)\tP50 (MEDIAN)\tP90 (UPSIDE)")
+		fmt.Fprintf(w, "Project IRR\t%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%\n",
+			res.ProjectIRRPercent.Mean, res.ProjectIRRPercent.P10, res.ProjectIRRPercent.P50, res.ProjectIRRPercent.P90)
+		fmt.Fprintf(w, "Equity IRR\t%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%\n",
+			res.EquityIRRPercent.Mean, res.EquityIRRPercent.P10, res.EquityIRRPercent.P50, res.EquityIRRPercent.P90)
+		fmt.Fprintf(w, "Minimum DSCR\t%.2fx\t%.2fx\t%.2fx\t%.2fx\n",
+			res.MinDSCR.Mean, res.MinDSCR.P10, res.MinDSCR.P50, res.MinDSCR.P90)
+		fmt.Fprintf(w, "Average DSCR\t%.2fx\t%.2fx\t%.2fx\t%.2fx\n",
+			res.AvgDSCR.Mean, res.AvgDSCR.P10, res.AvgDSCR.P50, res.AvgDSCR.P90)
+		fmt.Fprintf(w, "Loan Life Cov (LLCR)\t%.2fx\t%.2fx\t%.2fx\t%.2fx\n",
+			res.LoanLifeCoverageRatio.Mean, res.LoanLifeCoverageRatio.P10, res.LoanLifeCoverageRatio.P50, res.LoanLifeCoverageRatio.P90)
+		w.Flush()
+
+	case "cleantax":
+		calc := projectfinance.NewTaxCreditCalculator()
+		profile := calc.CalculateCredits(proj)
+
+		fmt.Printf("=== Clean Economy Tax Credit & CCfD Underwriting: %s ===\n", proj.Name)
+		fmt.Printf("Applicable Credit:       %s\n", profile.ApplicableITC)
+		fmt.Printf("Eligible CAPEX:          $%d CAD\n", profile.EligibleCapexCAD)
+		fmt.Printf("Base Credit Rate:        %.1f%%\n", profile.BaseCreditRatePercent)
+		fmt.Printf("Labor Condition Bonus:   +%.1f%%\n", profile.LaborConditionBonusPercent)
+		fmt.Printf("Effective Credit Rate:   %.1f%%\n", profile.EffectiveCreditRatePercent)
+		fmt.Printf("Total Tax Credit Yield:  $%d CAD\n", profile.TotalTaxCreditYieldCAD)
+		fmt.Printf("CCfD Underwriting:       Eligible: %t (Strike: $%.2f/t, Subsidy: $%d/yr)\n",
+			profile.CCfDEligible, profile.CCfDStrikePriceCADTonne, profile.EstimatedAnnualCCfDSubsidyCAD)
+		fmt.Printf("Audit Hash:              %s\n", profile.AuditHash)
+
+	default:
+		fmt.Printf("Unknown finance command: %s\n", sub)
+		fmt.Println("Usage: cog finance <simulate|cleantax>")
+	}
+}
+
 

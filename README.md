@@ -17,7 +17,7 @@ The essential data describing this buildout is fragmented across hundreds of fed
 
 ---
 
-### Built on CEGS
+## Built on CEGS
 
 CanadaOpportunityGraph is the official **reference implementation and flagship application** of the **[Canada Economic Graph Schema (CEGS)](spec/cegs/README.md)**.
 
@@ -64,7 +64,9 @@ CEGS is an open, implementation-neutral data specification for representing Cana
 ## Key Differentiating Capabilities
 
 ### 1. Deterministic Scoring Engines (No Hallucinated Scores)
+
 Authoritative scores are computed using versioned, deterministic algorithms:
+
 - **Buildability Score (0–100)**: Execution likelihood based on regulatory progress, Indigenous agreements, financing readiness, and site control.
 - **Investability Score (0–100)**: Capital opportunity scale, public co-investment de-risking, and offtake strength.
 - **Supplierability Score (0–100)**: Procurement proximity, engineering complexity, and domestic supply-chain intensity.
@@ -72,10 +74,13 @@ Authoritative scores are computed using versioned, deterministic algorithms:
 - **Canadian AI Sovereignty Index (0–100)**: Transparent scorecard on Canadian data/compute residency, US CLOUD Act immunity, bilingual capability, and Quebec Law 25 compliance.
 
 ### 2. Opportunity Propagation Engine
+
 When an upstream project is announced (e.g. an open-pit nickel mine or SMR nuclear facility), the engine deterministically derives downstream industrial demand (e.g. 230kV high-voltage substation interconnect, EPCM engineering packages, modular remote workforce camps, continuous aquatic monitoring).
+
 - Strictly distinguishes `CONFIRMED` procurement from `DERIVED` requirements and `SPECULATIVE` dependencies.
 
 ### 3. Sourced Provenance & Cryptographic Data Moat
+
 - Every material factual assertion points to an `Evidence` record with source URL, publisher, retrieval timestamp, and raw document SHA-256 content hash.
 - History is immutable: state transitions are append-only.
 - Missing data remains explicitly `UNKNOWN`. Conflicting evidence remains `CONFLICTED`.
@@ -87,6 +92,7 @@ When an upstream project is announced (e.g. an open-pit nickel mine or SMR nucle
 The repository provides identical targets for Unix (`make`) and native Windows PowerShell (`scripts/task.ps1`).
 
 ### Option A: Windows PowerShell
+
 ```powershell
 # Run deterministic offline demo
 .\scripts\task.ps1 demo
@@ -102,6 +108,7 @@ The repository provides identical targets for Unix (`make`) and native Windows P
 ```
 
 ### Option B: Unix / macOS / CI
+
 ```bash
 # Build CLI and server binaries
 make build
@@ -178,6 +185,7 @@ $ cog cegs diff v1.json v2.json
 ## Public CEGS Datasets
 
 Public release snapshots are maintained under [`data/cegs/`](data/cegs/) and [`data/public/`](data/public/):
+
 - `data/cegs/manifest.json`: Cryptographic dataset manifest.
 - `data/cegs/projects.jsonl`: Verified major infrastructure projects.
 - `data/cegs/organizations.jsonl`: Proponents, Crown corporations, and regulators.
