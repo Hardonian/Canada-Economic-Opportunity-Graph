@@ -116,3 +116,26 @@ func TestCLIExportMemoAndGeoJSON(t *testing.T) {
 		t.Fatalf("expected geojson FeatureCollection, got: %s", outGeo)
 	}
 }
+
+func TestCLIFilings(t *testing.T) {
+	outStream := captureStdout(func() {
+		handleFilings([]string{"stream"})
+	})
+	if !strings.Contains(outStream, "Real-Time Continuous Disclosure Stream") || !strings.Contains(outStream, "FILING ID") {
+		t.Fatalf("expected continuous disclosure stream, got: %s", outStream)
+	}
+
+	outEA := captureStdout(func() {
+		handleFilings([]string{"ea"})
+	})
+	if !strings.Contains(outEA, "Provincial Environmental Assessment") || !strings.Contains(outEA, "REGISTRY") {
+		t.Fatalf("expected EA registry notices, got: %s", outEA)
+	}
+
+	outAmend := captureStdout(func() {
+		handleFilings([]string{"amendments"})
+	})
+	if !strings.Contains(outAmend, "CanadaBuys & DCC Procurement Tender Amendments") || !strings.Contains(outAmend, "TENDER ID") {
+		t.Fatalf("expected tender amendments, got: %s", outAmend)
+	}
+}

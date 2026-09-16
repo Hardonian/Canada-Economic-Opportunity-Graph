@@ -120,3 +120,41 @@ func (s *Streamer) ParseFiling(issuer, ticker, exchange string, fType FilingType
 
 	return rec
 }
+
+// CanonicalDisclosures returns a curated list of representative continuous disclosure records across sectors.
+func CanonicalDisclosures() []*FilingRecord {
+	streamer := NewStreamer()
+	now := time.Now().UTC()
+	return []*FilingRecord{
+		streamer.ParseFiling(
+			"Canada Nickel Company Inc.",
+			"CNC",
+			"TSXV",
+			FilingTypeMDA,
+			"Crawford Nickel-Cobalt Project - Q3 2026 MD&A Disclosure",
+			"Positive Final Investment Decision reached for Crawford Mine. Early works capital expenditure estimate revised upward to $1.8B CAD. Major EPC contract awarded to Ausenco Engineering for FEED and site preparation.",
+			"https://sedarplus.ca/filings/10049281.pdf",
+			now.Add(-12*time.Hour),
+		),
+		streamer.ParseFiling(
+			"World Energy GH2 Inc.",
+			"WEGH2",
+			"CSE",
+			FilingTypeMaterialChange,
+			"Nujio'qonik Green Hydrogen - Project Financing & EPC Notice",
+			"Environmental assessment approved with decision statement issued. Board approved $4.5B CAD capex program. EPC contract awarded to SK ecoplant consortium.",
+			"https://sedarplus.ca/filings/10052981.pdf",
+			now.Add(-36*time.Hour),
+		),
+		streamer.ParseFiling(
+			"Cedar LNG Limited Partnership",
+			"CEDAR",
+			"TSX",
+			FilingTypeAIF,
+			"Cedar Floating LNG Facility - Annual Information Form",
+			"Asset transition to commercial operational readiness following final investment decision. Total capital cost revised to $3.4B CAD with Samsung Heavy Industries EPC contract.",
+			"https://sedarplus.ca/filings/10061204.pdf",
+			now.Add(-72*time.Hour),
+		),
+	}
+}

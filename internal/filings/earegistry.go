@@ -92,3 +92,41 @@ func (p *EAParser) ParseNotice(source, province, projectName, regID, title, rawT
 
 	return rec
 }
+
+// CanonicalEANotices returns a curated set of major provincial & federal EA registry records.
+func CanonicalEANotices() []*EARecord {
+	parser := NewEAParser()
+	now := time.Now().UTC()
+	return []*EARecord{
+		parser.ParseNotice(
+			"BC_EAO",
+			"BC",
+			"Cedar LNG Project",
+			"EA-2026-081",
+			"Issuance of Environmental Assessment Certificate",
+			"Environmental assessment certificate issued approval granted with 38 legally binding conditions.",
+			"https://projects.eao.gov.bc.ca/p/cedarlng",
+			now.Add(-48*time.Hour),
+		),
+		parser.ParseNotice(
+			"ONTARIO_ERO",
+			"ON",
+			"Darlington SMR Nuclear Expansion",
+			"ERO-019-9482",
+			"Terms of Reference Approved for SMR Units 2-4",
+			"Terms of reference approved for environmental baseline evaluation across Durham Region.",
+			"https://ero.ontario.ca/notice/019-9482",
+			now.Add(-96*time.Hour),
+		),
+		parser.ParseNotice(
+			"IAAC",
+			"FED",
+			"Contrecoeur Port Container Terminal",
+			"IAAC-80129",
+			"Public Comment Period Commenced for Marine Terminal Expansion",
+			"Invitation for public comments and Indigenous consultation period open for 30 calendar days.",
+			"https://iaac-aeic.gc.ca/050/evaluations/proj/80129",
+			now.Add(-120*time.Hour),
+		),
+	}
+}

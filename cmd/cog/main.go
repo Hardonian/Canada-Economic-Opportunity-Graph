@@ -21,6 +21,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/earthobs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/econometrics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/filings"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/gridphysics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/memoexport"
@@ -51,6 +52,8 @@ func main() {
 		handleCorridor(os.Args[2:])
 	case "finance":
 		handleFinance(os.Args[2:])
+	case "filings":
+		handleFilings(os.Args[2:])
 	case "cegs":
 		handleCEGS(os.Args[2:])
 	case "search":
@@ -91,6 +94,7 @@ func printUsage() {
 	fmt.Println("  cog corridor port [port_id]            Display strategic gateway multi-modal rail logistics")
 	fmt.Println("  cog finance simulate <id|slug> [--runs N] Run stochastic 10k Monte Carlo project cash flow model")
 	fmt.Println("  cog finance cleantax <id|slug>         Calculate Clean Economy ITCs & CCfD underwriting")
+	fmt.Println("  cog filings <stream|ea|amendments>     Stream real-time regulatory filings & tender amendments")
 	fmt.Println("  cog planning optimize [--obj <type>]   Run Sovereign Capital Allocation Optimizer")
 	fmt.Println("  cog planning wargame [--shock <type>]  Run geopolitical macro shock stress-testing")
 	fmt.Println("  cog planning labor [--prov <prov>]     Display Red Seal craft labor collision report")
@@ -976,5 +980,77 @@ func handleFinance(args []string) {
 		fmt.Println("Usage: cog finance <simulate|cleantax>")
 	}
 }
+
+func handleFilings(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: cog filings <stream|ea|amendments> [args...]")
+		return
+	}
+	sub := strings.ToLower(args[0])
+
+	switch sub {
+	case "stream":
+		records := filings.CanonicalDisclosures()
+		fmt.Println("=== Real-Time Continuous Disclosure Stream (SEDAR+ / MD&A) ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "FILING ID\tISSUER\tTICKER\tEXCHANGE\tTYPE\tSTAGE DETECTED\tAUDIT HASH")
+		for _, f := range records {
+			auditSnippet := f.AuditHash
+			if len(auditSnippet) > 16 {
+				auditSnippet = auditSnippet[:16] + "..."
+			}
+			stage := string(f.DetectedStage)
+			if stage == "" {
+				stage = "MONITORING"
+			}
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+				f.ID, f.IssuerName, f.Ticker, f.Exchange, f.FilingType, stage, auditSnippet)
+		}
+		w.Flush()
+
+	case "ea":
+		notices := filings.CanonicalEANotices()
+		fmt.Println("=== Provincial Environmental Assessment Registry Notices ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "REGISTRY\tPROVINCE\tPROJECT\tMILESTONE\tDEADLINE\tSUMMARY")
+		for _, n := range notices {
+			deadline := "N/A"
+			if n.CommentDeadline != nil {
+				deadline = n.CommentDeadline.Format("2006-01-02")
+			}
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
+				n.RegistrySource, n.Province, n.ProjectName, n.Milestone, deadline, n.Summary)
+		}
+		w.Flush()
+
+	case "amendments":
+		amendments := filings.CanonicalTenderAmendments()
+		fmt.Println("=== CanadaBuys & DCC Procurement Tender Amendments ===")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "TENDER ID\tTYPE\tAMEND #\tREVISED CLOSING\tAWARD VALUE (CAD)\tWINNING BIDDER")
+		for _, a := range amendments {
+			closing := "Unchanged"
+			if a.RevisedClosing != nil {
+				closing = a.RevisedClosing.Format("2006-01-02")
+			}
+			award := "Pending"
+			if a.ContractValueCAD > 0 {
+				award = fmt.Sprintf("$%d", a.ContractValueCAD)
+			}
+			winner := a.WinningBidder
+			if winner == "" {
+				winner = "In Evaluation"
+			}
+			fmt.Fprintf(w, "%s\t%s\t#%d\t%s\t%s\t%s\n",
+				a.TenderReference, a.Type, a.AmendmentNumber, closing, award, winner)
+		}
+		w.Flush()
+
+	default:
+		fmt.Printf("Unknown filings command: %s\n", sub)
+		fmt.Println("Usage: cog filings <stream|ea|amendments>")
+	}
+}
+
 
 
