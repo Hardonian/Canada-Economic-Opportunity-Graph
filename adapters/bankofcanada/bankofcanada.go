@@ -36,11 +36,9 @@ const (
 const valetAllowedHost = "www.bankofcanada.ca"
 
 var defaultSeries = []string{
-	"CPI_W",
-	"CPI_QC",
-	"CPI_ON",
-	"GDPPV",
-	"IRST_FF01",
+	"AVG.INTWO",         // Canadian Overnight Repo Rate Average (CORRA) (%)
+	"CL.CDN.MOST.1DL",   // Overnight money market financing rate
+	"EPS_CPI_INFLATION", // Consumer price index inflation
 }
 
 type BoCAdapter struct {
@@ -208,7 +206,7 @@ func (a *BoCAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {
 			)
 			res.TradeMetrics = append(res.TradeMetrics, &domain.TradeMetric{
 				ID:              metricID,
-				Geography:       "CA",
+				Geography:       "CAN",
 				MetricCode:      series,
 				MetricName:      series + " (BoC Valet)",
 				ReferencePeriod: date,
@@ -230,11 +228,9 @@ func parseFloat(s string) float64 {
 
 func inferUnit(series string) string {
 	switch {
-	case strings.HasPrefix(series, "CPI"):
-		return "index_2002=100"
-	case series == "GDPPV":
-		return "chained_2017_CAD_millions"
-	case strings.HasPrefix(series, "IRST"):
+	case strings.HasPrefix(series, "CPI") || series == "EPS_CPI_INFLATION":
+		return "percent_yoy"
+	case strings.HasPrefix(series, "AVG.INTWO") || strings.HasPrefix(series, "CL.CDN"):
 		return "percent"
 	default:
 		return "index"

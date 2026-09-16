@@ -13,7 +13,11 @@ import (
 	"time"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/bankofcanada"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/cmhc_housing"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/federal_contracts"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/global_trade"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/lobbyist_registry"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/nrcan_major_projects"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/official"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
@@ -24,8 +28,8 @@ import (
 )
 
 const (
-	datasetVersion = "2026-09-14-1"
-	datasetTime    = "2026-09-14T00:00:00Z"
+	datasetVersion = "2026-09-15-1"
+	datasetTime    = "2026-09-15T00:00:00Z"
 )
 
 func main() {
@@ -35,6 +39,10 @@ func main() {
 		nrcan_major_projects.NewNRCanAdapter("data/fixtures/nrcan_mpi_2025.json"),
 		official.NewAdapter("data/fixtures/official_records.json"),
 		global_trade.NewAdapter("data/fixtures/world_bank_trade_canada.json"),
+		bankofcanada.NewBoCAdapter(""),
+		federal_contracts.NewFederalContractsAdapter(""),
+		lobbyist_registry.NewLobbyistRegistryAdapter(""),
+		cmhc_housing.NewCMHCHousingAdapter(""),
 	})
 	ctx := context.Background()
 	report, err := pipeline.Run(ctx)
@@ -75,6 +83,35 @@ func main() {
 	for _, metric := range tradeMetrics {
 		evidence, err := store.GetEvidence(ctx, metric.EvidenceID)
 		must(err)
+		evidenceByID[evidence.ID] = evidence
+	}
+
+	// Federal procurements (e.g. Open.Canada contracts) are exported alongside
+	// their evidence so award records and their provenance stay linked.
+	procurements, err := store.ListProcurements(ctx, 1000, 0)
+	must(err)
+	sort.Slice(procurements, func(i, j int) bool { return procurements[i].ID < procurements[j].ID })
+	for _, proc := range procurements {
+		if proc.EvidenceID == "" {
+			continue
+		}
+		evidence, err := store.GetEvidence(ctx, proc.EvidenceID)
+		if err != nil || evidence == nil {
+			continue
+		}
+		evidenceByID[evidence.ID] = evidence
+	}
+
+	// Entities (e.g. lobbyist registrants) carry evidence IDs too; exporting
+	// their evidence keeps every cross-resource reference resolvable.
+	for _, entity := range entities {
+		if entity.EvidenceID == "" {
+			continue
+		}
+		evidence, err := store.GetEvidence(ctx, entity.EvidenceID)
+		if err != nil || evidence == nil {
+			continue
+		}
 		evidenceByID[evidence.ID] = evidence
 	}
 	var evidence []*domain.Evidence
@@ -118,6 +155,7 @@ func main() {
 	files["public/evidence.jsonl"] = mustJSONL(evidence)
 	files["public/scores.jsonl"] = mustJSONL(scores)
 	files["public/trade_metrics.jsonl"] = mustJSONL(tradeMetrics)
+	files["public/procurements.jsonl"] = mustJSONL(procurements)
 	files["cegs/projects.jsonl"] = mustJSONL(cegsProjects)
 	files["cegs/organizations.jsonl"] = mustJSONL(cegsOrgs)
 	files["cegs/events.jsonl"] = mustJSONL(cegsEvents)
@@ -158,7 +196,7 @@ func main() {
 		"publisher":        "CanadaOpportunityGraph",
 		"license":          "LicenseRef-COG-Generated-Data",
 		"generated_at":     generatedAt.Format(time.RFC3339),
-		"record_counts":    map[string]int{"projects": len(projects), "organizations": len(entities), "events": len(events), "evidence": len(evidence), "scores": len(scores), "trade_metrics": len(tradeMetrics)},
+		"record_counts":    map[string]int{"projects": len(projects), "organizations": len(entities), "events": len(events), "evidence": len(evidence), "scores": len(scores), "trade_metrics": len(tradeMetrics), "procurements": len(procurements)},
 		"jurisdictions":    jurisdictions,
 		"checksums_sha256": checksums,
 		"coverage_note":    "Coverage includes the 2025-2035 NRCan Major Projects Inventory point layer, curated primary-source project records, and credential-free World Bank Indicators API observations for Canada. Other registered trade sources remain explicitly marked as not yet ingested.",
