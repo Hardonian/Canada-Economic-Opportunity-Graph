@@ -41,3 +41,13 @@ pnpm-debug.log*
 
 # Next.js telemetry & cache
 .vercel
+
+# Rust / Cargo
+target/
+**/target/
+
+# Python / bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/

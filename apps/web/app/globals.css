@@ -314,3 +314,89 @@ body {
     text-decoration-thickness: 1px;
   }
 }
+
+/* ==========================================================================
+   Leaflet High-Fidelity Tile & Canvas Rendering Engine Protections
+   ========================================================================== */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: #040806 !important;
+  font-family: inherit;
+}
+
+/* Override Tailwind CSS preflight img { max-width: 100%; height: auto; } which distorts Leaflet tiles */
+.leaflet-container img.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  width: 256px !important;
+  height: 256px !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.leaflet-pane {
+  z-index: 400;
+}
+
+.leaflet-tile-pane {
+  z-index: 200;
+}
+
+.leaflet-overlay-pane {
+  z-index: 400;
+}
+
+.leaflet-shadow-pane {
+  z-index: 500;
+}
+
+.leaflet-marker-pane {
+  z-index: 600;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 650;
+}
+
+.leaflet-popup-pane {
+  z-index: 700;
+}
+
+.leaflet-zoom-box {
+  z-index: 800;
+}
+
+/* Custom Tactical Tooltip & Popup Overrides */
+.trade-route-tooltip,
+.opportunity-tooltip,
+.corridor-tooltip {
+  background: rgba(4, 8, 6, 0.92) !important;
+  border: 1px solid #1e3a2b !important;
+  color: #f7faf8 !important;
+  font-family: monospace !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  padding: 6px 10px !important;
+}
+
+.trade-route-tooltip::before,
+.opportunity-tooltip::before,
+.corridor-tooltip::before {
+  border-top-color: rgba(4, 8, 6, 0.92) !important;
+}
+
+.institutional-popup .leaflet-popup-content-wrapper {
+  background: rgba(4, 8, 6, 0.95) !important;
+  border: 1px solid #1e3a2b !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.institutional-popup .leaflet-popup-tip {
+  background: rgba(4, 8, 6, 0.95) !important;
+}
+

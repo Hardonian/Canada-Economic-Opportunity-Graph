@@ -541,3 +541,94 @@ class COGClient:
     def export_cegs(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Export the full CEGS dataset with optional filters."""
         return self._request("/api/v1/cegs/export", params=params or {})
+
+    def get_critical_minerals(self) -> Dict[str, Any]:
+        """Get Pillar A: 31 Canadian critical minerals taxonomy, refining hubs, and domestic retention stats."""
+        return self._request("/api/v1/critical-minerals")
+
+    def get_indigenous_overview(self) -> Dict[str, Any]:
+        """Get Pillar B: Indigenous sovereign co-investment framework, partnerships, and loan guarantee statistics."""
+        return self._request("/api/v1/indigenous")
+
+    def simulate_indigenous_loan_guarantee(
+        self,
+        capex_cad: Optional[float] = None,
+        indigenous_equity_pct: Optional[float] = None,
+        commercial_rate_pct: Optional[float] = None,
+        ilgp_spread_discount_bps: Optional[float] = None,
+        tenor_years: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Simulate $5B Federal Indigenous Loan Guarantee Program (ILGP) debt syndication and equity economics."""
+        params: Dict[str, Any] = {}
+        if capex_cad is not None:
+            params["capex_cad"] = capex_cad
+        if indigenous_equity_pct is not None:
+            params["indigenous_equity_pct"] = indigenous_equity_pct
+        if commercial_rate_pct is not None:
+            params["commercial_rate_pct"] = commercial_rate_pct
+        if ilgp_spread_discount_bps is not None:
+            params["ilgp_spread_discount_bps"] = ilgp_spread_discount_bps
+        if tenor_years is not None:
+            params["tenor_years"] = tenor_years
+        return self._request("/api/v1/indigenous/loan-guarantee-sim", params=params)
+
+    def get_trade_friction(
+        self,
+        total_bilateral_cad: Optional[float] = None,
+        direct_tariff_equiv_bps: Optional[float] = None,
+        non_tariff_friction_bps: Optional[float] = None,
+        supply_chain_delay_days: Optional[float] = None,
+        cross_border_trucking_friction_pct: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Simulate Pillar C: $130B internal Canadian trade barrier and friction tax burden model."""
+        params: Dict[str, Any] = {}
+        if total_bilateral_cad is not None:
+            params["total_bilateral_cad"] = total_bilateral_cad
+        if direct_tariff_equiv_bps is not None:
+            params["direct_tariff_equiv_bps"] = direct_tariff_equiv_bps
+        if non_tariff_friction_bps is not None:
+            params["non_tariff_friction_bps"] = non_tariff_friction_bps
+        if supply_chain_delay_days is not None:
+            params["supply_chain_delay_days"] = supply_chain_delay_days
+        if cross_border_trucking_friction_pct is not None:
+            params["cross_border_trucking_friction_pct"] = cross_border_trucking_friction_pct
+        return self._request("/api/v1/trade/friction", params=params)
+
+    def get_compute_sovereignty(
+        self,
+        allocated_grid_capacity_mw: Optional[float] = None,
+        clean_energy_mix_pct: Optional[float] = None,
+        target_efficiency_flops_per_watt: Optional[float] = None,
+        hyperscale_utilization_pct: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Simulate Pillar D: Clean Baseload and Sovereign AI Compute (FLOPs/MW metric & carbon offset)."""
+        params: Dict[str, Any] = {}
+        if allocated_grid_capacity_mw is not None:
+            params["allocated_grid_capacity_mw"] = allocated_grid_capacity_mw
+        if clean_energy_mix_pct is not None:
+            params["clean_energy_mix_pct"] = clean_energy_mix_pct
+        if target_efficiency_flops_per_watt is not None:
+            params["target_efficiency_flops_per_watt"] = target_efficiency_flops_per_watt
+        if hyperscale_utilization_pct is not None:
+            params["hyperscale_utilization_pct"] = hyperscale_utilization_pct
+        return self._request("/api/v1/compute/sovereignty", params=params)
+
+    def list_projects_spatial(
+        self,
+        min_lat: float,
+        max_lat: float,
+        min_lng: float,
+        max_lng: float,
+        limit: int = 100,
+    ) -> List[Dict[str, Any]]:
+        """Query projects within a spatial bounding box."""
+        params = {
+            "min_lat": min_lat,
+            "max_lat": max_lat,
+            "min_lng": min_lng,
+            "max_lng": max_lng,
+            "limit": limit,
+        }
+        resp = self._request("/api/v1/spatial/projects", params=params)
+        return resp if isinstance(resp, list) else []
+

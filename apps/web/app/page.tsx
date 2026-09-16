@@ -8,7 +8,12 @@ import {
   Zap, 
   Sparkles,
   ShieldCheck,
-  Briefcase
+  Briefcase,
+  Pickaxe,
+  Landmark,
+  Compass,
+  Cpu,
+  ChevronRight
 } from "lucide-react";
 import { getRadarData, getProjects, SNAPSHOT_MANIFEST } from "@/lib/data";
 import DynamicRadarExplorer from "@/components/DynamicRadarExplorer";
@@ -130,6 +135,133 @@ export default async function HomePage() {
               Checksummed release
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Four Pillars of Sovereign Canadian Capital Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-border/60 pb-3">
+          <div>
+            <div className="text-[10px] font-mono text-aurora uppercase tracking-wider font-bold">
+              STRATEGIC ARCHITECTURE // PILLARS A THROUGH D
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-text-main tracking-tight mt-0.5">
+              Four Pillars of Canadian Economic Sovereignty
+            </h2>
+          </div>
+          <p className="text-xs text-text-muted max-w-md">
+            Integrated macro models driving bilateral trade security, sovereign indigenous co-investment, internal market friction reduction, and clean AI baseload.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Pillar A: Critical Minerals */}
+          <Link
+            href="/map"
+            className="group glass-card p-5 rounded-xl border border-border/80 hover:border-aurora/50 transition-all duration-300 flex flex-col justify-between space-y-4 hover:shadow-[0_0_20px_rgba(0,245,160,0.1)]"
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-lg bg-aurora/10 text-aurora group-hover:scale-110 transition-transform">
+                  <Pickaxe className="h-5 w-5" />
+                </span>
+                <span className="text-[9px] font-mono text-text-subtle uppercase px-2 py-0.5 rounded bg-surface border border-borderSubtle">
+                  PILLAR A
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-text-main group-hover:text-aurora transition-colors">
+                Critical Minerals & Refining
+              </h3>
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                31 minerals taxonomy, hydrometallurgical hubs, and Domestic Value Retention Index (DVRI) tracking across resource belts.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-[10px] font-mono text-aurora">
+              <span>Explore Geospatial Hubs</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Pillar B: Indigenous Sovereignty */}
+          <Link
+            href="/capital"
+            className="group glass-card p-5 rounded-xl border border-border/80 hover:border-amber-400/50 transition-all duration-300 flex flex-col justify-between space-y-4 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)]"
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+                  <Landmark className="h-5 w-5" />
+                </span>
+                <span className="text-[9px] font-mono text-text-subtle uppercase px-2 py-0.5 rounded bg-surface border border-borderSubtle">
+                  PILLAR B
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-text-main group-hover:text-amber-400 transition-colors">
+                Indigenous Sovereignty & ILGP
+              </h3>
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                $5B Federal Indigenous Loan Guarantee Program (ILGP) debt syndication simulator, commercial rate discounts, and co-ownership.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-[10px] font-mono text-amber-400">
+              <span>Launch Debt Simulator</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Pillar C: Internal Trade */}
+          <Link
+            href="/trade"
+            className="group glass-card p-5 rounded-xl border border-border/80 hover:border-sky-400/50 transition-all duration-300 flex flex-col justify-between space-y-4 hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]"
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-lg bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform">
+                  <Compass className="h-5 w-5" />
+                </span>
+                <span className="text-[9px] font-mono text-text-subtle uppercase px-2 py-0.5 rounded bg-surface border border-borderSubtle">
+                  PILLAR C
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-text-main group-hover:text-sky-400 transition-colors">
+                Internal Trade & Friction Reduction
+              </h3>
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                $130B internal Canadian trade barrier model, interprovincial transport harmonization, and barrier tax analysis across all 13 provinces.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-[10px] font-mono text-sky-400">
+              <span>Simulate Barrier Tax</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Pillar D: Clean AI Compute */}
+          <Link
+            href="/ai-sovereignty"
+            className="group glass-card p-5 rounded-xl border border-border/80 hover:border-emerald-400/50 transition-all duration-300 flex flex-col justify-between space-y-4 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Cpu className="h-5 w-5" />
+                </span>
+                <span className="text-[9px] font-mono text-text-subtle uppercase px-2 py-0.5 rounded bg-surface border border-borderSubtle">
+                  PILLAR D
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-text-main group-hover:text-emerald-400 transition-colors">
+                Clean Baseload & AI Compute
+              </h3>
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                Clean FLOPs/MW metric, CANDU & SMR nuclear baseload, hydro grid interties, and sovereign Canadian hyperscale AI compute clusters.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-[10px] font-mono text-emerald-400">
+              <span>Calculate Clean FLOPs</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
         </div>
       </div>
 

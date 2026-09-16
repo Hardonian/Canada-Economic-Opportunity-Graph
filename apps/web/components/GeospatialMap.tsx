@@ -196,7 +196,7 @@ export default function GeospatialMap({
         center: [58.0, -98.0],
         zoom: 4,
         minZoom: 2,
-        maxZoom: 19,
+        maxZoom: 20,
         zoomControl: false,
         attributionControl: false,
       });
@@ -253,6 +253,27 @@ export default function GeospatialMap({
       layersGroupRef.current.gridInterties = L.layerGroup().addTo(map);
       layersGroupRef.current.buffer = L.layerGroup().addTo(map);
 
+      // Ensure Leaflet dynamically recalculates viewport bounds to prevent blank edge tiles
+      const handleResize = () => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      };
+      window.addEventListener("resize", handleResize);
+
+      // Staged invalidation to catch layout shifts, font loads, and flex/grid rendering
+      const t1 = setTimeout(handleResize, 100);
+      const t2 = setTimeout(handleResize, 350);
+      const t3 = setTimeout(handleResize, 1000);
+
+      let resizeObserver: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== "undefined" && mapContainerRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+          handleResize();
+        });
+        resizeObserver.observe(mapContainerRef.current);
+      }
+
       setIsLeafletReady(true);
     }
 
@@ -266,6 +287,15 @@ export default function GeospatialMap({
       }
     };
   }, []);
+
+  // Recalculate tile bounds on fullscreen toggle
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const t = setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 150);
+    return () => clearTimeout(t);
+  }, [isFullscreen]);
 
   // Update Base Tile Layer
   useEffect(() => {
@@ -281,14 +311,22 @@ export default function GeospatialMap({
 
       let tileUrl = provider.url;
       if (provider.id === "google-hybrid" && googleApiKey) {
-        tileUrl = `https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=${googleApiKey}`;
+        tileUrl = `https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=${googleApiKey}`;
       }
 
       tileLayerRef.current = L.tileLayer(tileUrl, {
         attribution: provider.attribution,
         maxZoom: provider.maxZoom,
+        maxNativeZoom: provider.maxNativeZoom || 17,
         subdomains: provider.subdomains || "abc",
+        keepBuffer: 8,
+        updateWhenIdle: false,
+        updateWhenZooming: true,
+        crossOrigin: true,
       }).addTo(map);
+
+      // Ensure all tiles in viewport render immediately without panning
+      map.invalidateSize();
     });
   }, [isLeafletReady, activeProviderId, googleApiKey]);
 
@@ -1024,11 +1062,11 @@ export default function GeospatialMap({
                 }`}
                 title={p.attribution}
               >
-                {p.id.includes("satellite") && "🛰️"}
-                {p.id.includes("clarity") && "🔭"}
-                {p.id.includes("dark") && "🌃"}
-                {p.id.includes("topo") && "🗺️"}
-                {p.id.includes("google") && "🇬"}
+                {p.id === "esri-satellite" && "🛰️"}
+                {p.id === "google-hybrid" && "📡"}
+                {p.id === "carto-dark" && "🌃"}
+                {p.id === "osm-topo" && "🗺️"}
+                {p.id === "esri-topo" && "⛰️"}
                 <span className="hidden sm:inline">{p.badge}</span>
               </button>
             ))}

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use crate::error::{CogError, CogResult};
 use crate::models::{
-    CapitalStack, CegsEnvelope, Organization, Project, ProjectList, ScoreBundle, Signal,
+    CapitalStack, CegsEnvelope, Organization, Project, ProjectList, ScoreBundle,
     SignalList,
 };
 
@@ -206,6 +206,65 @@ impl CogClient {
             }
         }
         Ok(parsed["data"].take())
+    }
+
+    // ── Strategic Sovereignty Pillars ────────────────────────────────────────
+
+    /// Get Pillar A: Critical Minerals taxonomy, refining clusters, and domestic retention statistics.
+    pub fn get_critical_minerals(&self) -> CogResult<Value> {
+        self.get("/api/v1/critical-minerals", &[])
+    }
+
+    /// Get Pillar B: Indigenous sovereign co-investment overview.
+    pub fn get_indigenous_overview(&self) -> CogResult<Value> {
+        self.get("/api/v1/indigenous", &[])
+    }
+
+    /// Simulate Pillar B: $5B Federal Indigenous Loan Guarantee Program syndication.
+    pub fn simulate_indigenous_loan_guarantee(
+        &self,
+        capex_cad: Option<f64>,
+        equity_pct: Option<f64>,
+    ) -> CogResult<Value> {
+        let mut params = Vec::new();
+        if let Some(c) = capex_cad {
+            params.push(("capex_cad", c.to_string()));
+        }
+        if let Some(e) = equity_pct {
+            params.push(("indigenous_equity_pct", e.to_string()));
+        }
+        self.get("/api/v1/indigenous/loan-guarantee-sim", &params)
+    }
+
+    /// Get Pillar C: Internal Canadian trade barrier friction model.
+    pub fn get_trade_friction(&self) -> CogResult<Value> {
+        self.get("/api/v1/trade/friction", &[])
+    }
+
+    /// Get Pillar D: Clean Baseload and Sovereign AI Compute (FLOPs/MW metric).
+    pub fn get_compute_sovereignty(&self) -> CogResult<Value> {
+        self.get("/api/v1/compute/sovereignty", &[])
+    }
+
+    /// Query projects within a spatial bounding box.
+    pub fn list_projects_spatial(
+        &self,
+        min_lat: f64,
+        max_lat: f64,
+        min_lng: f64,
+        max_lng: f64,
+        limit: Option<i32>,
+    ) -> CogResult<Value> {
+        let mut params = vec![
+            ("min_lat", min_lat.to_string()),
+            ("max_lat", max_lat.to_string()),
+            ("min_lng", min_lng.to_string()),
+            ("max_lng", max_lng.to_string()),
+        ];
+        if let Some(l) = limit {
+            params.push(("limit", l.to_string()));
+        }
+        self.get("/api/v1/spatial/projects", &params)
     }
 
     // ── internal ─────────────────────────────────────────────────────────────

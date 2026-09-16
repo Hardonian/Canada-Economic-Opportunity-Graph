@@ -59,7 +59,8 @@ export interface MapTileProvider {
   url: string;
   attribution: string;
   maxZoom: number;
-  subdomains?: string[];
+  maxNativeZoom: number;
+  subdomains?: string[] | string;
   badge: string;
 }
 
@@ -71,24 +72,28 @@ export const MAP_PROVIDERS: MapTileProvider[] = [
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, GIS Community",
     maxZoom: 19,
+    maxNativeZoom: 17,
     badge: "SUB-METER OPTICAL",
   },
   {
-    id: "esri-clarity",
-    name: "Esri Clarity (High-Definition Cloud-Free)",
-    category: "SATELLITE",
-    url: "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri Clarity &mdash; Archival Cloud-Free High-Definition",
-    maxZoom: 19,
-    badge: "CLOUD-FREE ARCHIVE",
+    id: "google-hybrid",
+    name: "Google Maps Hybrid Satellite (High-Res)",
+    category: "GOOGLE",
+    url: "https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+    attribution: "&copy; Google Maps &mdash; Satellite & Vector Labels",
+    maxZoom: 20,
+    maxNativeZoom: 20,
+    subdomains: ["0", "1", "2", "3"],
+    badge: "GOOGLE HYBRID",
   },
   {
     id: "carto-dark",
     name: "CartoDB Dark Matter (Tactical Operations)",
     category: "TACTICAL_DARK",
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
     attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> &copy; <a href=\"https://carto.com/\">CARTO</a>",
     maxZoom: 19,
+    maxNativeZoom: 19,
     subdomains: ["a", "b", "c", "d"],
     badge: "NIGHT OPS",
   },
@@ -98,18 +103,20 @@ export const MAP_PROVIDERS: MapTileProvider[] = [
     category: "TOPOGRAPHIC",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
-    maxZoom: 18,
+    maxZoom: 19,
+    maxNativeZoom: 18,
     subdomains: ["a", "b", "c"],
     badge: "ROAD & RAIL GRID",
   },
   {
-    id: "google-hybrid",
-    name: "Google Maps Hybrid / Satellite (Direct)",
-    category: "GOOGLE",
-    url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-    attribution: "&copy; Google Maps &mdash; Satellite & Road Labels",
-    maxZoom: 20,
-    badge: "GOOGLE HYBRID",
+    id: "esri-topo",
+    name: "Esri Canadian Topo & Relief",
+    category: "TOPOGRAPHIC",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles &copy; Esri &mdash; USGS, NOAA, NRCAN Topography",
+    maxZoom: 19,
+    maxNativeZoom: 18,
+    badge: "NRCAN / USGS TOPO",
   },
 ];
 
