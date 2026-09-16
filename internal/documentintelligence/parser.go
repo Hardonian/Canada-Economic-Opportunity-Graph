@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strconv"
@@ -343,7 +344,9 @@ func ExtractNI43101TechnicalReport(text string) (*TechnicalReport43101, error) {
 
 	if rawCapex := first(fields, "capex", "initial capex"); rawCapex != "" {
 		amount := ParseCapex(rawCapex)
-		report.InitialCapexCAD = amount.AmountInCents / 100 // whole CAD
+		if amount.Amount != nil {
+			report.InitialCapexCAD = *amount.Amount
+		}
 	}
 
 	return report, nil
