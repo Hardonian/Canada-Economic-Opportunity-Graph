@@ -46,3 +46,21 @@ This document outlines the phased milestone roadmap for CanadaOpportunityGraph a
 * [x] **Canadian Government FIP UX/UI Compliance**: Official bilingual Federal Identity Program banner with Canadian Flag motif, Canada Wordmark, WCAG 2.2 AA bilingual navigation, and OGL-Canada licensing.
 * [x] **Zero Open TODOs & Full QA Verification**: 100% test pass with race detector across 40+ packages, benchmark suites, deterministic CEGS specification conformance, and release manifest validation.
 
+---
+
+## Phase 5: Sovereign Intelligence, Predictive Econometrics & National Planning Engine (v2.0) (Completed)
+
+* [x] **Ultimate Beneficial Ownership (UBO) & Sovereign Screening**: Automated tracing of multi-tiered shell structures, foreign state-owned enterprise (SOE) screening, and Investment Canada Act (ICA) national security review tiers (`internal/ubo/`).
+* [x] **StatCan Multi-Regional Input-Output (MRIO) Multipliers**: Deterministic Direct, Indirect, and Induced GDP impact, person-years of employment generated, and 3-tier fiscal tax yields under Statistics Canada SUT multipliers (`internal/econometrics/`).
+* [x] **Graph Topology & Critical Infrastructure Centrality**: Betweenness centrality, PageRank, single-point-of-failure (SPOF) detection, and cascading failure propagation simulation (`internal/graphanalytics/`).
+* [x] **Bayesian Reference Class Megaproject Forecasting**: Bent Flyvbjerg empirical heavy-tailed lognormal hazard models predicting P10–P90 probability density distributions for cost overruns (%) and schedule delay (months) (`internal/risk/`).
+* [x] **Electrical Grid Interconnect & Hosting Capacity Engine**: Provincial balancing authority queue delay estimations (IESO, AESO, Hydro-Québec, BC Hydro) and transmission headroom constraints (`internal/gridphysics/`).
+* [x] **Earth Observation SAR & Optical Ground-Truth Telemetry**: Sentinel-1 SAR coherence displacement and Sentinel-2 NDVI surface reflection analysis to independently verify claimed construction stage against physical ground reality (`internal/earthobs/`).
+* [x] **Multi-Modal NI 43-101 & Capital Waterfall Parsers**: Automated extraction of mining reserves (tonnage, grade, recovery, mine life, strip ratio, NPV8, IRR) and capital stack waterfalls (`internal/documentintelligence/`).
+* [x] **Sovereign Capital Allocation Optimizer (MILP)**: Knapsack/MILP solver optimizing federal fiscal deployment across CIB loans, SIF grants, ITCs, and Indigenous loan guarantees to maximize private capital crowding-in and decarbonization (`internal/nationalplanning/optimizer.go`).
+* [x] **Geopolitical & Geoeconomic War Game Simulator**: Macroeconomic shock stress-testing (USMCA 25% Tariffs, Critical Mineral Embargo, Arctic Choke Point Closure, Grid Transformer Seizure) and sovereign countermeasure recommendations (`internal/nationalplanning/wargame.go`).
+* [x] **National Craft Labor & Trades Collision Aggregator**: Regional quarterly demand vs union hall capacity for Red Seal certified trades (electricians, linemen, nuclear welders, boilermakers, millwrights) (`internal/nationalplanning/labor.go`).
+* [x] **First Nations & Inuit Equity Co-Investment Modeler**: Simulating 25%–50% equity co-development, CIB Indigenous Equity Loan debt amortization, and multi-generational sovereign wealth flows (`internal/nationalplanning/indigenous.go`).
+* [x] **Institutional Command Center UI**: Fully productized Next.js Command Console on `/planning` with 6 interactive real-time panels and full backward compatibility with the v1.0 workbench (`apps/web/components/NationalPlanningWorkbench.tsx`).
+
+

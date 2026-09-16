@@ -332,7 +332,9 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		writeError(w, r, http.StatusRequestEntityTooLarge, "request_body_too_large", "The request body is too large.")
 		return false
 	}
-	if r.ContentLength != 0 || len(r.TransferEncoding) > 0 {
+	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
+		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/"))
+	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
 	}
@@ -422,6 +424,18 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/adapters", s.handleListAdapters)
 	s.mux.HandleFunc("POST /api/v1/adapters/{name}/approve", s.handleApproveAdapter)
 	s.mux.HandleFunc("DELETE /api/v1/adapters/{name}", s.handleDeleteAdapter)
+
+	// Sovereign Intelligence, Econometrics & National Planning
+	s.mux.HandleFunc("POST /api/v1/planning/optimize", s.handlePlanningOptimize)
+	s.mux.HandleFunc("GET /api/v1/planning/optimize", s.handlePlanningOptimize)
+	s.mux.HandleFunc("POST /api/v1/planning/wargame", s.handlePlanningWarGame)
+	s.mux.HandleFunc("GET /api/v1/planning/wargame", s.handlePlanningWarGame)
+	s.mux.HandleFunc("GET /api/v1/planning/labor", s.handlePlanningLabor)
+	s.mux.HandleFunc("GET /api/v1/projects/{id}/mrio", s.handleProjectMRIO)
+	s.mux.HandleFunc("GET /api/v1/projects/{id}/ubo", s.handleProjectUBO)
+	s.mux.HandleFunc("GET /api/v1/projects/{id}/flyvbjerg", s.handleProjectFlyvbjerg)
+	s.mux.HandleFunc("GET /api/v1/projects/{id}/grid", s.handleProjectGrid)
+	s.mux.HandleFunc("GET /api/v1/projects/{id}/earthobs", s.handleProjectEarthObs)
 
 	// Exports & CEGS Open Standard Endpoints
 	s.mux.HandleFunc("GET /api/v1/export/project/{id}", s.handleExportProject)
