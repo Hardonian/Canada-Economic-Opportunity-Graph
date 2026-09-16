@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangle, Database, Filter, Gauge, Network, Search } from "lucide-react";
 import SourceResults from "@/components/SourceResults";
+import DataMeshRegister from "@/components/DataMeshRegister";
 import { getSourceCoverage, getSources, type SourceQuery } from "@/lib/source-data";
 
 export const metadata: Metadata = {
@@ -160,6 +161,8 @@ export default async function SourcesPage({ searchParams }: { searchParams: Sear
           </div>
         </form>
       </section>
+
+      <DataMeshRegister />
 
       {sourceResult.status === "available" ? (
         <SourceResults
