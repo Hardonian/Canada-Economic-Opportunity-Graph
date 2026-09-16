@@ -266,3 +266,69 @@ export interface SourceCoverageReport {
   dead_letters: DeadLetterSummary;
   blind_spots: string[];
 }
+
+export interface ContractAwardNotice {
+  contractor_name: string;
+  scope_of_work: string;
+  value_cad: number;
+  award_date: string;
+}
+
+export interface FilingRecord {
+  id: string;
+  issuer_name: string;
+  ticker: string;
+  exchange: string;
+  filing_type: string;
+  document_title: string;
+  filing_date: string;
+  source_url: string;
+  raw_content_sha256: string;
+  capex_revision_cad?: number;
+  financing_announced_cad?: number;
+  stage_change_detected: boolean;
+  detected_stage?: LifecycleStage;
+  contract_awards?: ContractAwardNotice[];
+  material_events: string[];
+  audit_hash: string;
+}
+
+export interface EARecord {
+  id: string;
+  registry_source: string;
+  province: string;
+  project_name: string;
+  registry_project_id: string;
+  milestone: string;
+  notice_title: string;
+  notice_url: string;
+  published_date: string;
+  comment_deadline?: string;
+  approved: boolean;
+  conditions_count?: number;
+  summary: string;
+  audit_hash: string;
+}
+
+export interface TenderAmendment {
+  id: string;
+  tender_reference: string;
+  amendment_number: number;
+  type: string;
+  issued_date: string;
+  original_closing?: string;
+  revised_closing?: string;
+  winning_bidder?: string;
+  winning_bidder_bn?: string;
+  contract_value_cad?: number;
+  summary: string;
+  source_url: string;
+  audit_hash: string;
+}
+
+export interface FilingsResponse {
+  recent_disclosures: FilingRecord[];
+  recent_ea_notices: EARecord[];
+  recent_amendments: TenderAmendment[];
+  total_count: number;
+}

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/corridor"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
@@ -168,46 +167,15 @@ func (s *Server) handleExportSTAC(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, stac)
 }
 
-func (s *Server) handleFilingsRecent(w http.ResponseWriter, r *http.Request) {
-	streamer := filings.NewStreamer()
-	eaParser := filings.NewEAParser()
-	amendTracker := filings.NewAmendmentTracker()
-
-	now := time.Now().UTC()
-
-	sampleFiling := streamer.ParseFiling(
-		"Canada Nickel Company Inc.",
-		"CNC",
-		"TSXV",
-		filings.FilingTypeMDA,
-		"Q3 2026 Management's Discussion & Analysis",
-		"Positive Final Investment Decision reached. EPC contract awarded to Ausenco Engineering for $150M CAD.",
-		"https://sedarplus.ca/filings/10049281.pdf",
-		now.Add(-24*time.Hour),
-	)
-
-	sampleEA := eaParser.ParseNotice(
-		"BC_EAO",
-		"BC",
-		"Cedar LNG Project",
-		"EA-2026-081",
-		"Issuance of Environmental Assessment Certificate",
-		"Environmental Assessment Certificate approval granted with 38 legally binding conditions.",
-		"https://projects.eao.gov.bc.ca/p/cedarlng",
-		now.Add(-48*time.Hour),
-	)
-
-	sampleAmend := amendTracker.TrackAmendment(
-		"WS39482910-Doc29102",
-		3,
-		"Contract awarded to Aecon-PCL Industrial Joint Venture for $185M CAD.",
-		"https://canadabuys.canada.ca/tender/WS39482910",
-		now.Add(-72*time.Hour),
-	)
+func (s *Server) handleFilingsRecent(w http.ResponseWriter, _ *http.Request) {
+	disclosures := filings.CanonicalDisclosures()
+	eaNotices := filings.CanonicalEANotices()
+	amendments := filings.CanonicalTenderAmendments()
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"recent_disclosures": []interface{}{sampleFiling},
-		"recent_ea_notices":  []interface{}{sampleEA},
-		"recent_amendments":  []interface{}{sampleAmend},
+		"recent_disclosures": disclosures,
+		"recent_ea_notices":  eaNotices,
+		"recent_amendments":  amendments,
+		"total_count":        len(disclosures) + len(eaNotices) + len(amendments),
 	})
 }

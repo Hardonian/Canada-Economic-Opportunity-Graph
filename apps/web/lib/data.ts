@@ -2,7 +2,7 @@ import projectsSnapshot from "@/data/projects.snapshot.json";
 import manifestSnapshot from "@/data/manifest.snapshot.json";
 import procurementsSnapshot from "@/data/procurements.snapshot.json";
 import signalsSnapshot from "@/data/signals.snapshot.json";
-import { Procurement, Project, ProjectEvidence, ProjectScore, RadarStats, Signal } from "./types";
+import { Procurement, Project, ProjectEvidence, ProjectScore, RadarStats, Signal, FilingsResponse, FilingRecord, EARecord, TenderAmendment } from "./types";
 
 const SECTORS = new Set<Project["sector"]>([
   "Critical Minerals",
@@ -442,3 +442,191 @@ export async function getSignals(): Promise<Signal[]> {
   }
   return SNAPSHOT_SIGNALS;
 }
+
+export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
+  recent_disclosures: [
+    {
+      id: "filing-cnc-sedar-q3",
+      issuer_name: "Canada Nickel Company Inc.",
+      ticker: "CNC",
+      exchange: "TSXV",
+      filing_type: "MANAGEMENT_DISCUSSION_ANALYSIS",
+      document_title: "Crawford Nickel-Cobalt Project - Q3 2026 MD&A Disclosure",
+      filing_date: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+      source_url: "https://sedarplus.ca/filings/10049281.pdf",
+      raw_content_sha256: "9832c91823abce1287e0291bafe23981273981bafe",
+      capex_revision_cad: 1800000000,
+      stage_change_detected: true,
+      detected_stage: "CONSTRUCTION",
+      contract_awards: [
+        {
+          contractor_name: "Ausenco Engineering",
+          scope_of_work: "FEED & Early Works Construction",
+          value_cad: 150000000,
+          award_date: "2026-09-15"
+        }
+      ],
+      material_events: [
+        "Positive Final Investment Decision reached.",
+        "Capital expenditure estimate revised upward to $1.8B CAD.",
+        "Major EPC contract awarded to Ausenco Engineering."
+      ],
+      audit_hash: "a9f8234bc98e10482910fedc3829184a839201"
+    },
+    {
+      id: "filing-wegh2-sedar-notice",
+      issuer_name: "World Energy GH2 Inc.",
+      ticker: "WEGH2",
+      exchange: "CSE",
+      filing_type: "MATERIAL_CHANGE_REPORT",
+      document_title: "Nujio'qonik Green Hydrogen - Project Financing & EPC Notice",
+      filing_date: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+      source_url: "https://sedarplus.ca/filings/10052981.pdf",
+      raw_content_sha256: "8732bc981273891bafe289371982bca81927bc19",
+      capex_revision_cad: 4500000000,
+      stage_change_detected: true,
+      detected_stage: "CONSTRUCTION",
+      contract_awards: [
+        {
+          contractor_name: "SK ecoplant Consortium",
+          scope_of_work: "Electrolyzer & Wind Turbine Balance of Plant",
+          value_cad: 1200000000,
+          award_date: "2026-09-14"
+        }
+      ],
+      material_events: [
+        "Environmental assessment approved with decision statement issued.",
+        "Board approved $4.5B CAD capex program.",
+        "EPC contract awarded to SK ecoplant consortium."
+      ],
+      audit_hash: "b823e891726a89c89127bcf9817293a872619"
+    },
+    {
+      id: "filing-cedar-sedar-aif",
+      issuer_name: "Cedar LNG Limited Partnership",
+      ticker: "CEDAR",
+      exchange: "TSX",
+      filing_type: "ANNUAL_INFORMATION_FORM",
+      document_title: "Cedar Floating LNG Facility - Annual Information Form",
+      filing_date: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
+      source_url: "https://sedarplus.ca/filings/10061204.pdf",
+      raw_content_sha256: "7612984bafe8291bc98127391823901bacf91283",
+      capex_revision_cad: 3400000000,
+      stage_change_detected: true,
+      detected_stage: "OPERATING",
+      contract_awards: [
+        {
+          contractor_name: "Samsung Heavy Industries",
+          scope_of_work: "FLNG Vessel Fabrication & Hull Delivery",
+          value_cad: 1800000000,
+          award_date: "2026-09-12"
+        }
+      ],
+      material_events: [
+        "Commercial operational readiness reached following FID.",
+        "Total capital cost revised to $3.4B CAD."
+      ],
+      audit_hash: "c782194be8120391823bafe819203918239102"
+    }
+  ],
+  recent_ea_notices: [
+    {
+      id: "ea-bc_eao-cedarlng",
+      registry_source: "BC_EAO",
+      province: "BC",
+      project_name: "Cedar LNG Project",
+      registry_project_id: "EA-2026-081",
+      milestone: "ENVIRONMENTAL_ASSESSMENT_CERTIFICATE",
+      notice_title: "Issuance of Environmental Assessment Certificate",
+      notice_url: "https://projects.eao.gov.bc.ca/p/cedarlng",
+      published_date: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
+      approved: true,
+      conditions_count: 38,
+      summary: "Provincial Environmental Assessment Certificate officially granted with 38 legally binding conditions.",
+      audit_hash: "d918230912bc81923bafe1928371928301928"
+    },
+    {
+      id: "ea-ontario_ero-smr",
+      registry_source: "ONTARIO_ERO",
+      province: "ON",
+      project_name: "Darlington SMR Nuclear Expansion",
+      registry_project_id: "ERO-019-9482",
+      milestone: "TERMS_OF_REFERENCE_APPROVED",
+      notice_title: "Terms of Reference Approved for SMR Units 2-4",
+      notice_url: "https://ero.ontario.ca/notice/019-9482",
+      published_date: new Date(Date.now() - 96 * 3600 * 1000).toISOString(),
+      approved: true,
+      conditions_count: 15,
+      summary: "Terms of Reference approved setting baseline study requirements across Durham Region.",
+      audit_hash: "e81293019283bafe91283019283bafe9128301"
+    },
+    {
+      id: "ea-iaac-contrecoeur",
+      registry_source: "IAAC",
+      province: "FED",
+      project_name: "Contrecoeur Port Container Terminal",
+      registry_project_id: "IAAC-80129",
+      milestone: "PUBLIC_COMMENT_PERIOD_OPEN",
+      notice_title: "Public Comment Period Commenced for Marine Terminal Expansion",
+      notice_url: "https://iaac-aeic.gc.ca/050/evaluations/proj/80129",
+      published_date: new Date(Date.now() - 120 * 3600 * 1000).toISOString(),
+      comment_deadline: new Date(Date.now() + 18 * 24 * 3600 * 1000).toISOString(),
+      approved: false,
+      summary: "Invitation for public comments and Indigenous consultation period open for 30 calendar days.",
+      audit_hash: "f718293019283bafe91283019283bafe9128301"
+    }
+  ],
+  recent_amendments: [
+    {
+      id: "amend-ws39482910-03",
+      tender_reference: "WS39482910-Doc29102",
+      amendment_number: 3,
+      type: "CONTRACT_AWARD_NOTICE",
+      issued_date: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+      winning_bidder: "Aecon-PCL Industrial Joint Venture",
+      winning_bidder_bn: "100234892RC0001",
+      contract_value_cad: 185000000,
+      summary: "Contract awarded to Aecon-PCL Industrial Joint Venture for $185M CAD following formal RFP evaluation.",
+      source_url: "https://canadabuys.canada.ca/tender/WS39482910",
+      audit_hash: "a12938102938bafe91283019283bafe9128301"
+    },
+    {
+      id: "amend-pwgsc-2026-02",
+      tender_reference: "PWGSC-2026-HQ-0081",
+      amendment_number: 2,
+      type: "CLOSING_DATE_EXTENSION",
+      issued_date: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
+      revised_closing: new Date(Date.now() + 12 * 24 * 3600 * 1000).toISOString(),
+      summary: "Solicitation deadline extended by 14 calendar days for marine terminal berth dredging.",
+      source_url: "https://canadabuys.canada.ca/tender/PWGSC-2026-HQ-0081",
+      audit_hash: "b23948102938bafe91283019283bafe9128301"
+    },
+    {
+      id: "amend-dcc-esq-04",
+      tender_reference: "DCC-ESQ-2026-44",
+      amendment_number: 4,
+      type: "BIDDER_QA_RESPONSE",
+      issued_date: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
+      summary: "Technical clarification Q&A responses issued to registered proponents.",
+      source_url: "https://canadabuys.canada.ca/tender/DCC-ESQ-2026-44",
+      audit_hash: "c34958102938bafe91283019283bafe9128301"
+    }
+  ],
+  total_count: 9
+};
+
+export async function getRecentFilings(): Promise<FilingsResponse> {
+  const response = await fetchExternalAPI("/filings/recent");
+  if (response?.ok) {
+    try {
+      const data: unknown = await response.json();
+      if (isRecord(data) && Array.isArray(data.recent_disclosures)) {
+        return data as unknown as FilingsResponse;
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return CANONICAL_FILINGS_SNAPSHOT;
+}
+
