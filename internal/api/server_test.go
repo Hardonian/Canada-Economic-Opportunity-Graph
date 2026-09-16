@@ -469,3 +469,87 @@ func TestListProjectsSpatial(t *testing.T) {
 	}
 }
 
+func TestSovereigntyPillarsEndpoints(t *testing.T) {
+	store := database.NewMemoryStore()
+	ctx := context.Background()
+
+	p1 := &domain.Project{
+		ID:          "proj-ontario-lithium",
+		Slug:        "ontario-lithium-refinery",
+		Name:        "Thunder Bay Lithium Refining Complex",
+		Sector:      domain.SectorMiningMetals,
+		Subsector:   "Lithium hydroxide refining",
+		Province:    "ON",
+		CapexCAD:    1_500_000_000,
+		EvidenceIDs: []string{"ev-1"},
+	}
+	if err := store.SaveProject(ctx, p1); err != nil {
+		t.Fatal(err)
+	}
+
+	server := mustServer(t, store, testOptions())
+
+	// 1. GET /api/v1/critical-minerals
+	{
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/critical-minerals", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET /api/v1/critical-minerals status = %d: %s", rec.Code, rec.Body.String())
+		}
+		if !strings.Contains(rec.Body.String(), "Lithium") {
+			t.Fatalf("expected Lithium in critical minerals response: %s", rec.Body.String())
+		}
+	}
+
+	// 2. GET /api/v1/indigenous/loan-guarantee-sim
+	{
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/indigenous/loan-guarantee-sim?capex=1000000000&equity_pct=25&term_years=30", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET loan-guarantee-sim status = %d: %s", rec.Code, rec.Body.String())
+		}
+		if !strings.Contains(rec.Body.String(), "equity_amount_cad") {
+			t.Fatalf("expected equity_amount_cad in response: %s", rec.Body.String())
+		}
+	}
+
+	// 3. GET /api/v1/indigenous/overview
+	{
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/indigenous/overview", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET /api/v1/indigenous/overview status = %d: %s", rec.Code, rec.Body.String())
+		}
+	}
+
+	// 5. GET /api/v1/trade/friction
+	{
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/trade/friction", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET /api/v1/trade/friction status = %d: %s", rec.Code, rec.Body.String())
+		}
+		if !strings.Contains(rec.Body.String(), "AB-BC-ENERGY-PORTS") {
+			t.Fatalf("expected AB-BC corridor in friction response: %s", rec.Body.String())
+		}
+	}
+
+	// 6. GET /api/v1/compute/sovereignty
+	{
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/compute/sovereignty", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET /api/v1/compute/sovereignty status = %d: %s", rec.Code, rec.Body.String())
+		}
+		if !strings.Contains(rec.Body.String(), "HYDRO_QUEBEC") {
+			t.Fatalf("expected HYDRO_QUEBEC in compute sovereignty response: %s", rec.Body.String())
+		}
+	}
+}
+
+

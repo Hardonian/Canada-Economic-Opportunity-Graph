@@ -103,4 +103,11 @@ type Store interface {
 	ListTradeMetrics(ctx context.Context, geography string) ([]*domain.TradeMetric, error)
 
 	GetRadarStats(ctx context.Context) (*RadarStats, error)
+
+	// Sovereignty Pillars
+	GetCriticalMineralsAnalysis(ctx context.Context) (*domain.CriticalMineralsSummary, error)
+	SimulateIndigenousLoanGuarantee(ctx context.Context, req domain.IndigenousLoanGuaranteeReq) (*domain.IndigenousLoanGuaranteeResult, error)
+	GetIndigenousOverview(ctx context.Context) (*domain.IndigenousOverviewSummary, error)
+	GetInternalTradeFrictionMatrix(ctx context.Context) (*domain.TradeFrictionReport, error)
+	GetCleanBaseloadComputeProfile(ctx context.Context) (*domain.BaseloadComputeSummary, error)
 }

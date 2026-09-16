@@ -399,6 +399,13 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/projects/{id}/fit/{archetype}", s.handleProjectArchetypeFit)
 	s.mux.HandleFunc("GET /api/v1/projects/{id}/precedents", s.handleProjectPrecedents)
 
+	// Sovereignty Pillars
+	s.mux.HandleFunc("GET /api/v1/critical-minerals", s.handleCriticalMinerals)
+	s.mux.HandleFunc("GET /api/v1/indigenous/loan-guarantee-sim", s.handleIndigenousLoanGuaranteeSim)
+	s.mux.HandleFunc("GET /api/v1/indigenous/overview", s.handleIndigenousOverview)
+	s.mux.HandleFunc("GET /api/v1/trade/friction", s.handleTradeFriction)
+	s.mux.HandleFunc("GET /api/v1/compute/sovereignty", s.handleComputeSovereignty)
+
 	// Multi-Jurisdiction Reconciliation
 	s.mux.HandleFunc("GET /api/v1/reconciliation", s.handleReconciliation)
 
@@ -870,6 +877,69 @@ func (s *Server) handleAISovereignty(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleCriticalMinerals(w http.ResponseWriter, r *http.Request) {
+	summary, err := s.store.GetCriticalMineralsAnalysis(r.Context())
+	if err != nil {
+		writeError(w, r, http.StatusServiceUnavailable, "minerals_unavailable", "Critical minerals intelligence is temporarily unavailable.")
+		return
+	}
+	writeJSON(w, http.StatusOK, summary)
+}
+
+func (s *Server) handleIndigenousLoanGuaranteeSim(w http.ResponseWriter, r *http.Request) {
+	var req domain.IndigenousLoanGuaranteeReq
+	q := r.URL.Query()
+	if c := q.Get("capex"); c != "" {
+		if val, err := strconv.ParseInt(c, 10, 64); err == nil && val > 0 {
+			req.ProjectCapexCAD = val
+		}
+	}
+	if eq := q.Get("equity_pct"); eq != "" {
+		if val, err := strconv.ParseFloat(eq, 64); err == nil && val > 0 {
+			req.IndigenousEquityPct = val
+		}
+	}
+	if term := q.Get("term_years"); term != "" {
+		if val, err := strconv.Atoi(term); err == nil && val > 0 {
+			req.LoanTermYears = val
+		}
+	}
+
+	result, err := s.store.SimulateIndigenousLoanGuarantee(r.Context(), req)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "simulation_failed", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (s *Server) handleIndigenousOverview(w http.ResponseWriter, r *http.Request) {
+	overview, err := s.store.GetIndigenousOverview(r.Context())
+	if err != nil {
+		writeError(w, r, http.StatusServiceUnavailable, "indigenous_unavailable", "Indigenous capital intelligence is temporarily unavailable.")
+		return
+	}
+	writeJSON(w, http.StatusOK, overview)
+}
+
+func (s *Server) handleTradeFriction(w http.ResponseWriter, r *http.Request) {
+	report, err := s.store.GetInternalTradeFrictionMatrix(r.Context())
+	if err != nil {
+		writeError(w, r, http.StatusServiceUnavailable, "friction_unavailable", "Internal trade friction intelligence is temporarily unavailable.")
+		return
+	}
+	writeJSON(w, http.StatusOK, report)
+}
+
+func (s *Server) handleComputeSovereignty(w http.ResponseWriter, r *http.Request) {
+	summary, err := s.store.GetCleanBaseloadComputeProfile(r.Context())
+	if err != nil {
+		writeError(w, r, http.StatusServiceUnavailable, "compute_unavailable", "Clean baseload compute intelligence is temporarily unavailable.")
+		return
+	}
+	writeJSON(w, http.StatusOK, summary)
+}
+
 func (s *Server) handleRankings(w http.ResponseWriter, r *http.Request) {
 	dim := r.PathValue("dimension")
 	if dim != "buildability" {
@@ -1005,6 +1075,24 @@ func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 				"get": map[string]interface{}{
 					"summary": "Fetch project conforming to CEGS 0.1 standard",
 				},
+			},
+			"/api/v1/critical-minerals": map[string]interface{}{
+				"get": map[string]interface{}{
+					"summary": "Fetch Canada critical minerals midstream processing intelligence",
+				},
+			},
+			"/api/v1/indigenous/loan-guarantee-sim": map[string]interface{}{
+				"get":  map[string]interface{}{"summary": "Simulate $5B Indigenous Loan Guarantee Program debt syndication"},
+				"post": map[string]interface{}{"summary": "Simulate $5B Indigenous Loan Guarantee Program debt syndication"},
+			},
+			"/api/v1/indigenous/overview": map[string]interface{}{
+				"get": map[string]interface{}{"summary": "Fetch overview of First Nations major projects co-ownership"},
+			},
+			"/api/v1/trade/friction": map[string]interface{}{
+				"get": map[string]interface{}{"summary": "Fetch inter-provincial internal trade barrier friction report"},
+			},
+			"/api/v1/compute/sovereignty": map[string]interface{}{
+				"get": map[string]interface{}{"summary": "Fetch provincial clean baseload power vs AI compute headroom"},
 			},
 		},
 	}

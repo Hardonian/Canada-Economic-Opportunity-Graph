@@ -29,6 +29,10 @@ import {
   FileSpreadsheet,
   FileCode,
   Crosshair,
+  Radio,
+  Landmark,
+  Cpu,
+  Factory,
 } from "lucide-react";
 import type { Project } from "@/lib/types";
 import {
@@ -38,10 +42,16 @@ import {
   OPPORTUNITY_ZONES,
   STRATEGIC_CORRIDORS,
   MAP_FOCUS_PRESETS,
+  CRITICAL_MINERAL_HUBS,
+  TREATY_TERRITORIES,
+  GRID_INTERTIE_ZONES,
   type MapTileProvider,
   type TradeRoute,
   type ConflictMarker,
   type OpportunityZone,
+  type CriticalMineralHub,
+  type TreatyTerritory,
+  type GridIntertieZone,
 } from "@/lib/geospatial";
 
 interface GeospatialMapProps {
@@ -84,6 +94,10 @@ export default function GeospatialMap({
     opportunityZones: null,
     corridors: null,
     measurement: null,
+    mineralHubs: null,
+    treatyTerritories: null,
+    gridInterties: null,
+    buffer: null,
   });
 
   // State
@@ -92,12 +106,18 @@ export default function GeospatialMap({
   const [showConflictMarkers, setShowConflictMarkers] = useState<boolean>(true);
   const [showOpportunityZones, setShowOpportunityZones] = useState<boolean>(true);
   const [showCorridors, setShowCorridors] = useState<boolean>(true);
+  const [showMineralHubs, setShowMineralHubs] = useState<boolean>(true);
+  const [showTreatyTerritories, setShowTreatyTerritories] = useState<boolean>(true);
+  const [showGridInterties, setShowGridInterties] = useState<boolean>(true);
   const [cursorCoords, setCursorCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(4);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [selectedRoute, setSelectedRoute] = useState<TradeRoute | null>(null);
   const [selectedConflict, setSelectedConflict] = useState<ConflictMarker | null>(null);
   const [selectedZone, setSelectedZone] = useState<OpportunityZone | null>(null);
+  const [selectedMineralHub, setSelectedMineralHub] = useState<CriticalMineralHub | null>(null);
+  const [selectedTreaty, setSelectedTreaty] = useState<TreatyTerritory | null>(null);
+  const [selectedIntertie, setSelectedIntertie] = useState<GridIntertieZone | null>(null);
   const [googleApiKey, setGoogleApiKey] = useState<string>("");
   const [showKeyModal, setShowKeyModal] = useState<boolean>(false);
   const [isLeafletReady, setIsLeafletReady] = useState<boolean>(false);
@@ -108,6 +128,14 @@ export default function GeospatialMap({
   const isMeasuringRef = useRef<boolean>(false);
   const measurePointsRef = useRef<{ lat: number; lng: number }[]>([]);
 
+  // Corridor & Infrastructure Proximity Buffer Tool State (25km / 50km / 100km)
+  const [isBufferActive, setIsBufferActive] = useState<boolean>(false);
+  const [bufferRadiusKm, setBufferRadiusKm] = useState<number>(50);
+  const [bufferCenter, setBufferCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const isBufferActiveRef = useRef<boolean>(false);
+  const bufferRadiusKmRef = useRef<number>(50);
+  const bufferCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+
   // Instant Search Autocomplete State
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -117,7 +145,7 @@ export default function GeospatialMap({
   const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
   const exportContainerRef = useRef<HTMLDivElement>(null);
 
-  // Sync ref with state for Leaflet event handlers
+  // Sync refs with state for Leaflet event handlers
   useEffect(() => {
     isMeasuringRef.current = isMeasuring;
   }, [isMeasuring]);
@@ -125,6 +153,18 @@ export default function GeospatialMap({
   useEffect(() => {
     measurePointsRef.current = measurePoints;
   }, [measurePoints]);
+
+  useEffect(() => {
+    isBufferActiveRef.current = isBufferActive;
+  }, [isBufferActive]);
+
+  useEffect(() => {
+    bufferRadiusKmRef.current = bufferRadiusKm;
+  }, [bufferRadiusKm]);
+
+  useEffect(() => {
+    bufferCenterRef.current = bufferCenter;
+  }, [bufferCenter]);
 
   // Close search/export dropdowns on outside click
   useEffect(() => {
@@ -178,16 +218,27 @@ export default function GeospatialMap({
         setCurrentZoom(map.getZoom());
       });
 
-      // Handle map click for measurement tool
+      // Handle map click for buffer tool or measurement tool
       map.on("click", (e: any) => {
-        if (!isMeasuringRef.current) return;
-        const newPoint = {
-          lat: parseFloat(e.latlng.lat.toFixed(4)),
-          lng: parseFloat(e.latlng.lng.toFixed(4)),
-        };
-        const updated = [...measurePointsRef.current, newPoint];
-        measurePointsRef.current = updated;
-        setMeasurePoints(updated);
+        if (isBufferActiveRef.current) {
+          const newCenter = {
+            lat: parseFloat(e.latlng.lat.toFixed(4)),
+            lng: parseFloat(e.latlng.lng.toFixed(4)),
+          };
+          bufferCenterRef.current = newCenter;
+          setBufferCenter(newCenter);
+          return;
+        }
+
+        if (isMeasuringRef.current) {
+          const newPoint = {
+            lat: parseFloat(e.latlng.lat.toFixed(4)),
+            lng: parseFloat(e.latlng.lng.toFixed(4)),
+          };
+          const updated = [...measurePointsRef.current, newPoint];
+          measurePointsRef.current = updated;
+          setMeasurePoints(updated);
+        }
       });
 
       // Layer groups for dynamic filtering
@@ -197,6 +248,10 @@ export default function GeospatialMap({
       layersGroupRef.current.opportunityZones = L.layerGroup().addTo(map);
       layersGroupRef.current.corridors = L.layerGroup().addTo(map);
       layersGroupRef.current.measurement = L.layerGroup().addTo(map);
+      layersGroupRef.current.mineralHubs = L.layerGroup().addTo(map);
+      layersGroupRef.current.treatyTerritories = L.layerGroup().addTo(map);
+      layersGroupRef.current.gridInterties = L.layerGroup().addTo(map);
+      layersGroupRef.current.buffer = L.layerGroup().addTo(map);
 
       setIsLeafletReady(true);
     }
@@ -488,6 +543,243 @@ export default function GeospatialMap({
     });
   }, [isLeafletReady, showCorridors]);
 
+  // Render Critical Mineral Hubs
+  useEffect(() => {
+    if (!isLeafletReady || !layersGroupRef.current.mineralHubs) return;
+
+    import("leaflet").then((L) => {
+      const group = layersGroupRef.current.mineralHubs;
+      group.clearLayers();
+
+      if (!showMineralHubs) return;
+
+      CRITICAL_MINERAL_HUBS.forEach((hub) => {
+        const hubIcon = L.divIcon({
+          className: "mineral-hub-marker-icon",
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+          html: `
+            <div style="position: relative; width: 22px; height: 22px; cursor: pointer;">
+              <div style="position: absolute; inset: -4px; border-radius: 6px; background: ${hub.color}; opacity: 0.35; transform: rotate(45deg);" class="animate-pulse"></div>
+              <div style="width: 22px; height: 22px; background: #1a0b2e; border: 2px solid ${hub.color}; border-radius: 4px; display: flex; align-items: center; justify-content: center; transform: rotate(45deg); box-shadow: 0 0 10px ${hub.color};">
+                <div style="transform: rotate(-45deg); font-size: 10px; font-weight: bold; color: ${hub.color};">◆</div>
+              </div>
+            </div>
+          `,
+        });
+
+        const marker = L.marker([hub.location.lat, hub.location.lng], { icon: hubIcon });
+
+        marker.bindTooltip(
+          `<b>${hub.name}</b><br/><span style="color:${hub.color}">${hub.capacityMetric}</span><br/><span style="color:#00F5A0">DVRI: ${(hub.domesticRetentionRate * 100).toFixed(0)}%</span>`,
+          {
+            direction: "top",
+            className: "trade-route-tooltip",
+          }
+        );
+
+        marker.on("click", () => {
+          setSelectedMineralHub(hub);
+          setSelectedRoute(null);
+          setSelectedConflict(null);
+          setSelectedZone(null);
+          setSelectedTreaty(null);
+          setSelectedIntertie(null);
+        });
+
+        group.addLayer(marker);
+      });
+    });
+  }, [isLeafletReady, showMineralHubs]);
+
+  // Render Treaty Territories
+  useEffect(() => {
+    if (!isLeafletReady || !layersGroupRef.current.treatyTerritories) return;
+
+    import("leaflet").then((L) => {
+      const group = layersGroupRef.current.treatyTerritories;
+      group.clearLayers();
+
+      if (!showTreatyTerritories) return;
+
+      TREATY_TERRITORIES.forEach((t) => {
+        // Broad regional jurisdictional aura
+        const circle = L.circle([t.center.lat, t.center.lng], {
+          radius: 110000,
+          color: t.color,
+          fillColor: t.color,
+          fillOpacity: 0.1,
+          weight: 1.5,
+          dashArray: "6, 4",
+        });
+
+        circle.on("click", () => {
+          setSelectedTreaty(t);
+          setSelectedRoute(null);
+          setSelectedConflict(null);
+          setSelectedZone(null);
+          setSelectedMineralHub(null);
+          setSelectedIntertie(null);
+        });
+
+        group.addLayer(circle);
+
+        // Center Emblem Pin
+        const treatyIcon = L.divIcon({
+          className: "treaty-marker-icon",
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          html: `
+            <div style="position: relative; width: 20px; height: 20px; cursor: pointer;">
+              <div style="width: 20px; height: 20px; border-radius: 9999px; background: #061c12; border: 2px solid ${t.color}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px ${t.color}; font-size: 9px; font-weight: bold; color: ${t.color};">
+                ⚖
+              </div>
+            </div>
+          `,
+        });
+
+        const marker = L.marker([t.center.lat, t.center.lng], { icon: treatyIcon });
+        marker.bindTooltip(
+          `<b>${t.name}</b><br/><span style="color:${t.color}">${t.historicalFramework}</span><br/><span style="color:#00F5A0">${t.loanGuaranteeEligibility}</span>`,
+          {
+            direction: "top",
+            className: "opportunity-tooltip",
+          }
+        );
+
+        marker.on("click", () => {
+          setSelectedTreaty(t);
+          setSelectedRoute(null);
+          setSelectedConflict(null);
+          setSelectedZone(null);
+          setSelectedMineralHub(null);
+          setSelectedIntertie(null);
+        });
+
+        group.addLayer(marker);
+      });
+    });
+  }, [isLeafletReady, showTreatyTerritories]);
+
+  // Render Grid Intertie Zones & AI Compute Hubs
+  useEffect(() => {
+    if (!isLeafletReady || !layersGroupRef.current.gridInterties) return;
+
+    import("leaflet").then((L) => {
+      const group = layersGroupRef.current.gridInterties;
+      group.clearLayers();
+
+      if (!showGridInterties) return;
+
+      GRID_INTERTIE_ZONES.forEach((z) => {
+        // Clean power basin aura
+        const circle = L.circle([z.center.lat, z.center.lng], {
+          radius: 50000,
+          color: z.color,
+          fillColor: z.color,
+          fillOpacity: 0.12,
+          weight: 2,
+          dashArray: "4, 4",
+        });
+
+        circle.on("click", () => {
+          setSelectedIntertie(z);
+          setSelectedRoute(null);
+          setSelectedConflict(null);
+          setSelectedZone(null);
+          setSelectedMineralHub(null);
+          setSelectedTreaty(null);
+        });
+
+        group.addLayer(circle);
+
+        // Power Center Marker
+        const powerIcon = L.divIcon({
+          className: "power-intertie-icon",
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+          html: `
+            <div style="position: relative; width: 22px; height: 22px; cursor: pointer;">
+              <div style="position: absolute; inset: -4px; border-radius: 9999px; background: ${z.color}; opacity: 0.3;" class="animate-ping"></div>
+              <div style="width: 22px; height: 22px; border-radius: 9999px; background: #071926; border: 2px solid ${z.color}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${z.color}; font-size: 11px; font-weight: bold; color: ${z.color};">
+                ⚡
+              </div>
+            </div>
+          `,
+        });
+
+        const marker = L.marker([z.center.lat, z.center.lng], { icon: powerIcon });
+        marker.bindTooltip(
+          `<b>${z.name}</b><br/><span style="color:${z.color}">${z.gridOperator} (${z.cleanCapacityMW} MW)</span><br/><span style="color:#38BDF8">AI Headroom: ${z.aiHeadroomMW} MW</span>`,
+          {
+            direction: "top",
+            className: "trade-route-tooltip",
+          }
+        );
+
+        marker.on("click", () => {
+          setSelectedIntertie(z);
+          setSelectedRoute(null);
+          setSelectedConflict(null);
+          setSelectedZone(null);
+          setSelectedMineralHub(null);
+          setSelectedTreaty(null);
+        });
+
+        group.addLayer(marker);
+      });
+    });
+  }, [isLeafletReady, showGridInterties]);
+
+  // Render Infrastructure Proximity Buffer Layer
+  useEffect(() => {
+    if (!isLeafletReady || !layersGroupRef.current.buffer) return;
+
+    import("leaflet").then((L) => {
+      const group = layersGroupRef.current.buffer;
+      group.clearLayers();
+
+      if (!isBufferActive || !bufferCenter) return;
+
+      // 1. Buffer Radius Circle
+      const circle = L.circle([bufferCenter.lat, bufferCenter.lng], {
+        radius: bufferRadiusKm * 1000,
+        color: "#00F5A0",
+        fillColor: "#00F5A0",
+        fillOpacity: 0.16,
+        weight: 2.5,
+        dashArray: "6, 6",
+      });
+      group.addLayer(circle);
+
+      // 2. Buffer Center Marker
+      const centerIcon = L.divIcon({
+        className: "buffer-center-icon",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        html: `
+          <div style="position: relative; width: 24px; height: 24px;">
+            <div style="position: absolute; inset: -4px; border-radius: 9999px; background: #00F5A0; opacity: 0.5;" class="animate-ping"></div>
+            <div style="width: 24px; height: 24px; border-radius: 9999px; background: #040806; border: 2px solid #00F5A0; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px #00F5A0;">
+              <div style="width: 6px; height: 6px; border-radius: 9999px; background: #00F5A0;"></div>
+            </div>
+          </div>
+        `,
+      });
+
+      const marker = L.marker([bufferCenter.lat, bufferCenter.lng], { icon: centerIcon });
+      marker.bindTooltip(
+        `<b>Proximity Buffer Epicenter</b><br/>Radius: ${bufferRadiusKm} km`,
+        {
+          permanent: true,
+          direction: "top",
+          className: "trade-route-tooltip",
+        }
+      );
+      group.addLayer(marker);
+    });
+  }, [isLeafletReady, isBufferActive, bufferCenter, bufferRadiusKm]);
+
   // Render Geodesic Measurement Overlay
   useEffect(() => {
     if (!isLeafletReady || !layersGroupRef.current.measurement) return;
@@ -561,6 +853,25 @@ export default function GeospatialMap({
   const clearMeasurement = useCallback(() => {
     setMeasurePoints([]);
     measurePointsRef.current = [];
+  }, []);
+
+  // Infrastructure Proximity Buffer Analytics
+  const bufferIntersectingProjects = React.useMemo(() => {
+    if (!bufferCenter) return [];
+    return projects.filter((p) => {
+      if (typeof p.latitude !== "number" || typeof p.longitude !== "number") return false;
+      const dist = haversineDistanceKm(bufferCenter.lat, bufferCenter.lng, p.latitude, p.longitude);
+      return dist <= bufferRadiusKm;
+    });
+  }, [bufferCenter, bufferRadiusKm, projects]);
+
+  const bufferTotalCapex = React.useMemo(() => {
+    return bufferIntersectingProjects.reduce((sum, p) => sum + (p.capex_cad || 0), 0);
+  }, [bufferIntersectingProjects]);
+
+  const clearBuffer = useCallback(() => {
+    setBufferCenter(null);
+    bufferCenterRef.current = null;
   }, []);
 
   // Search Results
@@ -861,6 +1172,65 @@ export default function GeospatialMap({
             <span className="hidden sm:inline">Corridors</span>
           </button>
 
+          <button
+            onClick={() => setShowMineralHubs(!showMineralHubs)}
+            className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
+              showMineralHubs
+                ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                : "text-text-subtle hover:text-white"
+            }`}
+            title="Toggle Critical Mineral Refining & Processing Hubs"
+          >
+            <Factory className="h-3 w-3" />
+            <span className="hidden sm:inline">Mineral Hubs</span>
+          </button>
+
+          <button
+            onClick={() => setShowTreatyTerritories(!showTreatyTerritories)}
+            className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
+              showTreatyTerritories
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                : "text-text-subtle hover:text-white"
+            }`}
+            title="Toggle Treaty Territories & $5B Loan Guarantee Jurisdiction"
+          >
+            <Landmark className="h-3 w-3" />
+            <span className="hidden sm:inline">Treaty Lands</span>
+          </button>
+
+          <button
+            onClick={() => setShowGridInterties(!showGridInterties)}
+            className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
+              showGridInterties
+                ? "bg-blue-500/20 text-blue-300 border border-blue-500/40"
+                : "text-text-subtle hover:text-white"
+            }`}
+            title="Toggle Clean Energy Baseload & AI Interties"
+          >
+            <Cpu className="h-3 w-3" />
+            <span className="hidden sm:inline">Interties</span>
+          </button>
+
+          {/* Infrastructure Proximity Buffer Tool (25km / 50km / 100km) */}
+          <button
+            onClick={() => {
+              const next = !isBufferActive;
+              setIsBufferActive(next);
+              if (!next) {
+                clearBuffer();
+              }
+            }}
+            className={`p-1.5 rounded-lg border transition-colors flex items-center gap-1 ${
+              isBufferActive
+                ? "bg-emerald-500/25 border-aurora text-aurora shadow-[0_0_10px_rgba(0,245,160,0.5)]"
+                : "bg-[#040806] border-border text-text-muted hover:text-aurora"
+            }`}
+            title={isBufferActive ? "Disable Proximity Buffer Tool" : "Enable Infrastructure Proximity Buffer (25-100km)"}
+          >
+            <Radio className="h-3.5 w-3.5" />
+            <span className="hidden lg:inline text-[10px] font-mono font-bold">Buffer Tool</span>
+          </button>
+
           {/* Interactive Geodesic Measure Tool Button */}
           <button
             onClick={() => {
@@ -985,6 +1355,92 @@ export default function GeospatialMap({
         </div>
       )}
 
+      {/* Floating Infrastructure Proximity Buffer HUD Banner */}
+      {isBufferActive && (
+        <div className="absolute top-16 left-3 z-[1000] bg-[#040806]/95 backdrop-blur-md border border-aurora/60 rounded-xl px-4 py-2.5 shadow-2xl flex flex-wrap items-center gap-3 font-mono text-xs text-white animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-1.5 text-aurora font-bold">
+            <Radio className="h-4 w-4 animate-pulse" />
+            <span>CORRIDOR PROXIMITY BUFFER</span>
+          </div>
+
+          <div className="h-4 w-px bg-border/80 hidden sm:block" />
+
+          {/* Radius selector */}
+          <div className="flex items-center gap-1 bg-surface/60 p-0.5 rounded-lg border border-border/60">
+            {[25, 50, 100].map((r) => (
+              <button
+                key={r}
+                onClick={() => setBufferRadiusKm(r)}
+                className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors ${
+                  bufferRadiusKm === r
+                    ? "bg-aurora text-black font-bold shadow-[0_0_8px_#00F5A0]"
+                    : "text-text-subtle hover:text-white"
+                }`}
+              >
+                {r}km
+              </button>
+            ))}
+          </div>
+
+          <div className="h-4 w-px bg-border/80 hidden sm:block" />
+
+          {/* Coordinates or Click Prompt */}
+          <div className="text-[11px]">
+            {bufferCenter ? (
+              <span>
+                EPICENTER: <span className="text-white font-bold">{bufferCenter.lat}°, {bufferCenter.lng}°</span>
+              </span>
+            ) : (
+              <span className="text-aurora animate-pulse">Click map to drop radius epicenter</span>
+            )}
+          </div>
+
+          {/* Analytics Results */}
+          {bufferCenter && (
+            <div className="flex items-center gap-2 bg-[#0C1812] px-2 py-1 rounded-lg border border-aurora/40 text-[11px]">
+              <div>
+                INTERSECTIONS:{" "}
+                <span className="text-aurora font-bold">{bufferIntersectingProjects.length}</span>
+              </div>
+              <span className="text-border">|</span>
+              <div>
+                SUM CAPEX:{" "}
+                <span className="text-aurora font-bold">
+                  {bufferTotalCapex >= 1e9
+                    ? `$${(bufferTotalCapex / 1e9).toFixed(2)}B CAD`
+                    : bufferTotalCapex > 0
+                    ? `$${(bufferTotalCapex / 1e6).toFixed(0)}M CAD`
+                    : "$0 CAD"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5 ml-auto">
+            {bufferCenter && (
+              <button
+                onClick={clearBuffer}
+                className="px-2 py-1 rounded bg-surface hover:bg-surface/80 text-text-muted hover:text-white text-[10px] flex items-center gap-1"
+                title="Reset buffer epicenter"
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setIsBufferActive(false);
+                clearBuffer();
+              }}
+              className="px-2 py-1 rounded bg-aurora/20 text-aurora hover:bg-aurora/30 text-[10px] font-bold"
+            >
+              Exit Tool
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Map Container */}
       <div ref={mapContainerRef} className="w-full h-full z-0 select-none" />
 
@@ -1032,9 +1488,11 @@ export default function GeospatialMap({
         <div className="hidden md:flex pointer-events-auto bg-[#040806]/90 backdrop-blur-md border border-border/80 px-3 py-1.5 rounded-xl text-[10px] font-mono text-text-subtle items-center gap-2 shadow-xl">
           <span className="text-aurora font-bold">{projects.length}</span> projects
           <span>•</span>
-          <span className="text-sky-300 font-bold">{GLOBAL_TRADE_ROUTES.length}</span> routes
+          <span className="text-purple-400 font-bold">{CRITICAL_MINERAL_HUBS.length}</span> hubs
           <span>•</span>
-          <span className="text-red-400 font-bold">{CONFLICT_MARKERS.length}</span> chokepoints
+          <span className="text-emerald-400 font-bold">{TREATY_TERRITORIES.length}</span> treaties
+          <span>•</span>
+          <span className="text-sky-400 font-bold">{GRID_INTERTIE_ZONES.length}</span> interties
           <span>•</span>
           <span className="text-amber-400 font-bold">{OPPORTUNITY_ZONES.length}</span> zones
         </div>
@@ -1140,6 +1598,127 @@ export default function GeospatialMap({
           <div className="text-[10px] text-text-subtle">
             <span className="font-bold uppercase text-white">Target Resources:</span>{" "}
             {selectedZone.criticalMineralsOrEnergy.join(", ")}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Detail Flyout: Selected Critical Mineral Hub */}
+      {selectedMineralHub && (
+        <div className="absolute top-16 right-3 z-[1000] w-84 bg-[#140a24]/95 backdrop-blur-md border border-purple-500/50 rounded-xl p-4 text-xs font-mono shadow-2xl space-y-2.5 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center justify-between border-b border-purple-900/60 pb-2">
+            <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Factory className="h-3.5 w-3.5" />
+              Critical Mineral Midstream Hub
+            </div>
+            <button
+              onClick={() => setSelectedMineralHub(null)}
+              className="text-text-subtle hover:text-white text-sm"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="font-bold text-sm text-purple-100">{selectedMineralHub.name}</div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900/40 text-purple-300 border border-purple-700/50">
+              {selectedMineralHub.province} • {selectedMineralHub.processingType}
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/60 text-aurora border border-aurora/30">
+              DVRI Retention: {(selectedMineralHub.domesticRetentionRate * 100).toFixed(0)}%
+            </span>
+          </div>
+          <div className="space-y-1 bg-[#07030e]/80 p-2 rounded-lg border border-purple-900/40 text-[11px]">
+            <div>
+              <span className="text-text-subtle">Capacity:</span>{" "}
+              <span className="text-white font-semibold">{selectedMineralHub.capacityMetric}</span>
+            </div>
+            <div>
+              <span className="text-text-subtle">Annual Value:</span>{" "}
+              <span className="text-aurora font-semibold">{selectedMineralHub.annualValueCAD}</span>
+            </div>
+          </div>
+          <div className="text-[10px] text-text-subtle">
+            <span className="font-bold uppercase text-white">Focus Minerals:</span>{" "}
+            {selectedMineralHub.focusMinerals.join(", ")}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Detail Flyout: Selected Treaty Territory */}
+      {selectedTreaty && (
+        <div className="absolute top-16 right-3 z-[1000] w-84 bg-[#081a12]/95 backdrop-blur-md border border-emerald-500/50 rounded-xl p-4 text-xs font-mono shadow-2xl space-y-2.5 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center justify-between border-b border-emerald-900/60 pb-2">
+            <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Landmark className="h-3.5 w-3.5" />
+              Treaty Land & Economic Jurisdiction
+            </div>
+            <button
+              onClick={() => setSelectedTreaty(null)}
+              className="text-text-subtle hover:text-white text-sm"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="font-bold text-sm text-emerald-100">{selectedTreaty.name}</div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/40 text-emerald-300 border border-emerald-700/50">
+              {selectedTreaty.historicalFramework.replace(/_/g, " ")}
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#040806] text-aurora border border-aurora/40">
+              {selectedTreaty.province}
+            </span>
+          </div>
+          <div className="space-y-1 bg-[#040806]/80 p-2 rounded-lg border border-emerald-900/40 text-[11px]">
+            <div className="text-aurora font-semibold">
+              {selectedTreaty.loanGuaranteeEligibility}
+            </div>
+            <div className="text-text-muted text-[10px]">
+              Eligible for up to 100% debt guarantee under Canada&apos;s $5B ILGP facility.
+            </div>
+          </div>
+          <div className="text-[10px] text-text-subtle">
+            <span className="font-bold uppercase text-white">Signatories:</span>{" "}
+            {selectedTreaty.signatories.join(", ")}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Detail Flyout: Selected Clean Grid Intertie */}
+      {selectedIntertie && (
+        <div className="absolute top-16 right-3 z-[1000] w-84 bg-[#071520]/95 backdrop-blur-md border border-sky-500/50 rounded-xl p-4 text-xs font-mono shadow-2xl space-y-2.5 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center justify-between border-b border-sky-900/60 pb-2">
+            <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Cpu className="h-3.5 w-3.5" />
+              Clean Baseload & AI Intertie
+            </div>
+            <button
+              onClick={() => setSelectedIntertie(null)}
+              className="text-text-subtle hover:text-white text-sm"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="font-bold text-sm text-sky-100">{selectedIntertie.name}</div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-900/40 text-sky-300 border border-sky-700/50">
+              {selectedIntertie.gridOperator}
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#040806] text-white border border-border">
+              {selectedIntertie.baseloadType}
+            </span>
+          </div>
+          <div className="space-y-1 bg-[#040806]/80 p-2 rounded-lg border border-sky-900/40 text-[11px]">
+            <div className="flex justify-between">
+              <span className="text-text-subtle">Clean Capacity:</span>{" "}
+              <span className="text-white font-bold">{selectedIntertie.cleanCapacityMW} MW</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-subtle">AI Headroom:</span>{" "}
+              <span className="text-sky-300 font-bold">{selectedIntertie.aiHeadroomMW} MW</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-subtle">Clean Compute Efficiency:</span>{" "}
+              <span className="text-aurora font-bold">{selectedIntertie.cleanFlopsRatio}</span>
+            </div>
           </div>
         </div>
       )}

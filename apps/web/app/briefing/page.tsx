@@ -12,6 +12,10 @@ import {
   Printer,
   ShieldCheck,
   Sliders,
+  Factory,
+  Landmark,
+  Scale,
+  Zap,
 } from "lucide-react";
 import { FALLBACK_PROJECTS, SNAPSHOT_MANIFEST } from "@/lib/data";
 
@@ -221,6 +225,109 @@ export default function ExecutiveBriefingPage() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      {/* Memorandum to Cabinet: National Economic Sovereignty Pillars Annex */}
+      <section aria-labelledby="sovereignty-pillars-heading" className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-aurora/40 bg-aurora/10 px-3 py-1 font-mono text-[11px] text-aurora">
+              <ShieldCheck className="h-3.5 w-3.5" /> CABINET STRATEGIC ANNEX // ANNEXE STRATÉGIQUE DU CABINET
+            </div>
+            <h2 id="sovereignty-pillars-heading" className="text-xl sm:text-2xl font-black text-text-main mt-2">
+              National Economic Sovereignty Pillars
+            </h2>
+            <p className="text-xs text-text-muted mt-1 max-w-3xl">
+              Strategic priorities formulated for ministerial deliberation. These four operational vectors safeguard critical supply chains, mobilize Indigenous equity ownership, dismantle domestic trade barriers, and power sovereign AI computing.
+            </p>
+          </div>
+          <div className="rounded-xl border border-borderSubtle bg-surface px-4 py-2 font-mono text-xs text-right">
+            <span className="text-[10px] uppercase text-text-subtle">Framework Ref</span>
+            <div className="font-bold text-white">CEGS-MC-PILLARS-v1</div>
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          {/* Pillar A */}
+          <article className="glass-card rounded-2xl p-6 border border-purple-500/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-purple-400 font-bold font-mono text-xs">
+                <Factory className="h-4 w-4" /> PILLAR A: CRITICAL MINERALS MIDSTREAM
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-800">
+                DVRI: 82%–95%
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-white">Allied Supply Chain & Refining Sovereignty</h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Mandates domestic refining, hydrometallurgical processing, and cathode active material (CAM) manufacturing across 31 critical minerals. Anchored by major processing clusters in Bécancour, Sudbury, Temiskaming, and Sorel-Tracy, preventing raw concentrate leakage to geopolitical adversaries.
+            </p>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-xs font-mono">
+              <span className="text-text-subtle">Key Assets:</span>
+              <span className="text-purple-300 font-bold">Lithium, Nickel, REE, Cobalt, Titanium</span>
+            </div>
+          </article>
+
+          {/* Pillar B */}
+          <article className="glass-card rounded-2xl p-6 border border-emerald-500/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono text-xs">
+                <Landmark className="h-4 w-4" /> PILLAR B: INDIGENOUS ECONOMIC EQUITY
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                $5.0B ILGP Facility
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-white">$5B Federal Loan Guarantee Syndication</h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Provides Crown debt guarantees for First Nations, Inuit, and Métis communities acquiring equity stakes in national infrastructure. Lowers borrowing rates to Government of Canada AAA yields, unlocking hundreds of millions in net annual intergenerational dividends.
+            </p>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-xs font-mono">
+              <span className="text-text-subtle">Target Territories:</span>
+              <span className="text-emerald-300 font-bold">James Bay Cree, Treaty 8, Treaty 3, Nisga&apos;a</span>
+            </div>
+          </article>
+
+          {/* Pillar C */}
+          <article className="glass-card rounded-2xl p-6 border border-amber-500/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-400 font-bold font-mono text-xs">
+                <Scale className="h-4 w-4" /> PILLAR C: INTERNAL TRADE HARMONIZATION
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800">
+                +$95B CAD GDP Dividend
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-white">Dismantling Inter-Provincial Friction</h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Addresses Canada&apos;s $130B annual internal friction tax through CFTA modernization, credential reciprocity, and &quot;One Project, One Review&quot; permitting accords. Compresses inter-provincial linear transmission and transport approval timelines by up to 18 months.
+            </p>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-xs font-mono">
+              <span className="text-text-subtle">Priority Corridors:</span>
+              <span className="text-amber-300 font-bold">AB ↔ BC, ON ↔ QC, Prairies, Atlantic</span>
+            </div>
+          </article>
+
+          {/* Pillar D */}
+          <article className="glass-card rounded-2xl p-6 border border-sky-500/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sky-400 font-bold font-mono text-xs">
+                <Zap className="h-4 w-4" /> PILLAR D: CLEAN BASELOAD & SOVEREIGN AI
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800">
+                7.00 ExaFLOPs/GW
+              </span>
+            </div>
+            <h3 className="text-lg font-black text-white">Sovereign AI Compute on Clean Grids</h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Pairs Canada&apos;s CANDU nuclear, SMR, and northern hydroelectric grids (IESO, Hydro-Québec, BC Hydro) with hyperscale compute clusters. Guarantees 100% domestic data residency, Canadian control of cryptographic keys, and avoidance of millions of tonnes in fossil emissions.
+            </p>
+            <div className="pt-2 border-t border-borderSubtle flex items-center justify-between text-xs font-mono">
+              <span className="text-text-subtle">Clean Headroom:</span>
+              <span className="text-sky-300 font-bold">2,250+ MW Available Capacity</span>
+            </div>
+          </article>
         </div>
       </section>
 

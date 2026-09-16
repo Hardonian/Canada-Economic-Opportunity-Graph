@@ -399,6 +399,124 @@ func TestListProjectsInBounds(t *testing.T) {
 	}
 }
 
+func TestSovereigntyPillars(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	// Seed projects: lithium refining and CAM manufacturing
+	p1 := &domain.Project{
+		ID:          "proj-lith-refine",
+		Slug:        "becancour-lithium-refinery",
+		Name:        "Bécancour Lithium Hydroxide Refinery",
+		Sector:      domain.SectorMiningMetals,
+		Subsector:   "Chemical hydroxide refining and processing",
+		Province:    "QC",
+		CapexCAD:    1_200_000_000,
+		EvidenceIDs: []string{"ev-1"},
+	}
+	p2 := &domain.Project{
+		ID:          "proj-first-nations",
+		Slug:        "cree-transmission-line",
+		Name:        "Cree Nation Clean Energy Transmission",
+		Sector:      domain.SectorCleanEnergy,
+		Subsector:   "Hydro transmission",
+		Province:    "QC",
+		CapexCAD:    850_000_000,
+		EvidenceIDs: []string{"ev-2"},
+	}
+	p3 := &domain.Project{
+		ID:          "proj-battery-cam",
+		Slug:        "st-thomas-ev-battery",
+		Name:        "St. Thomas Gigafactory",
+		Sector:      domain.SectorMiningMetals,
+		Subsector:   "Lithium-ion CAM manufacturing and battery cells",
+		Province:    "ON",
+		CapexCAD:    7_000_000_000,
+		EvidenceIDs: []string{"ev-3"},
+	}
+	for _, p := range []*domain.Project{p1, p2, p3} {
+		if err := store.SaveProject(ctx, p); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// 1. Critical Minerals
+	cm, err := store.GetCriticalMineralsAnalysis(ctx)
+	if err != nil {
+		t.Fatalf("GetCriticalMineralsAnalysis failed: %v", err)
+	}
+	if cm.TotalProjects != 2 {
+		t.Fatalf("expected 2 critical mineral projects, got %d", cm.TotalProjects)
+	}
+	if cm.TopMinerals["Lithium"] != 2 {
+		t.Fatalf("expected 2 Lithium projects, got %d", cm.TopMinerals["Lithium"])
+	}
+	if cm.RefiningCount != 1 {
+		t.Fatalf("expected 1 Refining project, got %d", cm.RefiningCount)
+	}
+	if cm.ManufacturingCount != 1 {
+		t.Fatalf("expected 1 Manufacturing project, got %d", cm.ManufacturingCount)
+	}
+
+	// 2. Indigenous Loan Guarantee Simulator
+	req := domain.IndigenousLoanGuaranteeReq{
+		ProjectCapexCAD:             1_000_000_000,
+		IndigenousEquityPct:         20.0,
+		LoanTermYears:               30,
+		BaseSeniorRatePct:           6.5,
+		SovereignSpreadReductionBps: 85,
+	}
+	res, err := store.SimulateIndigenousLoanGuarantee(ctx, req)
+	if err != nil {
+		t.Fatalf("SimulateIndigenousLoanGuarantee failed: %v", err)
+	}
+	if res.EquityAmountCAD != 200_000_000 {
+		t.Fatalf("expected equity $200M CAD, got %d", res.EquityAmountCAD)
+	}
+	if res.AnnualDebtServiceSavingsCAD != 1_700_000 {
+		t.Fatalf("expected annual savings $1.7M CAD, got %d", res.AnnualDebtServiceSavingsCAD)
+	}
+	if res.CumulativeInterestSavingsCAD != 51_000_000 {
+		t.Fatalf("expected 30-year savings $51M CAD, got %d", res.CumulativeInterestSavingsCAD)
+	}
+	if res.RecommendedFacility != "FEDERAL_ILGP" {
+		t.Fatalf("expected FEDERAL_ILGP, got %s", res.RecommendedFacility)
+	}
+
+	// 3. Indigenous Overview
+	indigOverview, err := store.GetIndigenousOverview(ctx)
+	if err != nil {
+		t.Fatalf("GetIndigenousOverview failed: %v", err)
+	}
+	if indigOverview.TotalPartneredProjects == 0 {
+		t.Fatalf("expected at least 1 partnered project")
+	}
+
+	// 4. Internal Trade Friction
+	friction, err := store.GetInternalTradeFrictionMatrix(ctx)
+	if err != nil {
+		t.Fatalf("GetInternalTradeFrictionMatrix failed: %v", err)
+	}
+	if len(friction.Corridors) != 5 {
+		t.Fatalf("expected 5 trade corridors, got %d", len(friction.Corridors))
+	}
+	if friction.TotalAnnualFrictionTaxCAD <= 0 {
+		t.Fatalf("expected positive friction tax, got %d", friction.TotalAnnualFrictionTaxCAD)
+	}
+
+	// 5. Clean Baseload Compute Profile
+	compute, err := store.GetCleanBaseloadComputeProfile(ctx)
+	if err != nil {
+		t.Fatalf("GetCleanBaseloadComputeProfile failed: %v", err)
+	}
+	if len(compute.Grids) != 5 {
+		t.Fatalf("expected 5 provincial grids, got %d", len(compute.Grids))
+	}
+	if compute.TotalAIComputeHeadroomMW <= 0 {
+		t.Fatalf("expected positive AI compute headroom, got %f", compute.TotalAIComputeHeadroomMW)
+	}
+}
+
 // Ensure fmt and time imports are used.
 var _ = fmt.Sprintf
 var _ = time.Now

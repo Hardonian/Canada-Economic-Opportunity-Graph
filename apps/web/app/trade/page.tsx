@@ -4,6 +4,7 @@ import { ArrowUpRight, BarChart3, Boxes, Globe2, Network, PackageSearch, Ship, S
 import { SNAPSHOT_PROJECTS } from "@/lib/data";
 import { VETTED_SOURCES } from "@/lib/source-data";
 import { TRADE_METRICS } from "@/lib/trade-data";
+import InternalTradeSimulator from "@/components/InternalTradeSimulator";
 
 export const metadata: Metadata = {
   title: "Global Trade & Supply Chains",
@@ -77,6 +78,11 @@ export default function TradePage() {
           </div>
         </div>
       </header>
+
+      {/* Pillar C: Inter-Provincial Internal Trade & Regulatory Friction Simulator */}
+      <section aria-labelledby="internal-trade-simulator">
+        <InternalTradeSimulator />
+      </section>
 
       <section aria-labelledby="active-trade-intelligence-title" className="glass-card rounded-2xl border border-primary/30 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

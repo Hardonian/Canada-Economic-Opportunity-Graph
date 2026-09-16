@@ -61,6 +61,21 @@ func (s *stubStore) ListProjects(_ context.Context, _ database.ProjectFilter) ([
 func (s *stubStore) ListProjectsInBounds(_ context.Context, _, _, _, _ float64, _ int) ([]*domain.Project, error) {
 	return []*domain.Project{}, nil
 }
+func (s *stubStore) GetCriticalMineralsAnalysis(_ context.Context) (*domain.CriticalMineralsSummary, error) {
+	return &domain.CriticalMineralsSummary{}, nil
+}
+func (s *stubStore) SimulateIndigenousLoanGuarantee(_ context.Context, _ domain.IndigenousLoanGuaranteeReq) (*domain.IndigenousLoanGuaranteeResult, error) {
+	return &domain.IndigenousLoanGuaranteeResult{}, nil
+}
+func (s *stubStore) GetIndigenousOverview(_ context.Context) (*domain.IndigenousOverviewSummary, error) {
+	return &domain.IndigenousOverviewSummary{}, nil
+}
+func (s *stubStore) GetInternalTradeFrictionMatrix(_ context.Context) (*domain.TradeFrictionReport, error) {
+	return &domain.TradeFrictionReport{}, nil
+}
+func (s *stubStore) GetCleanBaseloadComputeProfile(_ context.Context) (*domain.BaseloadComputeSummary, error) {
+	return &domain.BaseloadComputeSummary{}, nil
+}
 func (s *stubStore) SaveEntity(_ context.Context, _ *domain.Entity) error { return nil }
 func (s *stubStore) GetEntity(_ context.Context, id string) (*domain.Entity, error) {
 	return nil, fmt.Errorf("entity %q not found", id)

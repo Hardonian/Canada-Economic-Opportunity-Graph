@@ -468,3 +468,184 @@ export const MAP_FOCUS_PRESETS = [
     description: "Continental cross-border industrial integration",
   },
 ];
+
+// --- Pillar A: Critical Minerals Refining & Midstream Hubs ---
+export interface CriticalMineralHub {
+  id: string;
+  name: string;
+  location: LatLngPoint;
+  province: string;
+  focusMinerals: string[];
+  processingType: "HYDROMETALLURGICAL" | "SMELTING" | "CAM_GIGAFACTORY" | "RECYCLING";
+  domesticRetentionRate: number;
+  capacityMetric: string;
+  annualValueCAD: string;
+  color: string;
+}
+
+export const CRITICAL_MINERAL_HUBS: CriticalMineralHub[] = [
+  {
+    id: "hub-becancour",
+    name: "Bécancour Battery Valley & CAM Megahub",
+    location: { lat: 46.342, lng: -72.435 },
+    province: "QC",
+    focusMinerals: ["Lithium", "Nickel", "Cobalt", "Graphite"],
+    processingType: "CAM_GIGAFACTORY",
+    domesticRetentionRate: 0.94,
+    capacityMetric: "120,000 tonnes/yr CAM",
+    annualValueCAD: "$14.5B CAD",
+    color: "#00F5A0",
+  },
+  {
+    id: "hub-temiskaming",
+    name: "Temiskaming Shores Cobalt & Nickel Refinery",
+    location: { lat: 47.516, lng: -79.678 },
+    province: "ON",
+    focusMinerals: ["Cobalt", "Nickel", "Black Mass Recycling"],
+    processingType: "HYDROMETALLURGICAL",
+    domesticRetentionRate: 0.88,
+    capacityMetric: "6,500 tonnes/yr Cobalt Sulfate",
+    annualValueCAD: "$1.8B CAD",
+    color: "#38BDF8",
+  },
+  {
+    id: "hub-sudbury",
+    name: "Sudbury Integrated Nickel Smelting Complex",
+    location: { lat: 46.491, lng: -80.993 },
+    province: "ON",
+    focusMinerals: ["Class-1 Nickel", "Copper", "PGMs"],
+    processingType: "SMELTING",
+    domesticRetentionRate: 0.82,
+    capacityMetric: "145,000 tonnes/yr Refined Nickel",
+    annualValueCAD: "$7.2B CAD",
+    color: "#F59E0B",
+  },
+  {
+    id: "hub-sorel-tracy",
+    name: "Sorel-Tracy Critical & Rare Metals Facility",
+    location: { lat: 46.033, lng: -73.116 },
+    province: "QC",
+    focusMinerals: ["Titanium", "Scandium", "Rare Earth Elements"],
+    processingType: "HYDROMETALLURGICAL",
+    domesticRetentionRate: 0.91,
+    capacityMetric: "3 tonnes/yr High-Purity Scandium Oxide",
+    annualValueCAD: "$950M CAD",
+    color: "#EC4899",
+  },
+];
+
+// --- Pillar B: Historic & Modern Treaty Territories ---
+export interface TreatyTerritory {
+  id: string;
+  name: string;
+  center: LatLngPoint;
+  province: string;
+  historicalFramework: "HISTORIC_NUMBERED_TREATY" | "MODERN_COMPREHENSIVE_TREATY" | "PEACE_AND_FRIENDSHIP";
+  signatories: string[];
+  loanGuaranteeEligibility: string;
+  color: string;
+}
+
+export const TREATY_TERRITORIES: TreatyTerritory[] = [
+  {
+    id: "treaty-james-bay",
+    name: "Grand Council of the Crees (Eeyou Istchee / James Bay)",
+    center: { lat: 52.5, lng: -77.5 },
+    province: "QC",
+    historicalFramework: "MODERN_COMPREHENSIVE_TREATY",
+    signatories: ["Cree Nation", "Government of Canada", "Government of Quebec"],
+    loanGuaranteeEligibility: "100% Priority Access under $5B Federal ILGP",
+    color: "#F59E0B",
+  },
+  {
+    id: "treaty-8-alberta-bc",
+    name: "Treaty 8 Traditional Territory (Energy & Mineral Basin)",
+    center: { lat: 56.5, lng: -117.5 },
+    province: "AB / BC",
+    historicalFramework: "HISTORIC_NUMBERED_TREATY",
+    signatories: ["Treaty 8 First Nations", "Crown in Right of Canada"],
+    loanGuaranteeEligibility: "Full Priority Access — AIOC & Federal ILGP",
+    color: "#10B981",
+  },
+  {
+    id: "treaty-3-ontario",
+    name: "Grand Council Treaty #3 (Northwestern Ontario Infrastructure)",
+    center: { lat: 49.8, lng: -93.5 },
+    province: "ON",
+    historicalFramework: "HISTORIC_NUMBERED_TREATY",
+    signatories: ["Treaty 3 Anishinaabe Nations", "Crown"],
+    loanGuaranteeEligibility: "Eligible for ALGP & Federal ILGP",
+    color: "#8B5CF6",
+  },
+  {
+    id: "treaty-nisgaa",
+    name: "Nisga'a Nation Territory (Nass River / Coastal Gateway)",
+    center: { lat: 55.2, lng: -129.2 },
+    province: "BC",
+    historicalFramework: "MODERN_COMPREHENSIVE_TREATY",
+    signatories: ["Nisga'a Lisims Government", "Canada", "British Columbia"],
+    loanGuaranteeEligibility: "Full Sovereign Co-Financing Available",
+    color: "#06B6D4",
+  },
+];
+
+// --- Pillar D: Clean Energy Grid Interties & AI Compute Clusters ---
+export interface GridIntertieZone {
+  id: string;
+  name: string;
+  center: LatLngPoint;
+  gridOperator: string;
+  cleanCapacityMW: number;
+  aiHeadroomMW: number;
+  baseloadType: string;
+  cleanFlopsRatio: string;
+  color: string;
+}
+
+export const GRID_INTERTIE_ZONES: GridIntertieZone[] = [
+  {
+    id: "grid-darlington-nuclear",
+    name: "Darlington Nuclear & SMR AI Clean Compute Hub",
+    center: { lat: 43.869, lng: -78.718 },
+    gridOperator: "IESO (Ontario)",
+    cleanCapacityMW: 3500,
+    aiHeadroomMW: 850,
+    baseloadType: "CANDU Nuclear & BWRX-300 SMR",
+    cleanFlopsRatio: "7.00 ExaFLOPs/GW",
+    color: "#38BDF8",
+  },
+  {
+    id: "grid-beauharnois-hydro",
+    name: "Beauharnois Hydroelectric Hyperscale Megacampus",
+    center: { lat: 45.316, lng: -73.905 },
+    gridOperator: "Hydro-Québec",
+    cleanCapacityMW: 1900,
+    aiHeadroomMW: 600,
+    baseloadType: "Run-of-the-River Hydro",
+    cleanFlopsRatio: "6.94 ExaFLOPs/GW",
+    color: "#00F5A0",
+  },
+  {
+    id: "grid-site-c-peace",
+    name: "Site C Clean Hydro Transmission Dispatch",
+    center: { lat: 56.196, lng: -120.912 },
+    gridOperator: "BC Hydro",
+    cleanCapacityMW: 1100,
+    aiHeadroomMW: 450,
+    baseloadType: "Reservoir Hydro",
+    cleanFlopsRatio: "6.95 ExaFLOPs/GW",
+    color: "#10B981",
+  },
+  {
+    id: "grid-alberta-heartland",
+    name: "Alberta Industrial Heartland Cogeneration & CCS",
+    center: { lat: 53.722, lng: -113.217 },
+    gridOperator: "AESO (Alberta)",
+    cleanCapacityMW: 900,
+    aiHeadroomMW: 350,
+    baseloadType: "Industrial Cogeneration + CCS",
+    cleanFlopsRatio: "6.46 ExaFLOPs/GW",
+    color: "#F59E0B",
+  },
+];
+

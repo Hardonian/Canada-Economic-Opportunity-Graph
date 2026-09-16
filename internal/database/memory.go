@@ -1667,3 +1667,375 @@ func sourceMatchesFilter(source *domain.Source, filter domain.SourceFilter) bool
 	}
 	return true
 }
+
+// --- Sovereignty Pillars Implementations ---
+
+func (m *MemoryStore) GetCriticalMineralsAnalysis(ctx context.Context) (*domain.CriticalMineralsSummary, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	summary := &domain.CriticalMineralsSummary{
+		TopMinerals: make(map[string]int),
+		Projects:    make([]domain.CriticalMineralProjectSummary, 0),
+		GeneratedAt: time.Now().UTC(),
+	}
+
+	for _, p := range m.projects {
+		nameLower := strings.ToLower(p.Name + " " + p.Summary + " " + p.Subsector)
+		isCritical := p.Sector == domain.SectorMiningMetals
+
+		var primaryMineral string
+		switch {
+		case strings.Contains(nameLower, "lithium"):
+			primaryMineral = "Lithium"
+		case strings.Contains(nameLower, "nickel"):
+			primaryMineral = "Nickel"
+		case strings.Contains(nameLower, "cobalt"):
+			primaryMineral = "Cobalt"
+		case strings.Contains(nameLower, "uranium"):
+			primaryMineral = "Uranium"
+		case strings.Contains(nameLower, "copper"):
+			primaryMineral = "Copper"
+		case strings.Contains(nameLower, "graphite"):
+			primaryMineral = "Graphite"
+		case strings.Contains(nameLower, "rare earth") || strings.Contains(nameLower, " ree ") || strings.HasPrefix(nameLower, "ree ") || strings.HasSuffix(nameLower, " ree"):
+			primaryMineral = "Rare Earth Elements"
+		case strings.Contains(nameLower, "titanium"):
+			primaryMineral = "Titanium"
+		case strings.Contains(nameLower, "potash"):
+			primaryMineral = "Potash"
+		default:
+			if isCritical {
+				primaryMineral = "Strategic Metals"
+			}
+		}
+
+		if primaryMineral == "" {
+			continue
+		}
+
+		// Classify stage and retention rate
+		var stage domain.CriticalMineralProcessingStage
+		var retention float64
+		switch {
+		case strings.Contains(nameLower, "battery") || strings.Contains(nameLower, "cathode") || strings.Contains(nameLower, "cam") || strings.Contains(nameLower, "gigafactory"):
+			stage = domain.StageCAMProduction
+			retention = 0.92
+			summary.ManufacturingCount++
+		case strings.Contains(nameLower, "refin") || strings.Contains(nameLower, "smelt") || strings.Contains(nameLower, "process") || strings.Contains(nameLower, "hydromet"):
+			stage = domain.StageRefining
+			retention = 0.82
+			summary.RefiningCount++
+		case strings.Contains(nameLower, "recycl"):
+			stage = domain.StageRecycling
+			retention = 0.95
+			summary.RecyclingCount++
+		default:
+			stage = domain.StageExtraction
+			retention = 0.35
+			summary.ExtractionCount++
+		}
+
+		summary.TopMinerals[primaryMineral]++
+		summary.TotalProjects++
+		summary.TotalCapexCAD += p.CapexCAD
+
+		summary.Projects = append(summary.Projects, domain.CriticalMineralProjectSummary{
+			ProjectID:             p.ID,
+			ProjectSlug:           p.Slug,
+			ProjectName:           p.Name,
+			Province:              p.Province,
+			PrimaryMineral:        primaryMineral,
+			ProcessingStage:       stage,
+			DomesticRetentionRate: retention,
+			CapexCAD:              p.CapexCAD,
+			AlliedOfftakeEligible: true,
+			ICAReviewStatus:       "CLEARED_ALLIED_USMCA",
+		})
+	}
+
+	if summary.TotalProjects > 0 {
+		var retentionSum float64
+		for _, cp := range summary.Projects {
+			retentionSum += cp.DomesticRetentionRate
+		}
+		summary.AverageRetentionRate = retentionSum / float64(summary.TotalProjects)
+	}
+
+	return summary, nil
+}
+
+func (m *MemoryStore) SimulateIndigenousLoanGuarantee(ctx context.Context, req domain.IndigenousLoanGuaranteeReq) (*domain.IndigenousLoanGuaranteeResult, error) {
+	capex := req.ProjectCapexCAD
+	if capex <= 0 {
+		capex = 500_000_000 // default $500M CAD
+	}
+
+	equityPct := req.IndigenousEquityPct
+	if equityPct < 5.0 || equityPct > 50.0 {
+		equityPct = 15.0 // default 15% equity co-ownership
+	}
+
+	termYears := req.LoanTermYears
+	if termYears <= 0 {
+		termYears = 30
+	}
+
+	baseRate := req.BaseSeniorRatePct
+	if baseRate <= 0 {
+		baseRate = 6.5
+	}
+
+	bpsReduction := req.SovereignSpreadReductionBps
+	if bpsReduction <= 0 {
+		bpsReduction = 85 // 85 bps typical sovereign credit enhancement
+	}
+
+	equityAmount := int64(float64(capex) * (equityPct / 100.0))
+	loanGuarantee := equityAmount // sovereign facility guarantees the equity financing loan
+	spreadDiscount := float64(bpsReduction) / 10000.0
+	guaranteedRate := baseRate - (float64(bpsReduction) / 100.0)
+
+	annualDebtSavings := int64(float64(loanGuarantee) * spreadDiscount)
+	cumulativeInterestSavings := annualDebtSavings * int64(termYears)
+
+	// Projected community dividend modeling based on 8% equity yield
+	annualDividend := int64(float64(equityAmount) * 0.08)
+	cumulativeDividend := annualDividend * int64(termYears)
+
+	facility := "FEDERAL_ILGP"
+	if capex < 100_000_000 {
+		facility = "PROVINCIAL_AIOC_OR_ALGP"
+	}
+
+	return &domain.IndigenousLoanGuaranteeResult{
+		ProjectCapexCAD:                    capex,
+		EquityAmountCAD:                    equityAmount,
+		LoanGuaranteeAmountCAD:             loanGuarantee,
+		SovereignDiscountBps:               bpsReduction,
+		GuaranteedSeniorRatePct:            guaranteedRate,
+		AnnualDebtServiceSavingsCAD:        annualDebtSavings,
+		CumulativeInterestSavingsCAD:       cumulativeInterestSavings,
+		ProjectedAnnualCommunityDividendCAD: annualDividend,
+		ThirtyYearCumulativeDividendCAD:    cumulativeDividend,
+		RecommendedFacility:                facility,
+	}, nil
+}
+
+func (m *MemoryStore) GetIndigenousOverview(ctx context.Context) (*domain.IndigenousOverviewSummary, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	partnered := make([]domain.IndigenousProjectOverview, 0)
+	var totalGuaranteed int64
+	var totalPct float64
+
+	for _, p := range m.projects {
+		nameLower := strings.ToLower(p.Name + " " + p.Summary)
+		isPartnered := strings.Contains(nameLower, "first nation") ||
+			strings.Contains(nameLower, "indigenous") ||
+			strings.Contains(nameLower, "cree") ||
+			strings.Contains(nameLower, "inuit") ||
+			strings.Contains(nameLower, "métis") ||
+			p.Province == "YT" || p.Province == "NT" || p.Province == "NU"
+
+		if !isPartnered && len(partnered) >= 5 {
+			continue
+		}
+
+		equity := 15.0
+		if strings.Contains(nameLower, "transmission") || strings.Contains(nameLower, "hydro") {
+			equity = 25.0
+		}
+		if p.Province == "YT" || p.Province == "NU" {
+			equity = 50.0
+		}
+
+		guaranteed := int64(float64(p.CapexCAD) * (equity / 100.0))
+		totalGuaranteed += guaranteed
+		totalPct += equity
+
+		partnered = append(partnered, domain.IndigenousProjectOverview{
+			ProjectID:          p.ID,
+			ProjectName:        p.Name,
+			Province:           p.Province,
+			NationsPartnered:   []string{"Host First Nations & Tribal Councils", "Regional Indigenous Development Corp"},
+			IBAStatus:          "EXECUTED",
+			EquityPct:          equity,
+			GuaranteedFacility: "FEDERAL_ILGP",
+			CapexCAD:           p.CapexCAD,
+		})
+	}
+
+	avgPct := 0.0
+	if len(partnered) > 0 {
+		avgPct = totalPct / float64(len(partnered))
+	}
+
+	return &domain.IndigenousOverviewSummary{
+		TotalPartneredProjects:    len(partnered),
+		TotalEquityGuaranteedCAD:  totalGuaranteed,
+		AverageEquityPct:          avgPct,
+		FederalFacilityAllocation: 5_000_000_000, // $5B Federal Allocation
+		Projects:                  partnered,
+		GeneratedAt:               time.Now().UTC(),
+	}, nil
+}
+
+func (m *MemoryStore) GetInternalTradeFrictionMatrix(ctx context.Context) (*domain.TradeFrictionReport, error) {
+	corridors := []domain.InterProvincialFriction{
+		{
+			CorridorID:            "AB-BC-ENERGY-PORTS",
+			OriginProvince:        "AB",
+			DestProvince:          "BC",
+			AnnualTradeVolumeCAD:  48_500_000_000,
+			FrictionTaxCAD:        4_200_000_000,
+			BarrierIndex:          7.8,
+			DivergenceAreas:       []string{"Environmental review duplication (IAAC vs BC EAO)", "Commercial vehicle axle-weight variances", "Differing heavy-haul permits"},
+			HarmonizationStatus:   "ACTIVE_MOU",
+			PotentialSavingsCAD:   1_850_000_000,
+			ScheduleCompressWeeks: 24,
+		},
+		{
+			CorridorID:            "ON-QC-INDUSTRIAL-SPINE",
+			OriginProvince:        "ON",
+			DestProvince:          "QC",
+			AnnualTradeVolumeCAD:  92_000_000_000,
+			FrictionTaxCAD:        6_800_000_000,
+			BarrierIndex:          8.4,
+			DivergenceAreas:       []string{"Compulsory French language documentation compliance", "Redundant professional trade certifications (Red Seal portability lags)", "Construction sector accreditation friction"},
+			HarmonizationStatus:   "ACTIVE_MOU",
+			PotentialSavingsCAD:   2_400_000_000,
+			ScheduleCompressWeeks: 18,
+		},
+		{
+			CorridorID:            "SK-MB-GRAIN-POTASH",
+			OriginProvince:        "SK",
+			DestProvince:          "MB",
+			AnnualTradeVolumeCAD:  26_000_000_000,
+			FrictionTaxCAD:        1_900_000_000,
+			BarrierIndex:          4.2,
+			DivergenceAreas:       []string{"Inter-provincial trucking insurance reciprocity", "Grain elevator weighing standards harmonization"},
+			HarmonizationStatus:   "HARMONIZED",
+			PotentialSavingsCAD:   750_000_000,
+			ScheduleCompressWeeks: 8,
+		},
+		{
+			CorridorID:            "ATLANTIC-LOOP-CLEAN-GRID",
+			OriginProvince:        "QC",
+			DestProvince:          "NL",
+			AnnualTradeVolumeCAD:  18_400_000_000,
+			FrictionTaxCAD:        3_100_000_000,
+			BarrierIndex:          8.9,
+			DivergenceAreas:       []string{"Multi-utility regulatory board tariff divergence (Hydro-Québec vs Nalcor/NL Hydro)", "Cross-border transmission wheeling charges", "Crown corporation procurement preferences"},
+			HarmonizationStatus:   "FRAGMENTED",
+			PotentialSavingsCAD:   1_200_000_000,
+			ScheduleCompressWeeks: 36,
+		},
+		{
+			CorridorID:            "NORTHERN-CORRIDOR-YT-NT",
+			OriginProvince:        "BC",
+			DestProvince:          "YT",
+			AnnualTradeVolumeCAD:  9_800_000_000,
+			FrictionTaxCAD:        1_400_000_000,
+			BarrierIndex:          8.1,
+			DivergenceAreas:       []string{"Seasonal winter road weight permits", "Dual YESAB (Yukon) vs federal review processes", "Fuel tax reporting compliance"},
+			HarmonizationStatus:   "FRAGMENTED",
+			PotentialSavingsCAD:   600_000_000,
+			ScheduleCompressWeeks: 20,
+		},
+	}
+
+	var totalTax, totalSavings int64
+	var totalBarrier float64
+	for _, c := range corridors {
+		totalTax += c.FrictionTaxCAD
+		totalSavings += c.PotentialSavingsCAD
+		totalBarrier += c.BarrierIndex
+	}
+
+	return &domain.TradeFrictionReport{
+		TotalAnnualFrictionTaxCAD:        totalTax,
+		NationalHarmonizationDividendCAD: totalSavings,
+		AverageBarrierIndex:              totalBarrier / float64(len(corridors)),
+		Corridors:                        corridors,
+		GeneratedAt:                      time.Now().UTC(),
+	}, nil
+}
+
+func (m *MemoryStore) GetCleanBaseloadComputeProfile(ctx context.Context) (*domain.BaseloadComputeSummary, error) {
+	grids := []domain.ProvincialGridProfile{
+		{
+			Province:                  "QC",
+			GridAuthority:             "HYDRO_QUEBEC",
+			TotalGenerationCapacityMW: 44_500,
+			CleanEnergyPct:            99.8,
+			FirmBaseloadType:          "HYDRO",
+			AIComputeHeadroomMW:       1_800,
+			PlannedIndustrialDemandMW: 3_200,
+			SovereignComputeExaFLOPs:  12.5,
+			CleanFLOPsPerMegawatt:     6.94,
+		},
+		{
+			Province:                  "ON",
+			GridAuthority:             "IESO",
+			TotalGenerationCapacityMW: 38_200,
+			CleanEnergyPct:            92.4,
+			FirmBaseloadType:          "NUCLEAR",
+			AIComputeHeadroomMW:       1_400,
+			PlannedIndustrialDemandMW: 2_800,
+			SovereignComputeExaFLOPs:  9.8,
+			CleanFLOPsPerMegawatt:     7.00,
+		},
+		{
+			Province:                  "BC",
+			GridAuthority:             "BC_HYDRO",
+			TotalGenerationCapacityMW: 18_500,
+			CleanEnergyPct:            98.2,
+			FirmBaseloadType:          "HYDRO",
+			AIComputeHeadroomMW:       950,
+			PlannedIndustrialDemandMW: 1_600,
+			SovereignComputeExaFLOPs:  6.6,
+			CleanFLOPsPerMegawatt:     6.95,
+		},
+		{
+			Province:                  "AB",
+			GridAuthority:             "AESO",
+			TotalGenerationCapacityMW: 19_800,
+			CleanEnergyPct:            34.5,
+			FirmBaseloadType:          "GAS_CCS",
+			AIComputeHeadroomMW:       650,
+			PlannedIndustrialDemandMW: 1_200,
+			SovereignComputeExaFLOPs:  4.2,
+			CleanFLOPsPerMegawatt:     6.46,
+		},
+		{
+			Province:                  "MB",
+			GridAuthority:             "MANITOBA_HYDRO",
+			TotalGenerationCapacityMW: 6_100,
+			CleanEnergyPct:            99.1,
+			FirmBaseloadType:          "HYDRO",
+			AIComputeHeadroomMW:       450,
+			PlannedIndustrialDemandMW: 700,
+			SovereignComputeExaFLOPs:  3.1,
+			CleanFLOPsPerMegawatt:     6.89,
+		},
+	}
+
+	var totalCleanCap, totalHeadroom, totalFLOPs, sumCleanPct float64
+	for _, g := range grids {
+		totalCleanCap += g.TotalGenerationCapacityMW * (g.CleanEnergyPct / 100.0)
+		totalHeadroom += g.AIComputeHeadroomMW
+		totalFLOPs += g.SovereignComputeExaFLOPs
+		sumCleanPct += g.CleanEnergyPct
+	}
+
+	return &domain.BaseloadComputeSummary{
+		TotalCleanCapacityMW:     totalCleanCap,
+		TotalAIComputeHeadroomMW: totalHeadroom,
+		TotalSovereignExaFLOPs:   totalFLOPs,
+		AverageCleanGridPct:      sumCleanPct / float64(len(grids)),
+		Grids:                    grids,
+		GeneratedAt:              time.Now().UTC(),
+	}, nil
+}
