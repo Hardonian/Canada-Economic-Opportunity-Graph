@@ -182,6 +182,36 @@ func DefaultOntology() []DependencyRule {
 			CapexPercentMin:  0.15,
 			CapexPercentMax:  0.30,
 		},
+		{
+			Sector:           domain.SectorTransportation,
+			Category:         "airport_global_investor_ground_lease",
+			TitleTemplate:    "Long-Term Master Ground Lease Concession Tranche",
+			Description:      "30-to-50-year commercial ground lease concession tranches, terminal infrastructure modernization, and global pension co-investment (CPPIB, CDPQ, OMERS, Brookfield) as announced by Mark Carney at the Canada Economic Growth Summit.",
+			Class:            domain.RequirementConfirmed,
+			TriggerMilestone: domain.StageEarlyDevelopment,
+			CapexPercentMin:  0.25,
+			CapexPercentMax:  0.45,
+		},
+		{
+			Sector:           domain.SectorTransportation,
+			Category:         "airport_intermodal_cargo_logistics",
+			TitleTemplate:    "Multi-Modal Air Cargo Logistics Hub & Rail Connector",
+			Description:      "Automated air cargo sorting facilities, cold-chain pharmaceutical distribution centers, and high-frequency intermodal freight and transit links.",
+			Class:            domain.RequirementDerived,
+			TriggerMilestone: domain.StageFeasibility,
+			CapexPercentMin:  0.15,
+			CapexPercentMax:  0.30,
+		},
+		{
+			Sector:           domain.SectorTransportation,
+			Category:         "airport_saf_and_clean_fueling",
+			TitleTemplate:    "Sustainable Aviation Fuel (SAF) Bunkering & Clean Power Interconnect",
+			Description:      "Dedicated SAF storage, fuel blending distribution manifolds, and high-capacity electrical substation ties for electrified ground service fleets.",
+			Class:            domain.RequirementDerived,
+			TriggerMilestone: domain.StagePermitting,
+			CapexPercentMin:  0.08,
+			CapexPercentMax:  0.18,
+		},
 	}
 }
 

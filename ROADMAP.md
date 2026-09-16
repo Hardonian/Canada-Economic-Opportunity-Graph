@@ -72,6 +72,8 @@ This document outlines the phased milestone roadmap for CanadaOpportunityGraph a
 * [x] **Universal CLI Subcommand Wiring**: Full native terminal access for `cog planning` (`optimize`, `wargame`, `labor`), `cog project` (`mrio`, `flyvbjerg`, `ubo`, `grid`, `earthobs`), and `cog extract` (`cards`, `ni43101`, `waterfall`, `iaac`) (`cmd/cog/main.go`).
 * [x] **Enterprise GraphQL Intelligence API**: Extended GraphQL SDL schema and high-throughput zero-dependency resolvers for `mrio`, `flyvbjerg`, `ubo`, `grid`, `earthobs`, `planningOptimize`, `planningWarGame`, `planningLabor`, and `predictedLinks` (`internal/graphql/`).
 * [x] **Executive Project Intelligence Dossier**: Full-width interactive dossier on all project profile pages (`/projects/[id]`) presenting multi-regional input-output GDP yields, Bayesian overrun hazard curves, UBO national security posture, electrical grid headroom, and Sentinel-1 SAR ground-truth telemetry (`apps/web/components/ProjectIntelligenceDossier.tsx`).
-* [x] **100% Race-Detector Test Verification**: Full Go test suite pass with `-race` across 40+ packages, zero race conditions, and complete Next.js 15 static/dynamic build verification (27/27 pages).
+* [x] **Canadian International Airport Global Investor Leasing Hubs**: Ingestion and indexing of the National Airports System (NAS) commercial ground lease modernization initiative announced by Mark Carney at the Canada Economic Growth Summit ($18B CAD target capex across YYZ, YVR, YUL, YYC, YEG) with downstream cargo and clean fueling dependency propagation rules.
+* [x] **Release 2026-09-16-1 & Full QA Closure**: Cryptographic release verification via `cmd/releasecheck`, complete race-detected test pass (`go test -race ./...`), live REST and GraphQL server query validation, and Next.js 15 production build pass (27/27 pages).
+
 
 

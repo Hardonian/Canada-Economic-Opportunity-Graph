@@ -239,5 +239,85 @@
         "source_id": "cib-oneida-investment-2021-05-19"
       }
     ]
+  },
+  {
+    "external_id": "nas:canadian-airports-leasing-hub",
+    "external_ids": {
+      "transport_canada_nas": "nas-airport-leasing-hubs"
+    },
+    "name": "Canadian International Airports — Global Investor Leasing & Infrastructure Hubs",
+    "summary": "Federal economic initiative announced by Mark Carney at the Canada Economic Growth Summit to modernize National Airports System (NAS) ground leases into global institutional investor leasing hubs. Unlocks long-term commercial concession tranches across major international gateway hubs (Toronto Pearson YYZ, Vancouver YVR, Montréal-Trudeau YUL, Calgary YYC, Edmonton YEG) for terminal expansion, air cargo corridors, and high-frequency intermodal transit.",
+    "sector": "Transportation & Ports",
+    "subsector": "Airport Commercial Ground Leases & Intermodal Logistics",
+    "province": "ON",
+    "location_name": "Toronto Pearson (YYZ), Vancouver (YVR), Montréal-Trudeau (YUL)",
+    "latitude": 43.6777,
+    "longitude": -79.6248,
+    "stage": "ANNOUNCED",
+    "capex_cad": 18000000000,
+    "capex_status": "REPORTED",
+    "confidence": "SUPPORTED",
+    "proponent": {
+      "legal_name": "Transport Canada & National Airports System Authorities",
+      "common_name": "Canadian International Airport Leasing Hubs",
+      "aliases": ["NAS Airport Commercial Leasing Hubs", "Pearson Global Gateway Hub", "YVR Global Hub"],
+      "entity_type": "FederalCrownPartnership",
+      "jurisdiction": "CA:FED",
+      "identifiers": {}
+    },
+    "sources": [
+      {
+        "source_id": "growth-summit-carney-airports-2026-06-18",
+        "publisher": "Canada Economic Growth Council",
+        "source_url": "https://growthcouncil.gc.ca/en/reports/canadian-airports-global-investor-leasing-hubs/",
+        "publication_date": "2026-06-18T00:00:00Z",
+        "effective_date": "2026-06-18T00:00:00Z",
+        "retrieved_at": "2026-09-15T00:00:00Z",
+        "source_class": "federal_taskforce_report",
+        "source_tier": 1,
+        "locator": "Policy Directive 4: National Airports System Ground Lease Modernization",
+        "excerpt": "Mark Carney announced at the Economic Summit that restructuring federal airport commercial ground leases into 30-50 year institutional concession tranches will mobilize up to $18 billion in private pension capital for terminal capacity, air cargo hubs, and rail links.",
+        "confidence": "VERIFIED"
+      },
+      {
+        "source_id": "transport-canada-nas-policy-2026",
+        "publisher": "Transport Canada",
+        "source_url": "https://tc.canada.ca/en/aviation/operating-airports-aerodromes/national-airports-system-commercial-leasing/",
+        "publication_date": "2026-06-20T00:00:00Z",
+        "effective_date": "2026-06-20T00:00:00Z",
+        "retrieved_at": "2026-09-15T00:00:00Z",
+        "source_class": "federal_regulator",
+        "source_tier": 1,
+        "locator": "Commercial ground leasing and private capital participation framework",
+        "excerpt": "Transport Canada outlines guidelines for private institutional co-investment in passenger processing, logistics hubs, and decarbonization infrastructure.",
+        "confidence": "REPORTED"
+      }
+    ],
+    "events": [
+      {
+        "external_id": "nas-airports-carney-announcement-2026-06-18",
+        "event_type": "policy.summit_announcement",
+        "event_date": "2026-06-18T00:00:00Z",
+        "previous_stage": "DISCOVERED",
+        "new_stage": "ANNOUNCED",
+        "title": "Carney announces Canadian International Airport Global Investor Leasing Hubs at Economic Summit",
+        "description": "At the Canada Economic Growth Summit, Advisory Chair Mark Carney unveiled the federal strategy to convert major international airport ground leases into global investor leasing hubs, unlocking private pension and institutional financing for mega-hubs.",
+        "source_id": "growth-summit-carney-airports-2026-06-18"
+      }
+    ],
+    "capital_items": [
+      {
+        "external_id": "nas-airports-concession-equity-tranche",
+        "category": "private_equity",
+        "status": "targeted",
+        "amount_cad": 18000000000,
+        "amount_type": "target",
+        "provider_name": "Global Infrastructure Funds & Canadian Pension Coalition",
+        "notes": "Long-term equity concession and ground lease tranches for terminal modernization and logistics hubs.",
+        "event_date": "2026-06-18T00:00:00Z",
+        "source_id": "growth-summit-carney-airports-2026-06-18"
+      }
+    ]
   }
 ]
+
