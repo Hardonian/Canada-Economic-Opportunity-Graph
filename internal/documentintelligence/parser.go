@@ -256,3 +256,165 @@ func stableID(value string) string {
 	sum := sha256.Sum256([]byte(strings.ToLower(strings.TrimSpace(value))))
 	return hex.EncodeToString(sum[:8])
 }
+
+// TechnicalReport43101 holds parsed parameters from a National Instrument 43-101 technical filing.
+type TechnicalReport43101 struct {
+	ProjectName      string    `json:"project_name"`
+	Commodity        string    `json:"commodity"`
+	ReserveTonnageMt float64   `json:"reserve_tonnage_mt"`
+	Grade            string    `json:"grade"`
+	RecoveryRatePct  float64   `json:"recovery_rate_pct"`
+	StripRatio       float64   `json:"strip_ratio"`
+	MineLifeYears    int       `json:"mine_life_years"`
+	InitialCapexCAD  int64     `json:"initial_capex_cad"`
+	AfterTaxNPV8CAD  int64     `json:"after_tax_npv8_cad"`
+	AfterTaxIRRPct   float64   `json:"after_tax_irr_pct"`
+	AuthorFirm       string    `json:"author_firm"`
+	EffectiveDate    time.Time `json:"effective_date"`
+}
+
+var (
+	tonnageRegex  = regexp.MustCompile(`(?i)(?:reserve|resource|tonnage|deposit)[:\s]+([0-9]+(?:\.[0-9]+)?)\s*(?:mt|million tonnes|million tons)`)
+	gradeRegex    = regexp.MustCompile(`(?i)(?:grade|average grade)[:\s]+([0-9]+(?:\.[0-9]+)?%?\s*[A-Za-z0-9_]+)`)
+	recoveryRegex = regexp.MustCompile(`(?i)(?:recovery|metallurgical recovery)[:\s]+([0-9]+(?:\.[0-9]+)?)\s*%`)
+	mineLifeRegex = regexp.MustCompile(`(?i)(?:mine life|life of mine|lom)[:\s]+([0-9]+)\s*years`)
+	npvRegex      = regexp.MustCompile(`(?i)(?:npv8%?|after-tax npv)[:\s]+(?:US\$|USD|C\$|CAD|\$)?\s*([0-9]+(?:\.[0-9]+)?)\s*([BM])`)
+	irrRegex      = regexp.MustCompile(`(?i)(?:after-tax irr|irr)[:\s]+([0-9]+(?:\.[0-9]+)?)\s*%`)
+)
+
+// ExtractNI43101TechnicalReport parses mining reserves and economic metrics from filing text.
+func ExtractNI43101TechnicalReport(text string) (*TechnicalReport43101, error) {
+	lines := strings.Split(text, "\n")
+	fields := make(map[string]string)
+	for _, l := range lines {
+		l = strings.TrimSpace(l)
+		if parts := strings.SplitN(l, ":", 2); len(parts) == 2 {
+			fields[strings.ToLower(strings.TrimSpace(parts[0]))] = strings.TrimSpace(parts[1])
+		}
+	}
+
+	report := &TechnicalReport43101{
+		ProjectName:   first(fields, "project", "property", "project name"),
+		Commodity:     first(fields, "commodity", "primary metal", "mineral"),
+		Grade:         first(fields, "grade", "average grade"),
+		AuthorFirm:    first(fields, "author", "qp", "engineering firm", "consultant"),
+		EffectiveDate: time.Now().UTC(),
+	}
+
+	if match := tonnageRegex.FindStringSubmatch(text); len(match) > 1 {
+		if val, err := strconv.ParseFloat(match[1], 64); err == nil {
+			report.ReserveTonnageMt = val
+		}
+	}
+
+	if report.Grade == "" {
+		if match := gradeRegex.FindStringSubmatch(text); len(match) > 1 {
+			report.Grade = strings.TrimSpace(match[1])
+		}
+	}
+
+	if match := recoveryRegex.FindStringSubmatch(text); len(match) > 1 {
+		if val, err := strconv.ParseFloat(match[1], 64); err == nil {
+			report.RecoveryRatePct = val
+		}
+	}
+
+	if match := mineLifeRegex.FindStringSubmatch(text); len(match) > 1 {
+		if val, err := strconv.Atoi(match[1]); err == nil {
+			report.MineLifeYears = val
+		}
+	}
+
+	if match := npvRegex.FindStringSubmatch(text); len(match) > 2 {
+		if val, err := strconv.ParseFloat(match[1], 64); err == nil {
+			mult := 1_000_000.0
+			if strings.EqualFold(match[2], "b") {
+				mult = 1_000_000_000.0
+			}
+			report.AfterTaxNPV8CAD = int64(math.Round(val * mult))
+		}
+	}
+
+	if match := irrRegex.FindStringSubmatch(text); len(match) > 1 {
+		if val, err := strconv.ParseFloat(match[1], 64); err == nil {
+			report.AfterTaxIRRPct = val
+		}
+	}
+
+	if rawCapex := first(fields, "capex", "initial capex"); rawCapex != "" {
+		amount := ParseCapex(rawCapex)
+		report.InitialCapexCAD = amount.AmountInCents / 100 // whole CAD
+	}
+
+	return report, nil
+}
+
+// CapitalWaterfallDossier models parsed financing tranches and weighted cost of capital.
+type CapitalWaterfallDossier struct {
+	SeniorDebtCAD        int64   `json:"senior_debt_cad"`
+	SponsorEquityCAD     int64   `json:"sponsor_equity_cad"`
+	ConcessionaryDebtCAD int64   `json:"concessionary_debt_cad"` // CIB
+	TaxCreditEquityCAD   int64   `json:"tax_credit_equity_cad"`   // ITCs
+	IndigenousEquityCAD  int64   `json:"indigenous_equity_cad"`
+	TotalCapexCAD        int64   `json:"total_capex_cad"`
+	BlendedWACCPct       float64 `json:"blended_wacc_pct"`
+	IsBalanced           bool    `json:"is_balanced"`
+}
+
+var trancheRegex = regexp.MustCompile(`(?i)([A-Za-z ]+):\s*(?:C\$|CAD|\$)?\s*([0-9]+(?:\.[0-9]+)?)\s*([BM])`)
+
+// ExtractCapitalWaterfall parses capital stack breakdowns and computes WACC.
+func ExtractCapitalWaterfall(text string, reportedCapexCAD int64) *CapitalWaterfallDossier {
+	waterfall := &CapitalWaterfallDossier{
+		TotalCapexCAD: reportedCapexCAD,
+	}
+
+	matches := trancheRegex.FindAllStringSubmatch(text, -1)
+	for _, m := range matches {
+		name := strings.ToLower(strings.TrimSpace(m[1]))
+		val, err := strconv.ParseFloat(m[2], 64)
+		if err != nil {
+			continue
+		}
+		mult := 1_000_000.0
+		if strings.EqualFold(m[3], "b") {
+			mult = 1_000_000_000.0
+		}
+		cad := int64(math.Round(val * mult))
+
+		switch {
+		case strings.Contains(name, "senior debt") || strings.Contains(name, "bank debt"):
+			waterfall.SeniorDebtCAD += cad
+		case strings.Contains(name, "sponsor equity") || strings.Contains(name, "equity"):
+			waterfall.SponsorEquityCAD += cad
+		case strings.Contains(name, "cib") || strings.Contains(name, "concessionary"):
+			waterfall.ConcessionaryDebtCAD += cad
+		case strings.Contains(name, "itc") || strings.Contains(name, "tax credit"):
+			waterfall.TaxCreditEquityCAD += cad
+		case strings.Contains(name, "indigenous"):
+			waterfall.IndigenousEquityCAD += cad
+		}
+	}
+
+	totalIdentified := waterfall.SeniorDebtCAD + waterfall.SponsorEquityCAD + waterfall.ConcessionaryDebtCAD +
+		waterfall.TaxCreditEquityCAD + waterfall.IndigenousEquityCAD
+
+	if reportedCapexCAD > 0 && totalIdentified == reportedCapexCAD {
+		waterfall.IsBalanced = true
+	}
+
+	// Calculate WACC
+	// Typical costs: Senior Debt 6.5%, Sponsor Equity 14.0%, Concessionary 4.5%, ITCs 0%, Indigenous 4.0%
+	if totalIdentified > 0 {
+		totF := float64(totalIdentified)
+		wacc := (float64(waterfall.SeniorDebtCAD)/totF)*6.5 +
+			(float64(waterfall.SponsorEquityCAD)/totF)*14.0 +
+			(float64(waterfall.ConcessionaryDebtCAD)/totF)*4.5 +
+			(float64(waterfall.TaxCreditEquityCAD)/totF)*0.0 +
+			(float64(waterfall.IndigenousEquityCAD)/totF)*4.0
+		waterfall.BlendedWACCPct = math.Round(wacc*100) / 100
+	}
+
+	return waterfall
+}
+

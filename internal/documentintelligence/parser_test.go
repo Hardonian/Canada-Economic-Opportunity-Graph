@@ -69,3 +69,59 @@ func deref(value *int64) int64 {
 	if value == nil { return 0 }
 	return *value
 }
+
+func TestExtractNI43101TechnicalReport(t *testing.T) {
+	fixture := `Project: Crawford Nickel-Cobalt Sulphide Project
+Commodity: Nickel
+Reserve: 1712 Mt
+Average Grade: 0.22% Ni
+Metallurgical Recovery: 71.0%
+Mine Life: 41 years
+Initial Capex: $3.5B
+After-Tax NPV8: $2.5B
+After-Tax IRR: 17.1%
+Author: Ausenco Engineering Canada Inc.`
+
+	report, err := ExtractNI43101TechnicalReport(fixture)
+	if err != nil {
+		t.Fatalf("ExtractNI43101TechnicalReport failed: %v", err)
+	}
+	if report.ProjectName != "Crawford Nickel-Cobalt Sulphide Project" {
+		t.Fatalf("unexpected project name: %s", report.ProjectName)
+	}
+	if report.Commodity != "Nickel" {
+		t.Fatalf("unexpected commodity: %s", report.Commodity)
+	}
+	if report.ReserveTonnageMt != 1712 {
+		t.Fatalf("unexpected tonnage: %.1f", report.ReserveTonnageMt)
+	}
+	if report.InitialCapexCAD != 3_500_000_000 {
+		t.Fatalf("unexpected initial capex: $%d", report.InitialCapexCAD)
+	}
+	if report.AfterTaxNPV8CAD != 2_500_000_000 {
+		t.Fatalf("unexpected NPV8: $%d", report.AfterTaxNPV8CAD)
+	}
+	if report.AfterTaxIRRPct != 17.1 {
+		t.Fatalf("unexpected IRR: %.1f%%", report.AfterTaxIRRPct)
+	}
+}
+
+func TestExtractCapitalWaterfall(t *testing.T) {
+	fixture := `Senior Debt: $1.4B
+Sponsor Equity: $1.0B
+CIB Concessionary Debt: $500M
+ITC Refundable Tax Credit: $400M
+Indigenous Equity Loan: $200M`
+
+	waterfall := ExtractCapitalWaterfall(fixture, 3_500_000_000)
+	if !waterfall.IsBalanced {
+		t.Fatalf("Expected waterfall to balance to $3.5B")
+	}
+	if waterfall.SeniorDebtCAD != 1_400_000_000 {
+		t.Fatalf("unexpected senior debt: $%d", waterfall.SeniorDebtCAD)
+	}
+	if waterfall.BlendedWACCPct <= 0 || waterfall.BlendedWACCPct > 10.0 {
+		t.Fatalf("unexpected WACC: %.2f%%", waterfall.BlendedWACCPct)
+	}
+}
+
