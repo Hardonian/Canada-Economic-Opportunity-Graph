@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Filter, 
@@ -15,21 +15,48 @@ import {
   List,
   ShieldCheck,
   TrendingUp,
-  Radio
+  Radio,
+  RefreshCw
 } from "lucide-react";
 import { FALLBACK_PROJECTS } from "@/lib/data";
+import type { Project } from "@/lib/types";
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>(FALLBACK_PROJECTS);
+  const [isLive, setIsLive] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedSector, setSelectedSector] = useState("ALL");
   const [selectedProvince, setSelectedProvince] = useState("ALL");
   const [sortBy, setSortBy] = useState<"capex" | "buildability" | "investability" | "name">("capex");
   const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
 
-  const sectors = ["ALL", ...Array.from(new Set(FALLBACK_PROJECTS.map((project) => project.sector))).sort()];
-  const provinces = ["ALL", ...Array.from(new Set(FALLBACK_PROJECTS.map((project) => project.province))).sort()];
+  const loadProjects = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/v1/projects?limit=500");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.projects) && data.projects.length > 0) {
+          setProjects(data.projects);
+          setIsLive(true);
+        }
+      }
+    } catch {
+      // Retain current projects
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  const filtered = FALLBACK_PROJECTS.filter((p) => {
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const sectors = ["ALL", ...Array.from(new Set(projects.map((project) => project.sector))).sort()];
+  const provinces = ["ALL", ...Array.from(new Set(projects.map((project) => project.province))).sort()];
+
+  const filtered = projects.filter((p) => {
     if (selectedSector !== "ALL" && p.sector !== selectedSector) return false;
     if (selectedProvince !== "ALL" && p.province !== selectedProvince) return false;
     if (search.trim() !== "") {
@@ -58,7 +85,7 @@ export default function ProjectsPage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border border-primary/40 text-[11px] font-mono text-aurora mb-3 shadow-sm">
             <Radio className="h-3.5 w-3.5 text-aurora animate-pulse" />
-            MAJOR PROJECTS CYCLE & CAPITAL TRACKING
+            {isLive ? "LIVE GRAPH CONNECTED" : "MAJOR PROJECTS CYCLE & CAPITAL TRACKING"}
           </div>
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-text-main">
             Canadian <span className="text-aurora">Major Projects Directory</span>
@@ -70,6 +97,18 @@ export default function ProjectsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={loadProjects}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card text-xs font-mono font-semibold text-text-main hover:border-aurora/50 hover:text-aurora transition-all disabled:opacity-50"
+            title="Refresh live data from Go API"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-aurora" : ""}`} />
+            <span className="hidden sm:inline">{isRefreshing ? "Syncing..." : "Sync Live"}</span>
+          </button>
+
           {/* View Mode Toggle */}
           <div className="inline-flex rounded-xl bg-surface p-1 border border-borderSubtle">
             <button

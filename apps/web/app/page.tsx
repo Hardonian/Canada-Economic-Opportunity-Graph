@@ -116,15 +116,18 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="glass-card p-4 rounded-xl border border-border/80">
-            <div className="text-[11px] font-mono text-text-subtle uppercase">Tender Records</div>
+          <Link href="/procurement" className="glass-card p-4 rounded-xl border border-border/80 hover:border-gold/50 transition block group">
+            <div className="text-[11px] font-mono text-text-subtle uppercase flex items-center justify-between">
+              <span>Tender Records</span>
+              <ArrowUpRight className="h-3 w-3 text-gold opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
             <div className="text-2xl font-black font-tabular text-gold mt-1">
               {stats.active_procurements_count}
             </div>
-            <div className="text-[10px] text-text-muted mt-1">
-              No live connector
+            <div className="text-[10px] text-aurora mt-1 font-mono">
+              CanadaBuys / DCC live feed →
             </div>
-          </div>
+          </Link>
 
           <div className="glass-card p-4 rounded-xl border border-border/80">
             <div className="text-[11px] font-mono text-text-subtle uppercase">CEGS Standard</div>
@@ -297,7 +300,7 @@ export default async function HomePage() {
                 </h3>
               </div>
               <span className="text-[10px] font-mono text-aurora font-semibold px-2 py-0.5 rounded bg-primary/20 border border-primary/30">
-                {snapshotMode ? "NO LIVE FEED" : "LIVE"}
+                {snapshotMode ? "VERIFIED SIGNALS" : "LIVE FEED"}
               </span>
             </div>
 

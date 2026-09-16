@@ -18,19 +18,36 @@ import {
   calculateFlyvbjerg, 
   calculateUBOScreening, 
   calculateGridAssessment, 
-  calculateEarthObs 
+  calculateEarthObs,
+  MRIOResult,
+  FlyvbjergResult,
+  UBOScreeningResult,
+  GridFeasibilityResult,
+  EarthObsResult
 } from "@/lib/intelligence";
 
 interface Props {
   project: Project;
+  initialMrio?: MRIOResult;
+  initialFlyvbjerg?: FlyvbjergResult;
+  initialUbo?: UBOScreeningResult;
+  initialGrid?: GridFeasibilityResult;
+  initialEarthobs?: EarthObsResult;
 }
 
-export default function ProjectIntelligenceDossier({ project }: Props) {
-  const mrio = calculateMRIO(project);
-  const flyvbjerg = calculateFlyvbjerg(project);
-  const ubo = calculateUBOScreening(project);
-  const grid = calculateGridAssessment(project);
-  const earthobs = calculateEarthObs(project);
+export default function ProjectIntelligenceDossier({ 
+  project, 
+  initialMrio, 
+  initialFlyvbjerg, 
+  initialUbo, 
+  initialGrid, 
+  initialEarthobs 
+}: Props) {
+  const mrio = initialMrio ?? calculateMRIO(project);
+  const flyvbjerg = initialFlyvbjerg ?? calculateFlyvbjerg(project);
+  const ubo = initialUbo ?? calculateUBOScreening(project);
+  const grid = initialGrid ?? calculateGridAssessment(project);
+  const earthobs = initialEarthobs ?? calculateEarthObs(project);
 
   const formatCAD = (n: number) => {
     if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;

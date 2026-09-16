@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   MapPin, 
@@ -21,7 +21,8 @@ import {
   Satellite,
   Sparkles,
   AlertTriangle,
-  Ship
+  Ship,
+  RefreshCw
 } from "lucide-react";
 import { FALLBACK_PROJECTS } from "@/lib/data";
 import type { Project } from "@/lib/types";
@@ -49,11 +50,33 @@ function hasCoordinates(project: Project): project is MappableProject {
 }
 
 export default function MapPage() {
+  const [projects, setProjects] = useState<Project[]>(FALLBACK_PROJECTS);
+  const [isLive, setIsLive] = useState(false);
   const [selectedSector, setSelectedSector] = useState("ALL");
   const [selectedStage, setSelectedStage] = useState("ALL");
   const [activeProject, setActiveProject] = useState(FALLBACK_PROJECTS[0]);
   const [hoveredProject, setHoveredProject] = useState<typeof FALLBACK_PROJECTS[0] | null>(null);
   const [viewEngine, setViewEngine] = useState<"GEOSPATIAL" | "VECTOR">("GEOSPATIAL");
+
+  useEffect(() => {
+    async function loadLive() {
+      try {
+        const res = await fetch("/api/v1/projects?limit=500");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.projects) && data.projects.length > 0) {
+            setProjects(data.projects);
+            setIsLive(true);
+            const airport = data.projects.find((p: Project) => p.slug.includes("airport"));
+            if (airport) setActiveProject(airport);
+          }
+        }
+      } catch {
+        // Fallback stays
+      }
+    }
+    loadLive();
+  }, []);
 
   const sectors = [
     "ALL",
@@ -67,7 +90,7 @@ export default function MapPage() {
 
   const stages = ["ALL", "CONSTRUCTION", "PERMITTING", "FEASIBILITY", "OPERATING"];
 
-  const filtered = FALLBACK_PROJECTS.filter((p) => {
+  const filtered = projects.filter((p) => {
     if (selectedSector !== "ALL" && p.sector !== selectedSector) return false;
     if (selectedStage !== "ALL" && p.current_stage !== selectedStage) return false;
     return true;

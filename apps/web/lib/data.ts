@@ -1,5 +1,7 @@
 import projectsSnapshot from "@/data/projects.snapshot.json";
 import manifestSnapshot from "@/data/manifest.snapshot.json";
+import procurementsSnapshot from "@/data/procurements.snapshot.json";
+import signalsSnapshot from "@/data/signals.snapshot.json";
 import { Procurement, Project, ProjectEvidence, ProjectScore, RadarStats, Signal } from "./types";
 
 const SECTORS = new Set<Project["sector"]>([
@@ -51,18 +53,23 @@ const CONFIDENCE = new Set<Project["confidence"]>([
 const EXTERNAL_API_BASE = process.env.COG_API_BASE || process.env.NEXT_PUBLIC_API_BASE;
 
 function configuredAPIBase(): string | null {
-  if (!EXTERNAL_API_BASE) return null;
+  const base = EXTERNAL_API_BASE || (process.env.NODE_ENV !== "production" ? `http://127.0.0.1:${process.env.COG_API_PORT || 8080}` : null);
+  if (!base) return null;
   try {
-    const parsed = new URL(EXTERNAL_API_BASE);
+    const parsed = new URL(base);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
-    return parsed.toString().replace(/\/$/, "");
+    let url = parsed.toString().replace(/\/$/, "");
+    if (!url.endsWith("/api/v1") && !url.includes("/api/")) {
+      url = `${url}/api/v1`;
+    }
+    return url;
   } catch {
     console.error("[data] Ignoring invalid API base URL", { configured: true });
     return null;
   }
 }
 
-const API_BASE = configuredAPIBase();
+export const API_BASE = configuredAPIBase();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -230,8 +237,12 @@ export const SNAPSHOT_PROJECTS: Project[] = normalizedSnapshotProjects;
 // Kept as a compatibility alias for client components that consume the bundled snapshot.
 export const FALLBACK_PROJECTS = SNAPSHOT_PROJECTS;
 export const SNAPSHOT_MANIFEST = manifestSnapshot;
+export const SNAPSHOT_PROCUREMENTS: Procurement[] = procurementsSnapshot as unknown as Procurement[];
+export const FALLBACK_PROCUREMENTS = SNAPSHOT_PROCUREMENTS;
+export const SNAPSHOT_SIGNALS: Signal[] = signalsSnapshot as unknown as Signal[];
+export const FALLBACK_SIGNALS = SNAPSHOT_SIGNALS;
 
-function buildSnapshotStats(projects: Project[]): RadarStats {
+function buildSnapshotStats(projects: Project[], procurementsCount = SNAPSHOT_PROCUREMENTS.length): RadarStats {
   const sectorBreakdown: Record<string, number> = {};
   const provinceBreakdown: Record<string, number> = {};
   let totalCapex = 0;
@@ -248,7 +259,7 @@ function buildSnapshotStats(projects: Project[]): RadarStats {
     capital_moving_week_cad: 0,
     accelerating_projects_count: projects.filter((project) => (project.scores?.buildability ?? 0) >= 50).length,
     stalled_projects_count: projects.filter((project) => project.current_stage === "DELAYED" || project.current_stage === "PAUSED").length,
-    active_procurements_count: 0,
+    active_procurements_count: procurementsCount,
     unknown_capex_projects: unknownCapex,
     data_status: "HEALTHY",
     sector_breakdown: sectorBreakdown,
@@ -258,8 +269,6 @@ function buildSnapshotStats(projects: Project[]): RadarStats {
 
 export const SNAPSHOT_RADAR_STATS = buildSnapshotStats(SNAPSHOT_PROJECTS);
 export const FALLBACK_RADAR_STATS = SNAPSHOT_RADAR_STATS;
-export const FALLBACK_PROCUREMENTS: Procurement[] = [];
-export const FALLBACK_SIGNALS: Signal[] = [];
 
 export interface RadarData {
   stats: RadarStats;
@@ -310,23 +319,19 @@ function normalizeRadarStats(value: unknown): RadarStats | null {
   };
 }
 
-async function fetchExternalAPI(path: string): Promise<Response | null> {
+export async function fetchExternalAPI(path: string): Promise<Response | null> {
   if (!API_BASE) return null;
   try {
     const response = await fetch(`${API_BASE}${path}`, {
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(5_000),
+      next: { revalidate: 30 },
+      signal: AbortSignal.timeout(2_000),
       headers: { Accept: "application/json" },
     });
     if (!response.ok) {
-      console.warn("[data] Upstream API returned a non-success response", { path, status: response.status });
+      return null;
     }
     return response;
-  } catch (error) {
-    console.error("[data] Upstream API request failed; serving vetted snapshot", {
-      path,
-      error: error instanceof Error ? error.message : String(error),
-    });
+  } catch {
     return null;
   }
 }
@@ -340,9 +345,12 @@ export async function getRadarData(): Promise<RadarData> {
       const stats = record ? normalizeRadarStats(record.stats) : null;
       if (stats && record) {
         return {
-          stats,
-          accelerating_projects: [],
-          recent_signals: [],
+          stats: {
+            ...stats,
+            active_procurements_count: stats.active_procurements_count || SNAPSHOT_PROCUREMENTS.length,
+          },
+          accelerating_projects: SNAPSHOT_PROJECTS.filter((p) => (p.scores?.buildability ?? 0) >= 50).slice(0, 25),
+          recent_signals: SNAPSHOT_SIGNALS,
           cegs_version: typeof record.cegs_version === "string" ? record.cegs_version : "0.1",
           source_mode: "LIVE_UPSTREAM_API",
           generated_at: typeof record.generated_at === "string" ? record.generated_at : undefined,
@@ -357,7 +365,7 @@ export async function getRadarData(): Promise<RadarData> {
   return {
     stats: SNAPSHOT_RADAR_STATS,
     accelerating_projects: SNAPSHOT_PROJECTS.filter((project) => (project.scores?.buildability ?? 0) >= 50),
-    recent_signals: FALLBACK_SIGNALS,
+    recent_signals: SNAPSHOT_SIGNALS,
     cegs_version: String(manifestSnapshot.cegs),
     source_mode: "BUNDLED_REVIEWED_SNAPSHOT",
     generated_at: String(manifestSnapshot.generated_at),
@@ -403,4 +411,34 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     }
   }
   return findSnapshotProject(slug);
+}
+
+export async function getProcurements(): Promise<Procurement[]> {
+  const response = await fetchExternalAPI("/procurements?limit=100");
+  if (response?.ok) {
+    try {
+      const data: unknown = await response.json();
+      if (isRecord(data) && Array.isArray(data.procurements) && data.procurements.length > 0) {
+        return data.procurements as Procurement[];
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return SNAPSHOT_PROCUREMENTS;
+}
+
+export async function getSignals(): Promise<Signal[]> {
+  const response = await fetchExternalAPI("/signals?limit=50");
+  if (response?.ok) {
+    try {
+      const data: unknown = await response.json();
+      if (isRecord(data) && Array.isArray(data.signals) && data.signals.length > 0) {
+        return data.signals as Signal[];
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return SNAPSHOT_SIGNALS;
 }

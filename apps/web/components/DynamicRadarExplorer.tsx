@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { 
   Flame, 
@@ -16,7 +16,8 @@ import {
   Zap,
   Filter,
   DollarSign,
-  Activity
+  Activity,
+  RefreshCw
 } from "lucide-react";
 import { Project } from "@/lib/types";
 
@@ -25,24 +26,52 @@ interface DynamicRadarExplorerProps {
 }
 
 export default function DynamicRadarExplorer({ initialProjects }: DynamicRadarExplorerProps) {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [selectedSector, setSelectedSector] = useState<string>("ALL");
   const [selectedStage, setSelectedStage] = useState<string>("ALL");
   const [activeTab, setActiveTab] = useState<"ALL" | "ACCELERATING" | "OPPORTUNITIES" | "CEGS">("ALL");
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
+  const fetchLiveProjects = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/v1/projects", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const incoming = Array.isArray(data) ? data : data.projects;
+        if (Array.isArray(incoming) && incoming.length > 0) {
+          setProjects(incoming);
+          setIsLiveConnected(true);
+          setLastSyncedAt(new Date().toLocaleTimeString("en-CA"));
+        }
+      }
+    } catch {
+      // Fallback seamlessly to initial bundled snapshot
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveProjects();
+  }, [fetchLiveProjects]);
 
   const sectors = useMemo(() => {
-    const list = Array.from(new Set(initialProjects.map((p) => p.sector)));
+    const list = Array.from(new Set(projects.map((p) => p.sector)));
     return ["ALL", ...list];
-  }, [initialProjects]);
+  }, [projects]);
 
   const filteredProjects = useMemo(() => {
-    return initialProjects.filter((p) => {
+    return projects.filter((p) => {
       if (selectedSector !== "ALL" && p.sector !== selectedSector) return false;
       if (selectedStage !== "ALL" && p.current_stage !== selectedStage) return false;
       if (activeTab === "ACCELERATING" && (p.scores?.buildability || 0) < 50) return false;
       return true;
     });
-  }, [initialProjects, selectedSector, selectedStage, activeTab]);
+  }, [projects, selectedSector, selectedStage, activeTab]);
 
   const totalFilteredCapex = useMemo(() => {
     return filteredProjects.reduce((acc, p) => acc + (p.capex_cad || 0), 0);
@@ -59,33 +88,56 @@ export default function DynamicRadarExplorer({ initialProjects }: DynamicRadarEx
       {/* Interactive Controls Bar */}
       <div className="glass-panel p-4 rounded-xl border border-border/80 shadow-lg shadow-black/40 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-borderSubtle pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="h-7 w-7 rounded-lg bg-aurora/10 border border-primary/40 flex items-center justify-center text-aurora shadow-[0_0_8px_rgba(0,245,160,0.2)]">
               <Filter className="h-3.5 w-3.5" />
             </div>
             <div>
-              <span className="font-bold text-xs uppercase tracking-wider text-text-main">
-                Dynamic Radar Filters
-              </span>
-              <span className="text-[11px] text-text-muted ml-2 font-mono">
-                {filteredProjects.length} of {initialProjects.length} Assets Active
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xs uppercase tracking-wider text-text-main">
+                  Dynamic Radar Filters
+                </span>
+                <span className={`inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                  isLiveConnected 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" 
+                    : "bg-surface border-borderSubtle text-text-subtle"
+                }`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${isLiveConnected ? "bg-emerald-400 animate-pulse" : "bg-text-subtle"}`} />
+                  {isLiveConnected ? "LIVE FEED ACTIVE" : "SNAPSHOT MODE"}
+                </span>
+              </div>
+              <span className="text-[11px] text-text-muted font-mono">
+                {filteredProjects.length} of {projects.length} Assets Active {lastSyncedAt && `· synced ${lastSyncedAt}`}
               </span>
             </div>
           </div>
 
-          {/* Dynamic Summary Micro-Ticker */}
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <div>
-              <span className="text-text-subtle text-[10px] uppercase block">Filtered Capital</span>
-              <span className="font-bold text-aurora text-sm">
-                ${(totalFilteredCapex / 1e9).toFixed(2)}B CAD
-              </span>
-            </div>
-            <div className="border-l border-border pl-4">
-              <span className="text-text-subtle text-[10px] uppercase block">Avg Buildability</span>
-              <span className="font-bold text-gold text-sm">
-                {avgBuildability}/100
-              </span>
+          <div className="flex items-center gap-4">
+            {/* Sync Live Button */}
+            <button
+              onClick={fetchLiveProjects}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-borderSubtle text-[11px] font-mono font-medium text-text-muted hover:text-aurora hover:border-primary/40 transition disabled:opacity-50"
+              title="Poll live Go API server for latest projects and telemetry"
+            >
+              <RefreshCw className={`h-3 w-3 ${isSyncing ? "animate-spin text-aurora" : ""}`} />
+              {isSyncing ? "Syncing..." : "Sync Live Engine"}
+            </button>
+
+            {/* Dynamic Summary Micro-Ticker */}
+            <div className="hidden sm:flex items-center gap-4 text-xs font-mono border-l border-border pl-4">
+              <div>
+                <span className="text-text-subtle text-[10px] uppercase block">Filtered Capital</span>
+                <span className="font-bold text-aurora text-sm">
+                  ${(totalFilteredCapex / 1e9).toFixed(2)}B CAD
+                </span>
+              </div>
+              <div className="border-l border-border pl-4">
+                <span className="text-text-subtle text-[10px] uppercase block">Avg Buildability</span>
+                <span className="font-bold text-gold text-sm">
+                  {avgBuildability}/100
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -101,7 +153,7 @@ export default function DynamicRadarExplorer({ initialProjects }: DynamicRadarEx
                   : "text-text-muted hover:text-text-main"
               }`}
             >
-              All Assets ({initialProjects.length})
+              All Assets ({projects.length})
             </button>
             <button
               onClick={() => setActiveTab("ACCELERATING")}

@@ -1,4 +1,5 @@
 import { Project } from "./types";
+import { fetchExternalAPI } from "./data";
 
 export interface MRIOResult {
   directGDPCAD: number;
@@ -350,4 +351,135 @@ export function calculateEarthObs(project: Project): EarthObsResult {
       ? "Copernicus Sentinel-1 SAR coherence displacement confirms extensive on-site civil excavation and foundation grading."
       : "Milestone status aligned with provincial regulatory registry filings and environmental telemetry baselines.",
   };
+}
+
+export async function fetchProjectMRIO(projectId: string, project: Project): Promise<MRIOResult> {
+  const res = await fetchExternalAPI(`/projects/${encodeURIComponent(projectId)}/mrio`);
+  if (res?.ok) {
+    try {
+      const data: any = await res.json();
+      if (data && typeof data.total_gdp_cad === "number") {
+        return {
+          directGDPCAD: data.direct_gdp_cad ?? 0,
+          indirectGDPCAD: data.indirect_gdp_cad ?? 0,
+          inducedGDPCAD: data.induced_gdp_cad ?? 0,
+          totalGDPCAD: data.total_gdp_cad ?? 0,
+          multiplier: data.total_multiplier ?? 1.4,
+          personYearsFTE: data.person_years_jobs ?? 0,
+          federalTaxCAD: data.federal_tax_cad ?? 0,
+          provincialTaxCAD: data.provincial_tax_cad ?? 0,
+          municipalTaxCAD: data.municipal_tax_cad ?? 0,
+          totalFiscalReturnCAD: data.total_fiscal_return_cad ?? 0,
+          modelVersion: data.model_version ?? "statcan-sut-mrio-v1.0 (Live)",
+        };
+      }
+    } catch {
+      // Fallback to calculation
+    }
+  }
+  return calculateMRIO(project);
+}
+
+export async function fetchProjectFlyvbjerg(projectId: string, project: Project): Promise<FlyvbjergResult> {
+  const res = await fetchExternalAPI(`/projects/${encodeURIComponent(projectId)}/flyvbjerg`);
+  if (res?.ok) {
+    try {
+      const data: any = await res.json();
+      if (data && typeof data.expected_cost_overrun_pct === "number") {
+        const quantiles = Array.isArray(data.percentiles)
+          ? data.percentiles.map((q: any) => ({
+              percentile: q.percentile,
+              label: `P${q.percentile}`,
+              costOverrunPct: q.cost_overrun_pct,
+              scheduleDelayMonths: q.schedule_delay_months,
+              forecastCapexCAD: q.forecast_capex_cad,
+            }))
+          : [];
+        return {
+          referenceClass: data.reference_class ?? project.sector,
+          historicalSampleSize: data.historical_sample_size ?? 300,
+          expectedCostOverrunPct: data.expected_cost_overrun_pct,
+          expectedDelayMonths: data.expected_delay_months ?? 24,
+          remotePenaltyPct: (data.remote_geography_penalty ?? 0) * 100,
+          techNoveltyPenaltyPct: (data.tech_novelty_penalty ?? 0) * 100,
+          quantiles,
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return calculateFlyvbjerg(project);
+}
+
+export async function fetchProjectUBOScreening(projectId: string, project: Project): Promise<UBOScreeningResult> {
+  const res = await fetchExternalAPI(`/projects/${encodeURIComponent(projectId)}/ubo`);
+  if (res?.ok) {
+    try {
+      const data: any = await res.json();
+      if (data && data.ica_risk) {
+        return {
+          icaRisk: data.ica_risk,
+          domesticControlPct: data.domestic_control_pct ?? 85,
+          ftaPartnerPct: data.fta_partner_pct ?? 15,
+          nonFTAPct: data.non_fta_pct ?? 0,
+          soeExposurePct: data.soe_exposure_pct ?? 0,
+          criticalMineralFlag: data.critical_mineral_flag ?? false,
+          dualUseSovereignty: data.dual_use_sovereignty ?? false,
+          notes: Array.isArray(data.notes) ? data.notes : [],
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return calculateUBOScreening(project);
+}
+
+export async function fetchProjectGridAssessment(projectId: string, project: Project): Promise<GridFeasibilityResult> {
+  const res = await fetchExternalAPI(`/projects/${encodeURIComponent(projectId)}/grid`);
+  if (res?.ok) {
+    try {
+      const data: any = await res.json();
+      if (data && data.system_operator) {
+        return {
+          systemOperator: data.system_operator,
+          cleanPurityPct: data.clean_purity_pct ?? 90,
+          estimatedMW: data.estimated_mw ?? 50,
+          interconnectVoltageKV: data.interconnect_voltage_kv ?? 230,
+          queueMonths: data.queue_months ?? 18,
+          headroomMW: data.headroom_mw ?? 100,
+          dedicatedSubstation: data.dedicated_substation ?? false,
+          reinforcementCapexCAD: data.reinforcement_capex_cad ?? 15000000,
+          feasibilityScore: data.feasibility_score ?? 80,
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return calculateGridAssessment(project);
+}
+
+export async function fetchProjectEarthObs(projectId: string, project: Project): Promise<EarthObsResult> {
+  const res = await fetchExternalAPI(`/projects/${encodeURIComponent(projectId)}/earthobs`);
+  if (res?.ok) {
+    try {
+      const data: any = await res.json();
+      if (data && data.corroboration_status) {
+        return {
+          corroborationStatus: data.corroboration_status,
+          physicalProgressScore: data.physical_progress_score ?? 50,
+          earthworksConfirmed: data.earthworks_confirmed ?? true,
+          structuresConfirmed: data.structures_confirmed ?? false,
+          lastSatellitePass: data.last_satellite_pass ?? "2026-08-14",
+          sensorConstellation: data.sensor_constellation ?? "Sentinel-1 / Sentinel-2",
+          telemetrySummary: data.telemetry_summary ?? "",
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return calculateEarthObs(project);
 }

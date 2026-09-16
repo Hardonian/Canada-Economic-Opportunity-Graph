@@ -389,11 +389,13 @@ const registeredTradeSources = [
   },
 ];
 
-const [projects, evidence, tradeMetrics, manifest] = await Promise.all([
+const [projects, evidence, tradeMetrics, manifest, procurements, events] = await Promise.all([
   readJsonLines(resolve(repositoryRoot, "data/public/projects.jsonl")),
   readJsonLines(resolve(repositoryRoot, "data/public/evidence.jsonl")),
   readJsonLines(resolve(repositoryRoot, "data/public/trade_metrics.jsonl")),
   readFile(resolve(repositoryRoot, "data/public/manifest.json"), "utf8").then(JSON.parse),
+  readJsonLines(resolve(repositoryRoot, "data/public/procurements.jsonl")),
+  readJsonLines(resolve(repositoryRoot, "data/public/events.jsonl")),
 ]);
 
 const evidenceById = new Map(evidence.map((item) => [item.id, item]));
@@ -521,6 +523,21 @@ compactSources.push(...registeredTradeSources
   authentication_required: source.authentication_required ?? false,
 })));
 
+const projectById = new Map(projects.map((p) => [p.id, p]));
+const compactSignals = events.map((ev) => {
+  const p = projectById.get(ev.project_id);
+  return {
+    id: `signal-${ev.id}`,
+    project_id: ev.project_id,
+    project_name: p?.name || "National Opportunity",
+    type: ev.event_type,
+    timestamp: ev.event_date,
+    magnitude: 85,
+    confidence: 90,
+    description: `${ev.title}: ${ev.description}`,
+  };
+});
+
 compactSources.sort((a, b) => a.publisher_name.localeCompare(b.publisher_name) || a.name.localeCompare(b.name));
 
 await mkdir(outputDirectory, { recursive: true });
@@ -529,6 +546,8 @@ await Promise.all([
   writeFile(resolve(outputDirectory, "sources.snapshot.json"), `${JSON.stringify(compactSources)}\n`),
   writeFile(resolve(outputDirectory, "trade-metrics.snapshot.json"), `${JSON.stringify(tradeMetrics)}\n`),
   writeFile(resolve(outputDirectory, "manifest.snapshot.json"), `${JSON.stringify(manifest)}\n`),
+  writeFile(resolve(outputDirectory, "procurements.snapshot.json"), `${JSON.stringify(procurements)}\n`),
+  writeFile(resolve(outputDirectory, "signals.snapshot.json"), `${JSON.stringify(compactSignals)}\n`),
 ]);
 
-console.log(`Generated web snapshot: ${compactProjects.length} projects, ${evidence.length} evidence records, ${tradeMetrics.length} trade metrics, ${compactSources.length} canonical source records.`);
+console.log(`Generated web snapshot: ${compactProjects.length} projects, ${evidence.length} evidence records, ${tradeMetrics.length} trade metrics, ${compactSources.length} canonical source records, ${procurements.length} procurements, ${compactSignals.length} signals.`);

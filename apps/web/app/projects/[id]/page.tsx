@@ -21,6 +21,13 @@ import {
 } from "lucide-react";
 import { getProjectBySlug } from "@/lib/data";
 import ProjectIntelligenceDossier from "@/components/ProjectIntelligenceDossier";
+import { 
+  fetchProjectMRIO, 
+  fetchProjectFlyvbjerg, 
+  fetchProjectUBOScreening, 
+  fetchProjectGridAssessment, 
+  fetchProjectEarthObs 
+} from "@/lib/intelligence";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -33,6 +40,14 @@ export default async function ProjectProfilePage({ params }: Props) {
   if (!project) {
     notFound();
   }
+
+  const [mrio, flyvbjerg, ubo, grid, earthobs] = await Promise.all([
+    fetchProjectMRIO(project.id, project),
+    fetchProjectFlyvbjerg(project.id, project),
+    fetchProjectUBOScreening(project.id, project),
+    fetchProjectGridAssessment(project.id, project),
+    fetchProjectEarthObs(project.id, project),
+  ]);
 
   // Scores are sparse by design. Never substitute an unevidenced score: doing
   // so both caused the production crash and overstated analytical coverage.
@@ -305,7 +320,14 @@ export default async function ProjectProfilePage({ params }: Props) {
       </div>
 
       {/* Multi-Dimensional Institutional Intelligence & Risk Dossier */}
-      <ProjectIntelligenceDossier project={project} />
+      <ProjectIntelligenceDossier 
+        project={project} 
+        initialMrio={mrio} 
+        initialFlyvbjerg={flyvbjerg} 
+        initialUbo={ubo} 
+        initialGrid={grid} 
+        initialEarthobs={earthobs} 
+      />
 
       {/* Grid: Downstream Opportunities & Evidence Trust Profile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
