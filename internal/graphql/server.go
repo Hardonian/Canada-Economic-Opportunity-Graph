@@ -145,6 +145,24 @@ func (h *Handler) resolveField(ctx context.Context, field string, args map[strin
 		return h.resolver.resolveReconciliation(ctx, args, subFields)
 	case "aiSovereignty":
 		return h.resolver.resolveAISovereignty(ctx, args, subFields)
+	case "mrio":
+		return h.resolver.resolveMRIO(ctx, args, subFields)
+	case "flyvbjerg":
+		return h.resolver.resolveFlyvbjerg(ctx, args, subFields)
+	case "ubo":
+		return h.resolver.resolveUBO(ctx, args, subFields)
+	case "grid":
+		return h.resolver.resolveGrid(ctx, args, subFields)
+	case "earthobs":
+		return h.resolver.resolveEarthObs(ctx, args, subFields)
+	case "planningOptimize":
+		return h.resolver.resolvePlanningOptimize(ctx, args, subFields)
+	case "planningWarGame":
+		return h.resolver.resolvePlanningWarGame(ctx, args, subFields)
+	case "planningLabor":
+		return h.resolver.resolvePlanningLabor(ctx, args, subFields)
+	case "predictedLinks":
+		return h.resolver.resolvePredictedLinks(ctx, args, subFields)
 	default:
 		return nil, fmt.Errorf("unknown field %q", field)
 	}

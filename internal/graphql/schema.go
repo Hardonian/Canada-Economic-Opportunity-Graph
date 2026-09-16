@@ -50,6 +50,33 @@ type Query {
 
   """AI Sovereignty benchmark scores."""
   aiSovereignty: [AISovereigntyScore!]!
+
+  """StatCan input-output macro multipliers for a project."""
+  mrio(projectId: String!): MRIOImpact
+
+  """Bayesian reference class cost and schedule overrun hazard curve."""
+  flyvbjerg(projectId: String!): FlyvbjergRiskForecast
+
+  """Ultimate Beneficial Ownership & Investment Canada Act screening."""
+  ubo(projectId: String!): UBOScreening
+
+  """Electrical grid feasibility and interconnect queue headroom."""
+  grid(projectId: String!): GridAssessment
+
+  """Satellite SAR and optical ground-truth corroboration dossier."""
+  earthobs(projectId: String!): GroundTruthDossier
+
+  """Sovereign capital allocation optimizer."""
+  planningOptimize(objective: String): OptimizationResult!
+
+  """Geopolitical macro-shock stress testing."""
+  planningWarGame(scenario: String): WarGameResult!
+
+  """Red Seal craft labor constraint and collision report."""
+  planningLabor(province: String): RegionalLaborReport!
+
+  """Machine-learned topological link prediction for partners and supply chain."""
+  predictedLinks(projectId: String!): [PredictedLink!]!
 }
 
 """
@@ -128,5 +155,118 @@ type ProjectUpdate {
 type PortfolioUpdate {
   totalProjects: Int!
   updatedAt:     String!
+}
+
+type MRIOImpact {
+  projectId:            String!
+  projectName:          String!
+  capexCAD:             Float!
+  directGDPCAD:         Float!
+  indirectGDPCAD:       Float!
+  inducedGDPCAD:        Float!
+  totalGDPCAD:          Float!
+  totalMultiplier:       Float!
+  personYearsJobs:      Int!
+  federalTaxCAD:        Float!
+  provincialTaxCAD:     Float!
+  municipalTaxCAD:      Float!
+  totalFiscalReturnCAD: Float!
+  modelVersion:         String!
+  auditHash:            String!
+}
+
+type FlyvbjergRiskForecast {
+  projectId:              String!
+  projectName:            String!
+  sector:                 String!
+  baseCapexCAD:           Float!
+  referenceClass:         String!
+  historicalSampleSize:   Int!
+  expectedCostOverrunPct: Float!
+  expectedDelayMonths:    Int!
+  auditHash:              String!
+}
+
+type UBOScreening {
+  projectId:            String!
+  proponentName:        String!
+  icaRisk:              String!
+  domesticControlShare: Float!
+  ftaPartnerShare:      Float!
+  nonFTAShare:          Float!
+  soeExposurePercent:   Float!
+  criticalMineralFlag:  Boolean!
+  dualUseSovereignty:   Boolean!
+  auditHash:            String!
+}
+
+type GridAssessment {
+  projectId:                 String!
+  projectName:               String!
+  province:                  String!
+  systemOperator:            String!
+  estimatedLoadOrGenMW:      Float!
+  interconnectVoltageKV:     Int!
+  queueEstimatedMonths:      Int!
+  substationHeadroomMW:      Float!
+  dedicatedSubstationNeeded: Boolean!
+  reinforcementCostCAD:      Float!
+  gridFeasibilityScore:      Float!
+  cleanPowerPurityPct:       Float!
+  auditHash:                 String!
+}
+
+type GroundTruthDossier {
+  projectId:             String!
+  claimedStage:          String!
+  corroborationStatus:   String!
+  physicalProgressScore: Float!
+  earthworksConfirmed:   Boolean!
+  structuresConfirmed:   Boolean!
+  telemetrySummary:      String!
+  auditHash:             String!
+}
+
+type OptimizationResult {
+  requestId:               String!
+  objective:               String!
+  totalPublicInvestedCAD:  Float!
+  totalPrivateMobilizedCAD: Float!
+  crowdingInMultiplier:    Float!
+  totalGHGAbatedMtYr:      Float!
+  auditHash:               String!
+}
+
+type WarGameResult {
+  simulationId:                String!
+  scenario:                    String!
+  scenarioTitle:               String!
+  scenarioDescription:         String!
+  totalAssetsStalledCount:     Int!
+  totalFrozenCapexCAD:         Float!
+  estimatedNationalGDPLossCAD: Float!
+  auditHash:                   String!
+}
+
+type RegionalLaborReport {
+  province:            String!
+  totalActiveCapexCAD: Float!
+  concurrentProjects:  Int!
+  totalLaborDemandFTE: Int!
+  collisionDetected:   Boolean!
+  strategicAdvice:     String!
+  auditHash:           String!
+}
+
+type PredictedLink {
+  entityId:        String!
+  entityName:      String!
+  projectId:       String!
+  projectName:     String!
+  predictedRole:   String!
+  confidenceScore: Float!
+  adamicAdarScore: Float!
+  rationale:       String!
+  auditHash:       String!
 }
 `

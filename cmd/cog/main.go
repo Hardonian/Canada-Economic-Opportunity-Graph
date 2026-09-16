@@ -264,7 +264,7 @@ func handleProject(args []string) {
 		fmt.Println(bundle.ToMarkdown())
 
 	case "mrio":
-		impact := econometrics.NewMRIOEngine().CalculateEconomicImpact(proj)
+		impact := econometrics.NewEngine().CalculateMRIO(proj)
 		fmt.Printf("=== StatCan Input-Output Macro Multipliers: %s ===\n", proj.Name)
 		fmt.Printf("Project ID:            %s\n", proj.ID)
 		fmt.Printf("Tracked CAPEX:         $%d CAD\n", impact.CapexCAD)
@@ -295,8 +295,8 @@ func handleProject(args []string) {
 		}
 		fmt.Println("\nHazard Distribution Quantiles:")
 		for _, pt := range forecast.Percentiles {
-			fmt.Printf("  %-16s Cost: +%5.1f%% | Schedule: +%2d mo | Expected CAPEX: $%d CAD\n",
-				pt.Percentile, pt.CostOverrunPct, pt.ScheduleDelayMonths, pt.ExpectedTotalCapexCAD)
+			fmt.Printf("  P%-2d             Cost: +%5.1f%% | Schedule: +%2d mo | Forecast CAPEX: $%d CAD\n",
+				pt.Percentile, pt.CostOverrunPct, pt.ScheduleDelayMonths, pt.ForecastCapexCAD)
 		}
 		fmt.Printf("\nAudit Hash:            %s\n", forecast.AuditHash)
 
@@ -462,25 +462,23 @@ func handleDemo() {
 
 func handleExtract(args []string) {
 	if len(args) < 1 {
-		fmt.Println("Usage: cog extract <file> [--source <id>] [--visibility RESTRICTED]")
+		fmt.Println("Usage: cog extract <cards|ni43101|waterfall|iaac> <file> [options]")
 		return
 	}
+
+	mode := "cards"
 	filePath := args[0]
-	sourceID := "workspace"
-	visibility := domain.VisibilityInternalRestricted
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--source":
-			if i+1 < len(args) {
-				sourceID = args[i+1]
-				i++
-			}
-		case "--visibility":
-			if i+1 < len(args) {
-				visibility = domain.VisibilityClass(strings.ToUpper(strings.TrimSpace(args[i+1])))
-				i++
-			}
+	shift := 0
+
+	switch args[0] {
+	case "cards", "ni43101", "waterfall", "iaac":
+		mode = args[0]
+		if len(args) < 2 {
+			fmt.Printf("Usage: cog extract %s <file>\n", mode)
+			return
 		}
+		filePath = args[1]
+		shift = 1
 	}
 
 	data, err := os.ReadFile(filePath)
@@ -488,15 +486,171 @@ func handleExtract(args []string) {
 		fmt.Printf("Error reading file: %v\n", err)
 		os.Exit(1)
 	}
-	cards, err := documentintelligence.ExtractCards(string(data), sourceID, visibility, time.Now().UTC())
-	if err != nil {
-		fmt.Printf("Extraction error: %v\n", err)
-		os.Exit(1)
+
+	switch mode {
+	case "ni43101":
+		rep, err := documentintelligence.ExtractNI43101TechnicalReport(string(data))
+		if err != nil {
+			fmt.Printf("Extraction error: %v\n", err)
+			os.Exit(1)
+		}
+		out, _ := json.MarshalIndent(rep, "", "  ")
+		fmt.Println(string(out))
+
+	case "waterfall":
+		wf := documentintelligence.ExtractCapitalWaterfall(string(data), 0)
+		out, _ := json.MarshalIndent(wf, "", "  ")
+		fmt.Println(string(out))
+
+	case "iaac":
+		stmt, err := documentintelligence.ExtractIAACDecisionStatement(string(data))
+		if err != nil {
+			fmt.Printf("Extraction error: %v\n", err)
+			os.Exit(1)
+		}
+		out, _ := json.MarshalIndent(stmt, "", "  ")
+		fmt.Println(string(out))
+
+	case "cards":
+		sourceID := "workspace"
+		visibility := domain.VisibilityInternalRestricted
+		for i := shift; i < len(args); i++ {
+			switch args[i] {
+			case "--source":
+				if i+1 < len(args) {
+					sourceID = args[i+1]
+					i++
+				}
+			case "--visibility":
+				if i+1 < len(args) {
+					visibility = domain.VisibilityClass(strings.ToUpper(strings.TrimSpace(args[i+1])))
+					i++
+				}
+			}
+		}
+		cards, err := documentintelligence.ExtractCards(string(data), sourceID, visibility, time.Now().UTC())
+		if err != nil {
+			fmt.Printf("Extraction error: %v\n", err)
+			os.Exit(1)
+		}
+		if len(cards) == 0 {
+			fmt.Println("No portfolio cards found in the supplied text.")
+			return
+		}
+		out, _ := json.MarshalIndent(cards, "", "  ")
+		fmt.Println(string(out))
 	}
-	if len(cards) == 0 {
-		fmt.Println("No portfolio cards found in the supplied text.")
+}
+
+func handlePlanning(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: cog planning <optimize|wargame|labor> [options]")
 		return
 	}
-	out, _ := json.MarshalIndent(cards, "", "  ")
-	fmt.Println(string(out))
+	subCmd := strings.ToLower(args[0])
+	store := getSeededStore()
+	projects, _, err := store.ListProjects(context.Background(), database.ProjectFilter{Limit: 1000})
+	if err != nil {
+		fmt.Printf("Error fetching projects: %v\n", err)
+		return
+	}
+
+	switch subCmd {
+	case "optimize":
+		obj := nationalplanning.ObjectiveBalancedStrategy
+		for i := 1; i < len(args); i++ {
+			if args[i] == "--obj" && i+1 < len(args) {
+				obj = nationalplanning.ObjectiveType(strings.ToUpper(args[i+1]))
+				i++
+			}
+		}
+		res := nationalplanning.NewOptimizer().Optimize(projects, nationalplanning.OptimizationRequest{
+			Objective: obj,
+		})
+
+		fmt.Println("=== Sovereign Capital Allocation Optimizer ===")
+		fmt.Printf("Objective Target:           %s\n", res.Objective)
+		fmt.Printf("Total Public Invested:      $%d CAD\n", res.TotalPublicInvestedCAD)
+		fmt.Printf("Private Capital Mobilized:  $%d CAD\n", res.TotalPrivateMobilizedCAD)
+		fmt.Printf("Crowding-In Multiplier:     %.2fx\n", res.CrowdingInMultiplier)
+		fmt.Printf("Total GHG Abated:           %.1f Mt CO2e / yr\n", res.TotalGHGAbatedMtPerYear)
+		fmt.Printf("Audit Hash:                 %s\n\n", res.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "PROJECT\tPROV\tSECTOR\tTOTAL CAPEX\tPUBLIC ALLOC\tPRIVATE MOBILIZED\tUTILITY")
+		for _, p := range res.AllocatedProjects {
+			fmt.Fprintf(w, "%s\t%s\t%s\t$%d\t$%d\t$%d\t%.1f\n",
+				p.ProjectName, p.Province, p.Sector, p.TotalCapexCAD, p.TotalPublicCAD, p.PrivateMobilized, p.UtilityScore)
+		}
+		w.Flush()
+
+	case "wargame":
+		scenario := nationalplanning.ShockUSMCATariffs
+		for i := 1; i < len(args); i++ {
+			if args[i] == "--shock" && i+1 < len(args) {
+				scenario = nationalplanning.ShockScenario(strings.ToUpper(args[i+1]))
+				i++
+			}
+		}
+		res := nationalplanning.NewWarGameEngine().SimulateScenario(projects, nationalplanning.WarGameRequest{
+			Scenario: scenario,
+		})
+
+		fmt.Println("=== National Planning Geopolitical War Game ===")
+		fmt.Printf("Scenario:                %s\n", res.ScenarioTitle)
+		fmt.Printf("Description:             %s\n", res.ScenarioDescription)
+		fmt.Printf("Stalled Assets:          %d\n", res.TotalAssetsStalledCount)
+		fmt.Printf("Total Frozen CAPEX:      $%d CAD\n", res.TotalFrozenCapexCAD)
+		fmt.Printf("Est. National GDP Loss:  $%d CAD\n", res.EstimatedNationalGDPLossCAD)
+		fmt.Printf("Audit Hash:              %s\n\n", res.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "PROJECT\tPROV\tSECTOR\tCAPEX\tSTALL %\tRECOMMENDED COUNTERMEASURE")
+		for _, sp := range res.StalledProjects {
+			fmt.Fprintf(w, "%s\t%s\t%s\t$%d\t%.0f%%\t%s\n",
+				sp.ProjectName, sp.Province, sp.Sector, sp.OriginalCapexCAD, sp.StallLikelihood*100, sp.RecommendedAction)
+		}
+		w.Flush()
+
+		if len(res.SovereignMitigations) > 0 {
+			fmt.Println("\nSovereign Strategic Mitigations:")
+			for i, m := range res.SovereignMitigations {
+				fmt.Printf("  %d. %s\n", i+1, m)
+			}
+		}
+
+	case "labor":
+		prov := "ON"
+		for i := 1; i < len(args); i++ {
+			if args[i] == "--prov" && i+1 < len(args) {
+				prov = strings.ToUpper(args[i+1])
+				i++
+			}
+		}
+		rep := nationalplanning.NewLaborAggregator().AnalyzeProvince(prov, projects)
+
+		fmt.Printf("=== Red Seal Craft Labor Pinch-Point Report: %s ===\n", rep.Province)
+		fmt.Printf("Active Tracked CAPEX:    $%d CAD\n", rep.TotalActiveCapexCAD)
+		fmt.Printf("Concurrent Projects:     %d\n", rep.ConcurrentProjects)
+		fmt.Printf("Total Craft Labor Peak:  %d FTE\n", rep.TotalLaborDemandFTE)
+		fmt.Printf("Collision Detected:      %t\n", rep.CollisionDetected)
+		fmt.Printf("Audit Hash:              %s\n\n", rep.AuditHash)
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "RED SEAL TRADE\tDEMAND FTE\tSUPPLY FTE\tUTILIZATION\tSTATUS\tWAGE RISK")
+		for _, t := range rep.Trades {
+			fmt.Fprintf(w, "%s\t%d\t%d\t%.1f%%\t%s\t%s\n",
+				t.Trade, t.PeakDemandFTE, t.RegionalSupplyFTE, t.UtilizationPct, t.CollisionStatus, t.WageInflationRisk)
+		}
+		w.Flush()
+
+		if rep.StrategicAdvice != "" {
+			fmt.Printf("\nStrategic Workforce Directive:\n%s\n", rep.StrategicAdvice)
+		}
+
+	default:
+		fmt.Printf("Unknown planning command: %s\n", subCmd)
+		fmt.Println("Usage: cog planning <optimize|wargame|labor>")
+	}
 }
+

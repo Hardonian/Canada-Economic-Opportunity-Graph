@@ -590,3 +590,98 @@ func TestGraphQL_FieldProjection_Events(t *testing.T) {
 		t.Error("eventType should be present")
 	}
 }
+
+func TestGraphQL_IntelligenceQueries(t *testing.T) {
+	h := newTestHandler(t)
+
+	tests := []struct {
+		name      string
+		query     string
+		rootField string
+		checkKey  string
+	}{
+		{
+			name:      "MRIO query",
+			query:     `{ mrio(projectId: "proj-test-1") { projectId totalGDPCAD totalMultiplier } }`,
+			rootField: "mrio",
+			checkKey:  "totalGDPCAD",
+		},
+		{
+			name:      "Flyvbjerg query",
+			query:     `{ flyvbjerg(projectId: "proj-test-1") { projectId expectedCostOverrunPct } }`,
+			rootField: "flyvbjerg",
+			checkKey:  "expectedCostOverrunPct",
+		},
+		{
+			name:      "UBO screening query",
+			query:     `{ ubo(projectId: "proj-test-1") { projectId icaRisk domesticControlShare } }`,
+			rootField: "ubo",
+			checkKey:  "icaRisk",
+		},
+		{
+			name:      "Grid feasibility query",
+			query:     `{ grid(projectId: "proj-test-1") { projectId systemOperator gridFeasibilityScore } }`,
+			rootField: "grid",
+			checkKey:  "systemOperator",
+		},
+		{
+			name:      "EarthObs ground-truth query",
+			query:     `{ earthobs(projectId: "proj-test-1") { projectId corroborationStatus physicalProgressScore } }`,
+			rootField: "earthobs",
+			checkKey:  "corroborationStatus",
+		},
+		{
+			name:      "Planning optimize query",
+			query:     `{ planningOptimize(objective: "BALANCED") { objective crowdingInMultiplier } }`,
+			rootField: "planningOptimize",
+			checkKey:  "crowdingInMultiplier",
+		},
+		{
+			name:      "Planning war-game query",
+			query:     `{ planningWarGame(scenario: "USMCA_2026_TARIFF_25") { scenario scenarioTitle } }`,
+			rootField: "planningWarGame",
+			checkKey:  "scenarioTitle",
+		},
+		{
+			name:      "Planning labor query",
+			query:     `{ planningLabor(province: "ON") { province totalActiveCapexCAD } }`,
+			rootField: "planningLabor",
+			checkKey:  "province",
+		},
+		{
+			name:      "Predicted links query",
+			query:     `{ predictedLinks(projectId: "proj-test-1") { projectId confidenceScore } }`,
+			rootField: "predictedLinks",
+			checkKey:  "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			body, _ := json.Marshal(map[string]string{"query": tc.query})
+			w := doPOST(t, h, string(body))
+			resp := decodeResponse(t, w)
+			if errs, ok := resp["errors"].([]interface{}); ok && len(errs) > 0 {
+				t.Fatalf("unexpected errors for %s: %v", tc.name, errs)
+			}
+			data, ok := resp["data"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("expected data map, got %T", resp["data"])
+			}
+			fieldVal := data[tc.rootField]
+			if fieldVal == nil {
+				t.Fatalf("expected non-nil field %s", tc.rootField)
+			}
+			if tc.checkKey != "" {
+				m, ok := fieldVal.(map[string]interface{})
+				if !ok {
+					t.Fatalf("expected map for %s, got %T", tc.rootField, fieldVal)
+				}
+				if m[tc.checkKey] == nil {
+					t.Errorf("expected key %s in %s result", tc.checkKey, tc.rootField)
+				}
+			}
+		})
+	}
+}
+

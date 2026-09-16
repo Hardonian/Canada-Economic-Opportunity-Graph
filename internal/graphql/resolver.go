@@ -3,10 +3,18 @@ package graphql
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/earthobs"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/econometrics"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/gridphysics"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/linkpred"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/nationalplanning"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/risk"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ubo"
 )
 
 // Resolver holds a reference to the persistent store and implements all query
@@ -18,6 +26,17 @@ type Resolver struct {
 // NewResolver constructs a Resolver backed by the given store.
 func NewResolver(store database.Store) *Resolver {
 	return &Resolver{store: store}
+}
+
+func (r *Resolver) getProjectByIDOrSlug(ctx context.Context, id string) (*domain.Project, error) {
+	proj, err := r.store.GetProject(ctx, id)
+	if err != nil {
+		proj, err = r.store.GetProjectBySlug(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return proj, nil
 }
 
 // ─── query: projects ─────────────────────────────────────────────────────────
@@ -133,6 +152,274 @@ func (r *Resolver) resolveAISovereignty(ctx context.Context, _ map[string]interf
 			"overallScore": 0.0,
 			"tier":         "UNRATED",
 		})
+	}
+	return out, nil
+}
+
+// ─── query: mrio ─────────────────────────────────────────────────────────────
+
+func (r *Resolver) resolveMRIO(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("mrio: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	impact := econometrics.NewEngine().CalculateMRIO(proj)
+	m := map[string]interface{}{
+		"projectId":            impact.ProjectID,
+		"projectName":          impact.ProjectName,
+		"capexCAD":             float64(impact.CapexCAD),
+		"directGDPCAD":         float64(impact.DirectGDPCAD),
+		"indirectGDPCAD":       float64(impact.IndirectGDPCAD),
+		"inducedGDPCAD":        float64(impact.InducedGDPCAD),
+		"totalGDPCAD":          float64(impact.TotalGDPCAD),
+		"totalMultiplier":      impact.TotalMultipler,
+		"personYearsJobs":      int(impact.PersonYearsJobs),
+		"federalTaxCAD":        float64(impact.FederalTaxCAD),
+		"provincialTaxCAD":     float64(impact.ProvincialTaxCAD),
+		"municipalTaxCAD":      float64(impact.MunicipalTaxCAD),
+		"totalFiscalReturnCAD": float64(impact.TotalFiscalReturn),
+		"modelVersion":         impact.ModelVersion,
+		"auditHash":            impact.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: flyvbjerg ─────────────────────────────────────────────────────────
+
+func (r *Resolver) resolveFlyvbjerg(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("flyvbjerg: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	forecast := risk.NewEvaluator().ForecastProject(proj)
+	m := map[string]interface{}{
+		"projectId":              forecast.ProjectID,
+		"projectName":            forecast.ProjectName,
+		"sector":                 string(forecast.Sector),
+		"baseCapexCAD":           float64(forecast.BaseCapexCAD),
+		"referenceClass":         forecast.ReferenceClass,
+		"historicalSampleSize":   forecast.HistoricalSampleSize,
+		"expectedCostOverrunPct": forecast.ExpectedCostOverrunPct,
+		"expectedDelayMonths":    forecast.ExpectedDelayMonths,
+		"auditHash":              forecast.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: ubo ───────────────────────────────────────────────────────────────
+
+func (r *Resolver) resolveUBO(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("ubo: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	screening := ubo.NewEvaluator().ScreenProject(proj, nil)
+	m := map[string]interface{}{
+		"projectId":            screening.ProjectID,
+		"proponentName":        screening.ProponentName,
+		"icaRisk":              string(screening.ICARisk),
+		"domesticControlShare": screening.DomesticControlShare,
+		"ftaPartnerShare":      screening.FTAPartnerShare,
+		"nonFTAShare":          screening.NonFTAShare,
+		"soeExposurePercent":   screening.SOEExposurePercent,
+		"criticalMineralFlag":  screening.CriticalMineralFlag,
+		"dualUseSovereignty":   screening.DualUseSovereignty,
+		"auditHash":            screening.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: grid ──────────────────────────────────────────────────────────────
+
+func (r *Resolver) resolveGrid(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("grid: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	assessment := gridphysics.NewEngine().AssessProject(proj)
+	m := map[string]interface{}{
+		"projectId":                 assessment.ProjectID,
+		"projectName":               assessment.ProjectName,
+		"province":                  assessment.Province,
+		"systemOperator":            string(assessment.Operator),
+		"estimatedLoadOrGenMW":      assessment.EstimatedLoadOrGenMW,
+		"interconnectVoltageKV":     assessment.InterconnectVoltageKV,
+		"queueEstimatedMonths":      assessment.QueueEstimatedMonths,
+		"substationHeadroomMW":      assessment.SubstationHeadroomMW,
+		"dedicatedSubstationNeeded": assessment.DedicatedSubstationNeeded,
+		"reinforcementCostCAD":      float64(assessment.ReinforcementCostCAD),
+		"gridFeasibilityScore":      assessment.GridFeasibilityScore,
+		"cleanPowerPurityPct":       assessment.CleanPowerPurityPct,
+		"auditHash":                 assessment.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: earthobs ──────────────────────────────────────────────────────────
+
+func (r *Resolver) resolveEarthObs(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("earthobs: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	dossier := earthobs.NewEvaluator().CorroborateProject(proj, nil)
+	m := map[string]interface{}{
+		"projectId":             dossier.ProjectID,
+		"claimedStage":          string(dossier.ClaimedStage),
+		"corroborationStatus":   string(dossier.CorroborationStatus),
+		"physicalProgressScore": dossier.PhysicalProgressScore,
+		"earthworksConfirmed":   dossier.EarthworksConfirmed,
+		"structuresConfirmed":   dossier.StructuresConfirmed,
+		"telemetrySummary":      dossier.TelemetrySummary,
+		"auditHash":             dossier.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: planningOptimize ─────────────────────────────────────────────────
+
+func (r *Resolver) resolvePlanningOptimize(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	projects, _, err := r.store.ListProjects(ctx, database.ProjectFilter{Limit: 1000})
+	if err != nil {
+		return nil, fmt.Errorf("planningOptimize: %w", err)
+	}
+	obj := nationalplanning.ObjectiveBalancedStrategy
+	if raw := stringArg(args, "objective"); raw != "" {
+		obj = nationalplanning.ObjectiveType(strings.ToUpper(raw))
+	}
+	res := nationalplanning.NewOptimizer().Optimize(projects, nationalplanning.OptimizationRequest{
+		Objective: obj,
+	})
+	m := map[string]interface{}{
+		"requestId":                res.RequestID,
+		"objective":                string(res.Objective),
+		"totalPublicInvestedCAD":   float64(res.TotalPublicInvestedCAD),
+		"totalPrivateMobilizedCAD": float64(res.TotalPrivateMobilizedCAD),
+		"crowdingInMultiplier":     res.CrowdingInMultiplier,
+		"totalGHGAbatedMtYr":       res.TotalGHGAbatedMtPerYear,
+		"auditHash":                res.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: planningWarGame ──────────────────────────────────────────────────
+
+func (r *Resolver) resolvePlanningWarGame(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	projects, _, err := r.store.ListProjects(ctx, database.ProjectFilter{Limit: 1000})
+	if err != nil {
+		return nil, fmt.Errorf("planningWarGame: %w", err)
+	}
+	scenario := nationalplanning.ShockUSMCATariffs
+	if raw := stringArg(args, "scenario"); raw != "" {
+		scenario = nationalplanning.ShockScenario(strings.ToUpper(raw))
+	}
+	res := nationalplanning.NewWarGameEngine().SimulateScenario(projects, nationalplanning.WarGameRequest{
+		Scenario: scenario,
+	})
+	m := map[string]interface{}{
+		"simulationId":                res.SimulationID,
+		"scenario":                    string(res.Scenario),
+		"scenarioTitle":               res.ScenarioTitle,
+		"scenarioDescription":         res.ScenarioDescription,
+		"totalAssetsStalledCount":     res.TotalAssetsStalledCount,
+		"totalFrozenCapexCAD":         float64(res.TotalFrozenCapexCAD),
+		"estimatedNationalGDPLossCAD": float64(res.EstimatedNationalGDPLossCAD),
+		"auditHash":                   res.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: planningLabor ────────────────────────────────────────────────────
+
+func (r *Resolver) resolvePlanningLabor(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	projects, _, err := r.store.ListProjects(ctx, database.ProjectFilter{Limit: 1000})
+	if err != nil {
+		return nil, fmt.Errorf("planningLabor: %w", err)
+	}
+	prov := "ON"
+	if raw := stringArg(args, "province"); raw != "" {
+		prov = strings.ToUpper(raw)
+	}
+	rep := nationalplanning.NewLaborAggregator().AnalyzeProvince(prov, projects)
+	m := map[string]interface{}{
+		"province":            rep.Province,
+		"totalActiveCapexCAD": float64(rep.TotalActiveCapexCAD),
+		"concurrentProjects":  rep.ConcurrentProjects,
+		"totalLaborDemandFTE": rep.TotalLaborDemandFTE,
+		"collisionDetected":   rep.CollisionDetected,
+		"strategicAdvice":     rep.StrategicAdvice,
+		"auditHash":           rep.AuditHash,
+	}
+	return projectFields(m, subFields), nil
+}
+
+// ─── query: predictedLinks ───────────────────────────────────────────────────
+
+func (r *Resolver) resolvePredictedLinks(ctx context.Context, args map[string]interface{}, subFields []string) (interface{}, error) {
+	id := stringArg(args, "projectId")
+	if id == "" {
+		id = stringArg(args, "id")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("predictedLinks: argument 'projectId' is required")
+	}
+	proj, err := r.getProjectByIDOrSlug(ctx, id)
+	if err != nil {
+		return nil, nil
+	}
+	entities, _ := r.store.ListEntities(ctx)
+	projects, _, _ := r.store.ListProjects(ctx, database.ProjectFilter{Limit: 1000})
+
+	links := linkpred.NewLinkPredictor().PredictProjectPartners(proj, entities, projects, nil)
+	out := make([]interface{}, 0, len(links))
+	for _, l := range links {
+		m := map[string]interface{}{
+			"entityId":        l.EntityID,
+			"entityName":      l.EntityName,
+			"projectId":       l.ProjectID,
+			"projectName":     l.ProjectName,
+			"predictedRole":   string(l.PredictedRole),
+			"confidenceScore": l.ConfidenceScore,
+			"adamicAdarScore": l.AdamicAdarScore,
+			"rationale":       l.Rationale,
+			"auditHash":       l.AuditHash,
+		}
+		out = append(out, projectFields(m, subFields))
 	}
 	return out, nil
 }

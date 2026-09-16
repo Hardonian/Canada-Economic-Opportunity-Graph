@@ -20,6 +20,7 @@ import {
   Radio
 } from "lucide-react";
 import { getProjectBySlug } from "@/lib/data";
+import ProjectIntelligenceDossier from "@/components/ProjectIntelligenceDossier";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -302,6 +303,9 @@ export default async function ProjectProfilePage({ params }: Props) {
           })}
         </div>
       </div>
+
+      {/* Multi-Dimensional Institutional Intelligence & Risk Dossier */}
+      <ProjectIntelligenceDossier project={project} />
 
       {/* Grid: Downstream Opportunities & Evidence Trust Profile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

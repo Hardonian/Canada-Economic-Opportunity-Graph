@@ -63,4 +63,15 @@ This document outlines the phased milestone roadmap for CanadaOpportunityGraph a
 * [x] **First Nations & Inuit Equity Co-Investment Modeler**: Simulating 25%–50% equity co-development, CIB Indigenous Equity Loan debt amortization, and multi-generational sovereign wealth flows (`internal/nationalplanning/indigenous.go`).
 * [x] **Institutional Command Center UI**: Fully productized Next.js Command Console on `/planning` with 6 interactive real-time panels and full backward compatibility with the v1.0 workbench (`apps/web/components/NationalPlanningWorkbench.tsx`).
 
+---
+
+## Phase 6: Relational Graph ML, Statutory Intelligence & Enterprise Graph API (v2.1) (Completed)
+
+* [x] **Relational Link Prediction & Graph ML**: Topological graph algorithms (Adamic-Adar index, Resource Allocation, and Jaccard sector affinity) forecasting unannounced EPC partnerships, offtake agreements, and joint ventures (`internal/linkpred/`).
+* [x] **Statutory Impact Assessment & Injunction Risk Engine**: Deterministic extraction of Impact Assessment Act (IAA) Section 54 conditions, environmental covenants, and Haida Nation Duty-to-Consult legal risk scores (`internal/documentintelligence/iaac_parser.go`).
+* [x] **Universal CLI Subcommand Wiring**: Full native terminal access for `cog planning` (`optimize`, `wargame`, `labor`), `cog project` (`mrio`, `flyvbjerg`, `ubo`, `grid`, `earthobs`), and `cog extract` (`cards`, `ni43101`, `waterfall`, `iaac`) (`cmd/cog/main.go`).
+* [x] **Enterprise GraphQL Intelligence API**: Extended GraphQL SDL schema and high-throughput zero-dependency resolvers for `mrio`, `flyvbjerg`, `ubo`, `grid`, `earthobs`, `planningOptimize`, `planningWarGame`, `planningLabor`, and `predictedLinks` (`internal/graphql/`).
+* [x] **Executive Project Intelligence Dossier**: Full-width interactive dossier on all project profile pages (`/projects/[id]`) presenting multi-regional input-output GDP yields, Bayesian overrun hazard curves, UBO national security posture, electrical grid headroom, and Sentinel-1 SAR ground-truth telemetry (`apps/web/components/ProjectIntelligenceDossier.tsx`).
+* [x] **100% Race-Detector Test Verification**: Full Go test suite pass with `-race` across 40+ packages, zero race conditions, and complete Next.js 15 static/dynamic build verification (27/27 pages).
+
 
