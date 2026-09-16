@@ -362,6 +362,7 @@ func (s *Server) registerRoutes() {
 
 	// Projects
 	s.mux.HandleFunc("GET /api/v1/projects", s.handleListProjects)
+	s.mux.HandleFunc("GET /api/v1/projects/spatial", s.handleListProjectsSpatial)
 	s.mux.HandleFunc("GET /api/v1/projects/{id}", s.handleGetProject)
 	s.mux.HandleFunc("GET /api/v1/projects/{id}/events", s.handleGetProjectEvents)
 	s.mux.HandleFunc("GET /api/v1/projects/{id}/scores", s.handleGetProjectScores)
@@ -593,6 +594,52 @@ func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
 		"total":    total,
 		"limit":    limit,
 		"offset":   offset,
+	})
+}
+
+func (s *Server) handleListProjectsSpatial(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	minLat, err := boundedFloat64(q.Get("min_lat"), -90.0, -90.0, 90.0)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "invalid_min_lat", err.Error())
+		return
+	}
+	maxLat, err := boundedFloat64(q.Get("max_lat"), 90.0, -90.0, 90.0)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "invalid_max_lat", err.Error())
+		return
+	}
+	minLng, err := boundedFloat64(q.Get("min_lng"), -180.0, -180.0, 180.0)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "invalid_min_lng", err.Error())
+		return
+	}
+	maxLng, err := boundedFloat64(q.Get("max_lng"), 180.0, -180.0, 180.0)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "invalid_max_lng", err.Error())
+		return
+	}
+	limit, err := boundedInt(q.Get("limit"), 500, 1, 1000)
+	if err != nil {
+		writeError(w, r, http.StatusBadRequest, "invalid_limit", err.Error())
+		return
+	}
+
+	projects, err := s.store.ListProjectsInBounds(r.Context(), minLat, maxLat, minLng, maxLng, limit)
+	if err != nil {
+		writeError(w, r, http.StatusServiceUnavailable, "projects_unavailable", "Projects are temporarily unavailable.")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"projects": projects,
+		"total":    len(projects),
+		"bounds": map[string]float64{
+			"min_lat": minLat,
+			"max_lat": maxLat,
+			"min_lng": minLng,
+			"max_lng": maxLng,
+		},
 	})
 }
 
@@ -933,6 +980,18 @@ func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 					"parameters": []map[string]any{
 						{"name": "limit", "in": "query", "schema": map[string]any{"type": "integer", "minimum": 1, "maximum": 500}},
 						{"name": "offset", "in": "query", "schema": map[string]any{"type": "integer", "minimum": 0}},
+					},
+				},
+			},
+			"/api/v1/projects/spatial": map[string]interface{}{
+				"get": map[string]interface{}{
+					"summary": "Query Canadian major capital projects within geospatial bounding box",
+					"parameters": []map[string]any{
+						{"name": "min_lat", "in": "query", "schema": map[string]any{"type": "number", "minimum": -90, "maximum": 90}},
+						{"name": "max_lat", "in": "query", "schema": map[string]any{"type": "number", "minimum": -90, "maximum": 90}},
+						{"name": "min_lng", "in": "query", "schema": map[string]any{"type": "number", "minimum": -180, "maximum": 180}},
+						{"name": "max_lng", "in": "query", "schema": map[string]any{"type": "number", "minimum": -180, "maximum": 180}},
+						{"name": "limit", "in": "query", "schema": map[string]any{"type": "integer", "minimum": 1, "maximum": 1000}},
 					},
 				},
 			},
@@ -1446,6 +1505,17 @@ func boundedInt(raw string, defaultValue, min, max int) (int, error) {
 	value, err := strconv.Atoi(raw)
 	if err != nil || value < min || value > max {
 		return 0, fmt.Errorf("value must be an integer between %d and %d", min, max)
+	}
+	return value, nil
+}
+
+func boundedFloat64(raw string, defaultValue, min, max float64) (float64, error) {
+	if raw == "" {
+		return defaultValue, nil
+	}
+	value, err := strconv.ParseFloat(raw, 64)
+	if err != nil || value < min || value > max {
+		return 0, fmt.Errorf("value must be a number between %g and %g", min, max)
 	}
 	return value, nil
 }

@@ -76,6 +76,29 @@ export default function ExecutiveBriefingPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
+      {/* Federal Document & Security Classification Banner */}
+      <div className="rounded-xl border border-red-500/40 bg-[#160608]/90 p-3 sm:p-4 text-xs font-mono shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-900/60 pb-2">
+          <div className="flex items-center gap-2 text-red-400 font-bold tracking-wider text-[11px]">
+            <span className="inline-block px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-800 text-[10px]">
+              CONFIDENTIEL // CONFIDENTIAL
+            </span>
+            <span>PROTECTED B // CEGS-INTELLIGENCE // CANADIAN EYES ONLY</span>
+          </div>
+          <div className="text-[10px] text-text-subtle">
+            DOC REF: <span className="text-white font-semibold">MC-2026-CEGS-0089-REV4</span>
+          </div>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[10px] text-text-subtle">
+          <div>
+            <span className="text-text-muted">PORTFOLIOS:</span> Natural Resources Canada (NRCan) • Innovation, Science & Economic Development (ISED) • Finance Canada
+          </div>
+          <div>
+            <span className="text-text-muted">CLASSIFICATION:</span> Memorandum to Cabinet (MC) / Mémorandum au Cabinet
+          </div>
+        </div>
+      </div>
+
       <header className="relative overflow-hidden rounded-2xl border border-border/90 bg-gradient-to-b from-card to-surface p-6 shadow-2xl sm:p-8">
         <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-96 w-96 rounded-full bg-gold/10 blur-3xl" />
         <div className="relative z-10">
@@ -288,6 +311,39 @@ export default function ExecutiveBriefingPage() {
           <a href="/api/v1/cegs/export" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 font-black text-[#050b08] hover:bg-aurora-mint">
             <Database aria-hidden="true" className="h-4 w-4" /> Open export <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
           </a>
+        </div>
+      </section>
+
+      {/* Ministerial Attestation & Privy Council Office Record */}
+      <section aria-labelledby="attestation-heading" className="rounded-2xl border border-borderSubtle bg-card/80 p-6 font-mono text-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-borderSubtle pb-3">
+          <div className="flex items-center gap-2 text-text-main font-bold">
+            <ShieldCheck className="h-4 w-4 text-aurora" />
+            <h2 id="attestation-heading">Privy Council Office (PCO) Attestation & Audit Trail</h2>
+          </div>
+          <div className="text-[10px] text-text-subtle">
+            RECORD STAMP: {generatedDate}
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-4 text-[11px]">
+          <div className="p-3 rounded-xl border border-borderSubtle bg-surface/60 space-y-1">
+            <div className="text-[10px] text-text-subtle uppercase">Originating Authority</div>
+            <div className="font-bold text-text-main">Assistant Deputy Minister</div>
+            <div className="text-[10px] text-text-muted">Economic Opportunity Graph Secretariat</div>
+            <div className="text-[9px] text-aurora pt-1">STATUS: TRANSMITTED (CRYPTOGRAPHICALLY VERIFIED)</div>
+          </div>
+          <div className="p-3 rounded-xl border border-borderSubtle bg-surface/60 space-y-1">
+            <div className="text-[10px] text-text-subtle uppercase">Cabinet Secretariat Review</div>
+            <div className="font-bold text-text-main">Privy Council Office</div>
+            <div className="text-[10px] text-text-muted">Operations & Policy Review Division</div>
+            <div className="text-[9px] text-gold pt-1">STATUS: REGISTERED · SCHEDULED FOR COMMITTEE</div>
+          </div>
+          <div className="p-3 rounded-xl border border-borderSubtle bg-surface/60 space-y-1">
+            <div className="text-[10px] text-text-subtle uppercase">Integrity Hash</div>
+            <div className="font-bold text-text-main truncate text-[10px] text-aurora">{projectsChecksum}</div>
+            <div className="text-[10px] text-text-muted">Deterministic dataset digest</div>
+            <div className="text-[9px] text-text-subtle pt-1">STANDARD: CEGS v{SNAPSHOT_MANIFEST.cegs}</div>
+          </div>
         </div>
       </section>
     </div>

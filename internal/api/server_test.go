@@ -421,3 +421,51 @@ func (s *requestIDStore) ListProjects(ctx context.Context, _ database.ProjectFil
 	s.requestID = RequestIDFromContext(ctx)
 	return nil, 0, nil
 }
+
+func TestListProjectsSpatial(t *testing.T) {
+	store := database.NewMemoryStore()
+	ctx := context.Background()
+
+	p1 := &domain.Project{ID: "p-on", Slug: "p-on", Name: "Ontario Project", Latitude: 43.65, Longitude: -79.38}
+	p2 := &domain.Project{ID: "p-bc", Slug: "p-bc", Name: "BC Project", Latitude: 49.28, Longitude: -123.12}
+	for _, p := range []*domain.Project{p1, p2} {
+		if err := store.SaveProject(ctx, p); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	server := mustServer(t, store, testOptions())
+
+	// Test valid Ontario box query
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/projects/spatial?min_lat=43.0&max_lat=44.0&min_lng=-80.0&max_lng=-79.0&limit=10", nil)
+	rec := httptest.NewRecorder()
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d: %s", rec.Code, rec.Body.String())
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Ontario Project") {
+		t.Fatalf("expected Ontario Project in response, got %s", body)
+	}
+	if strings.Contains(body, "BC Project") {
+		t.Fatalf("did not expect BC Project in Ontario bounds, got %s", body)
+	}
+
+	// Test invalid bounds (min_lat > 90)
+	reqBad := httptest.NewRequest(http.MethodGet, "/api/v1/projects/spatial?min_lat=999", nil)
+	recBad := httptest.NewRecorder()
+	server.ServeHTTP(recBad, reqBad)
+	if recBad.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request for out-of-range min_lat, got %d", recBad.Code)
+	}
+
+	// Test invalid limit
+	reqBadLimit := httptest.NewRequest(http.MethodGet, "/api/v1/projects/spatial?limit=99999", nil)
+	recBadLimit := httptest.NewRecorder()
+	server.ServeHTTP(recBadLimit, reqBadLimit)
+	if recBadLimit.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request for limit > 1000, got %d", recBadLimit.Code)
+	}
+}
+

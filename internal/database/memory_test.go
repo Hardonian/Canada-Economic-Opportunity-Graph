@@ -356,6 +356,49 @@ func TestRebuildIndexes(t *testing.T) {
 	}
 }
 
+func TestListProjectsInBounds(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	p1 := &domain.Project{ID: "p1", Slug: "p1", Name: "In Bounds 1", Latitude: 53.5, Longitude: -113.5}
+	p2 := &domain.Project{ID: "p2", Slug: "p2", Name: "In Bounds 2", Latitude: 51.0, Longitude: -114.0}
+	p3 := &domain.Project{ID: "p3", Slug: "p3", Name: "Out of Bounds (East)", Latitude: 45.4, Longitude: -75.7}
+	p4 := &domain.Project{ID: "p4", Slug: "p4", Name: "No Coordinates", Latitude: 0, Longitude: 0}
+
+	for _, p := range []*domain.Project{p1, p2, p3, p4} {
+		if err := store.SaveProject(ctx, p); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Alberta box: 50.0 to 55.0 lat, -115.0 to -110.0 lng
+	results, err := store.ListProjectsInBounds(ctx, 50.0, 55.0, -115.0, -110.0, 10)
+	if err != nil {
+		t.Fatalf("ListProjectsInBounds failed: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("expected 2 projects, got %d", len(results))
+	}
+
+	// Limit test
+	limited, err := store.ListProjectsInBounds(ctx, 50.0, 55.0, -115.0, -110.0, 1)
+	if err != nil {
+		t.Fatalf("ListProjectsInBounds limit test failed: %v", err)
+	}
+	if len(limited) != 1 {
+		t.Fatalf("expected 1 project due to limit, got %d", len(limited))
+	}
+
+	// Inverted bounds test
+	inv, err := store.ListProjectsInBounds(ctx, 55.0, 50.0, -110.0, -115.0, 10)
+	if err != nil {
+		t.Fatalf("expected nil error on inverted bounds, got %v", err)
+	}
+	if len(inv) != 0 {
+		t.Fatalf("expected 0 results on inverted bounds, got %d", len(inv))
+	}
+}
+
 // Ensure fmt and time imports are used.
 var _ = fmt.Sprintf
 var _ = time.Now

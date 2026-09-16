@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -21,7 +21,14 @@ import {
   ExternalLink,
   Flame,
   Ship,
-  Info
+  Info,
+  Ruler,
+  Search,
+  Download,
+  Trash2,
+  FileSpreadsheet,
+  FileCode,
+  Crosshair,
 } from "lucide-react";
 import type { Project } from "@/lib/types";
 import {
@@ -34,7 +41,7 @@ import {
   type MapTileProvider,
   type TradeRoute,
   type ConflictMarker,
-  type OpportunityZone
+  type OpportunityZone,
 } from "@/lib/geospatial";
 
 interface GeospatialMapProps {
@@ -43,6 +50,21 @@ interface GeospatialMapProps {
   onSelectProject: (p: Project) => void;
   selectedSector: string;
   selectedStage: string;
+}
+
+// Great circle Haversine formula for calculating geodesic distance in kilometers
+function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's mean radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 export default function GeospatialMap({
@@ -61,6 +83,7 @@ export default function GeospatialMap({
     conflictMarkers: null,
     opportunityZones: null,
     corridors: null,
+    measurement: null,
   });
 
   // State
@@ -78,6 +101,44 @@ export default function GeospatialMap({
   const [googleApiKey, setGoogleApiKey] = useState<string>("");
   const [showKeyModal, setShowKeyModal] = useState<boolean>(false);
   const [isLeafletReady, setIsLeafletReady] = useState<boolean>(false);
+
+  // Advanced Geodesic Measure Tool State
+  const [isMeasuring, setIsMeasuring] = useState<boolean>(false);
+  const [measurePoints, setMeasurePoints] = useState<{ lat: number; lng: number }[]>([]);
+  const isMeasuringRef = useRef<boolean>(false);
+  const measurePointsRef = useRef<{ lat: number; lng: number }[]>([]);
+
+  // Instant Search Autocomplete State
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Spatial Export Menu State
+  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
+  const exportContainerRef = useRef<HTMLDivElement>(null);
+
+  // Sync ref with state for Leaflet event handlers
+  useEffect(() => {
+    isMeasuringRef.current = isMeasuring;
+  }, [isMeasuring]);
+
+  useEffect(() => {
+    measurePointsRef.current = measurePoints;
+  }, [measurePoints]);
+
+  // Close search/export dropdowns on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+      if (exportContainerRef.current && !exportContainerRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   // Initialize Map
   useEffect(() => {
@@ -117,12 +178,25 @@ export default function GeospatialMap({
         setCurrentZoom(map.getZoom());
       });
 
+      // Handle map click for measurement tool
+      map.on("click", (e: any) => {
+        if (!isMeasuringRef.current) return;
+        const newPoint = {
+          lat: parseFloat(e.latlng.lat.toFixed(4)),
+          lng: parseFloat(e.latlng.lng.toFixed(4)),
+        };
+        const updated = [...measurePointsRef.current, newPoint];
+        measurePointsRef.current = updated;
+        setMeasurePoints(updated);
+      });
+
       // Layer groups for dynamic filtering
       layersGroupRef.current.projects = L.layerGroup().addTo(map);
       layersGroupRef.current.tradeRoutes = L.layerGroup().addTo(map);
       layersGroupRef.current.conflictMarkers = L.layerGroup().addTo(map);
       layersGroupRef.current.opportunityZones = L.layerGroup().addTo(map);
       layersGroupRef.current.corridors = L.layerGroup().addTo(map);
+      layersGroupRef.current.measurement = L.layerGroup().addTo(map);
 
       setIsLeafletReady(true);
     }
@@ -149,7 +223,7 @@ export default function GeospatialMap({
       }
 
       const provider = MAP_PROVIDERS.find((p) => p.id === activeProviderId) || MAP_PROVIDERS[0];
-      
+
       let tileUrl = provider.url;
       if (provider.id === "google-hybrid" && googleApiKey) {
         tileUrl = `https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=${googleApiKey}`;
@@ -206,7 +280,7 @@ export default function GeospatialMap({
                   ? `<div style="position: absolute; inset: -6px; border-radius: 9999px; background: ${color}; opacity: 0.4;" class="${pingClass}"></div>`
                   : ""
               }
-              <div style="width: ${size}px; height: ${size}px; border-radius: 9999px; background: ${color}; border: 2px solid #040806; box-shadow: 0 0 10px ${color}; display: flex; items-center; justify-content: center; cursor: pointer;">
+              <div style="width: ${size}px; height: ${size}px; border-radius: 9999px; background: ${color}; border: 2px solid #040806; box-shadow: 0 0 10px ${color}; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                 <div style="width: 4px; height: 4px; border-radius: 9999px; background: #ffffff;"></div>
               </div>
             </div>
@@ -414,6 +488,186 @@ export default function GeospatialMap({
     });
   }, [isLeafletReady, showCorridors]);
 
+  // Render Geodesic Measurement Overlay
+  useEffect(() => {
+    if (!isLeafletReady || !layersGroupRef.current.measurement) return;
+
+    import("leaflet").then((L) => {
+      const group = layersGroupRef.current.measurement;
+      group.clearLayers();
+
+      if (measurePoints.length === 0) return;
+
+      // Draw polyline connecting measurement points
+      if (measurePoints.length > 1) {
+        const latLngs = measurePoints.map((p) => [p.lat, p.lng]);
+        const polyline = L.polyline(latLngs as any, {
+          color: "#F59E0B",
+          weight: 3,
+          dashArray: "6, 6",
+          opacity: 0.9,
+        });
+        group.addLayer(polyline);
+      }
+
+      // Draw waypoint pins
+      measurePoints.forEach((p, idx) => {
+        const isEndpoint = idx === measurePoints.length - 1;
+        const icon = L.divIcon({
+          className: "measurement-waypoint-icon",
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+          html: `
+            <div style="width: 22px; height: 22px; border-radius: 9999px; background: ${
+              isEndpoint ? "#00F5A0" : "#F59E0B"
+            }; border: 2px solid #040806; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; color: #040806; font-family: monospace; box-shadow: 0 0 8px rgba(0,0,0,0.8);">
+              ${idx + 1}
+            </div>
+          `,
+        });
+
+        const marker = L.marker([p.lat, p.lng], { icon });
+
+        // Calculate distance from previous point if applicable
+        if (idx > 0) {
+          const prev = measurePoints[idx - 1];
+          const legDist = haversineDistanceKm(prev.lat, prev.lng, p.lat, p.lng);
+          marker.bindTooltip(
+            `<b>Leg ${idx}</b>: ${legDist.toFixed(1)} km (${(legDist / 1.852).toFixed(1)} NM)`,
+            { permanent: true, direction: "top", className: "trade-route-tooltip" }
+          );
+        }
+
+        group.addLayer(marker);
+      });
+    });
+  }, [isLeafletReady, measurePoints]);
+
+  // Compute Cumulative Geodesic Distance
+  const totalMeasureDistanceKm = React.useMemo(() => {
+    if (measurePoints.length < 2) return 0;
+    let sum = 0;
+    for (let i = 1; i < measurePoints.length; i++) {
+      sum += haversineDistanceKm(
+        measurePoints[i - 1].lat,
+        measurePoints[i - 1].lng,
+        measurePoints[i].lat,
+        measurePoints[i].lng
+      );
+    }
+    return sum;
+  }, [measurePoints]);
+
+  const clearMeasurement = useCallback(() => {
+    setMeasurePoints([]);
+    measurePointsRef.current = [];
+  }, []);
+
+  // Search Results
+  const searchResults = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return projects
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.province.toLowerCase().includes(q) ||
+          p.sector.toLowerCase().includes(q)
+      )
+      .slice(0, 6);
+  }, [projects, searchQuery]);
+
+  // Spatial Export Handlers
+  const handleExportGeoJSON = useCallback(() => {
+    const validProjects = projects.filter(
+      (p) => typeof p.latitude === "number" && typeof p.longitude === "number"
+    );
+
+    const geojson = {
+      type: "FeatureCollection",
+      crs: {
+        type: "name",
+        properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" },
+      },
+      metadata: {
+        title: "Canada Economic Opportunity Graph — Active Geospatial Layer",
+        export_timestamp: new Date().toISOString(),
+        total_features: validProjects.length,
+        authority: "Government of Canada / Gouvernement du Canada (CEGS Standard)",
+      },
+      features: validProjects.map((p) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [p.longitude, p.latitude],
+        },
+        properties: {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          sector: p.sector,
+          province: p.province,
+          current_stage: p.current_stage,
+          capex_cad: p.capex_cad,
+          proponent_name: p.proponent_name,
+        },
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/geo+json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `canada_economic_graph_spatial_${new Date().toISOString().slice(0, 10)}.geojson`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [projects]);
+
+  const handleExportCSV = useCallback(() => {
+    const validProjects = projects.filter(
+      (p) => typeof p.latitude === "number" && typeof p.longitude === "number"
+    );
+
+    const headers = [
+      "id",
+      "name",
+      "slug",
+      "sector",
+      "province",
+      "current_stage",
+      "capex_cad",
+      "latitude",
+      "longitude",
+      "proponent_name",
+    ];
+
+    const rows = validProjects.map((p) => [
+      `"${p.id}"`,
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"${p.slug}"`,
+      `"${p.sector}"`,
+      `"${p.province}"`,
+      `"${p.current_stage}"`,
+      p.capex_cad,
+      p.latitude,
+      p.longitude,
+      `"${(p.proponent_name || "").replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `canada_economic_graph_projects_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [projects]);
+
   // Pan to preset function
   const handlePresetSelect = (preset: (typeof MAP_FOCUS_PRESETS)[0]) => {
     if (mapInstanceRef.current) {
@@ -440,11 +694,11 @@ export default function GeospatialMap({
     <div
       className={`relative w-full rounded-2xl border border-border/80 overflow-hidden bg-[#040806] shadow-2xl transition-all duration-300 ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none border-none h-screen" : "h-[680px]"
-      }`}
+      } ${isMeasuring ? "cursor-crosshair" : ""}`}
     >
       {/* Top Interactive HUD Bar */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Left: Base Map & Presets */}
+        {/* Left: Base Map, Presets & Instant Search */}
         <div className="flex flex-wrap items-center gap-1.5 pointer-events-auto bg-card/90 backdrop-blur-md border border-border/80 p-1.5 rounded-xl shadow-xl">
           {/* Base Layer Switcher */}
           <div className="flex items-center gap-1 bg-[#040806]/80 p-1 rounded-lg border border-border/50">
@@ -469,7 +723,7 @@ export default function GeospatialMap({
             ))}
           </div>
 
-          {/* Preset Buttons Dropdown */}
+          {/* Preset Buttons */}
           <div className="hidden md:flex items-center gap-1 pl-1 border-l border-border/60">
             {MAP_FOCUS_PRESETS.slice(0, 4).map((preset) => (
               <button
@@ -482,14 +736,85 @@ export default function GeospatialMap({
               </button>
             ))}
           </div>
+
+          {/* Instant Search Autocomplete Bar */}
+          <div ref={searchContainerRef} className="relative pl-1 border-l border-border/60">
+            <div className="flex items-center bg-[#040806] border border-border/80 rounded-lg px-2 py-1 text-xs">
+              <Search className="h-3.5 w-3.5 text-text-subtle mr-1.5 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search map..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => setIsSearchOpen(true)}
+                className="bg-transparent border-none outline-none text-white text-[11px] w-24 sm:w-32 placeholder-text-subtle/50 font-mono"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setIsSearchOpen(false);
+                  }}
+                  className="text-text-subtle hover:text-white text-[10px] ml-1"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Search Dropdown Results */}
+            {isSearchOpen && searchResults.length > 0 && (
+              <div className="absolute top-full mt-1.5 left-0 w-72 bg-[#0C1812]/98 backdrop-blur-md border border-aurora/50 rounded-xl p-1.5 shadow-2xl z-[1200] font-mono text-xs space-y-1 max-h-72 overflow-y-auto">
+                <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-text-subtle font-bold border-b border-border/50">
+                  Matching Capital Projects ({searchResults.length})
+                </div>
+                {searchResults.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      if (typeof p.latitude === "number" && typeof p.longitude === "number") {
+                        mapInstanceRef.current?.flyTo([p.latitude, p.longitude], 9, {
+                          duration: 1.2,
+                        });
+                      }
+                      onSelectProject(p);
+                      setIsSearchOpen(false);
+                    }}
+                    className="w-full text-left p-2 rounded-lg hover:bg-surface transition-colors space-y-0.5 group"
+                  >
+                    <div className="font-bold text-[11px] text-text-main group-hover:text-aurora truncate">
+                      {p.name}
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-text-subtle">
+                      <span>
+                        {p.sector} • {p.province}
+                      </span>
+                      <span className="text-aurora font-semibold">
+                        {p.capex_cad >= 1e9
+                          ? `$${(p.capex_cad / 1e9).toFixed(1)}B`
+                          : p.capex_cad > 0
+                          ? `$${(p.capex_cad / 1e6).toFixed(0)}M`
+                          : "N/R"}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Right: Layer Toggles & Utility Controls */}
+        {/* Right: Layer Toggles, Measure, Export & Utility Controls */}
         <div className="flex items-center gap-1.5 pointer-events-auto bg-card/90 backdrop-blur-md border border-border/80 p-1.5 rounded-xl shadow-xl">
           <button
             onClick={() => setShowTradeRoutes(!showTradeRoutes)}
             className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
-              showTradeRoutes ? "bg-aurora/20 text-aurora border border-aurora/40" : "text-text-subtle hover:text-white"
+              showTradeRoutes
+                ? "bg-aurora/20 text-aurora border border-aurora/40"
+                : "text-text-subtle hover:text-white"
             }`}
             title="Toggle Global Maritime & Continental Trade Routes"
           >
@@ -500,7 +825,9 @@ export default function GeospatialMap({
           <button
             onClick={() => setShowConflictMarkers(!showConflictMarkers)}
             className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
-              showConflictMarkers ? "bg-red-500/20 text-red-400 border border-red-500/40" : "text-text-subtle hover:text-white"
+              showConflictMarkers
+                ? "bg-red-500/20 text-red-400 border border-red-500/40"
+                : "text-text-subtle hover:text-white"
             }`}
             title="Toggle Conflict & Regulatory Friction Markers"
           >
@@ -511,7 +838,9 @@ export default function GeospatialMap({
           <button
             onClick={() => setShowOpportunityZones(!showOpportunityZones)}
             className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
-              showOpportunityZones ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "text-text-subtle hover:text-white"
+              showOpportunityZones
+                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                : "text-text-subtle hover:text-white"
             }`}
             title="Toggle Strategic Opportunity Zones"
           >
@@ -522,13 +851,75 @@ export default function GeospatialMap({
           <button
             onClick={() => setShowCorridors(!showCorridors)}
             className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-colors ${
-              showCorridors ? "bg-sky-500/20 text-sky-300 border border-sky-500/40" : "text-text-subtle hover:text-white"
+              showCorridors
+                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
+                : "text-text-subtle hover:text-white"
             }`}
             title="Toggle Clean Transmission Corridors"
           >
             <Zap className="h-3 w-3" />
             <span className="hidden sm:inline">Corridors</span>
           </button>
+
+          {/* Interactive Geodesic Measure Tool Button */}
+          <button
+            onClick={() => {
+              const next = !isMeasuring;
+              setIsMeasuring(next);
+              if (!next) {
+                clearMeasurement();
+              }
+            }}
+            className={`p-1.5 rounded-lg border transition-colors flex items-center gap-1 ${
+              isMeasuring
+                ? "bg-amber-500/25 border-amber-500 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                : "bg-[#040806] border-border text-text-muted hover:text-aurora"
+            }`}
+            title={isMeasuring ? "Disable Distance Measure Tool" : "Enable Geodesic Distance Measure Tool"}
+          >
+            <Ruler className="h-3.5 w-3.5" />
+            <span className="hidden lg:inline text-[10px] font-mono">Measure</span>
+          </button>
+
+          {/* Spatial Data Export Dropdown */}
+          <div ref={exportContainerRef} className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="p-1.5 rounded-lg bg-[#040806] border border-border text-text-muted hover:text-aurora transition-colors flex items-center gap-1"
+              title="Export Spatial Geospatial Layer (GeoJSON / CSV)"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline text-[10px] font-mono">Export</span>
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute top-full mt-1.5 right-0 w-52 bg-[#0C1812]/98 backdrop-blur-md border border-border rounded-xl p-1.5 shadow-2xl z-[1200] font-mono text-xs space-y-1">
+                <div className="px-2.5 py-1 text-[9px] uppercase tracking-wider text-text-subtle font-bold border-b border-border/50">
+                  Download Spatial Layer
+                </div>
+                <button
+                  onClick={() => {
+                    handleExportGeoJSON();
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface text-text-main hover:text-aurora text-[11px] flex items-center gap-2"
+                >
+                  <FileCode className="h-3.5 w-3.5 text-aurora" />
+                  Export GeoJSON (.geojson)
+                </button>
+                <button
+                  onClick={() => {
+                    handleExportCSV();
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface text-text-main hover:text-aurora text-[11px] flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-sky-400" />
+                  Export Table (.csv)
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Google Maps API Key Modal Trigger */}
           <button
@@ -550,16 +941,75 @@ export default function GeospatialMap({
         </div>
       </div>
 
+      {/* Floating Measurement HUD Banner */}
+      {isMeasuring && (
+        <div className="absolute top-16 left-3 z-[1000] bg-[#040806]/95 backdrop-blur-md border border-amber-500/60 rounded-xl px-4 py-2.5 shadow-2xl flex flex-wrap items-center gap-3 font-mono text-xs text-white animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+            <Ruler className="h-4 w-4 animate-pulse" />
+            <span>GEODESIC MEASURE</span>
+          </div>
+          <div className="h-4 w-px bg-border/80 hidden sm:block" />
+          <div>
+            DISTANCE:{" "}
+            <span className="text-aurora font-bold">{totalMeasureDistanceKm.toFixed(1)} km</span>{" "}
+            <span className="text-text-muted text-[11px]">
+              ({(totalMeasureDistanceKm / 1.852).toFixed(1)} NM)
+            </span>
+          </div>
+          <div className="text-[11px] text-text-subtle hidden sm:block">
+            {measurePoints.length === 0
+              ? "Click map to set initial waypoint"
+              : `${measurePoints.length} waypoint${measurePoints.length > 1 ? "s" : ""}`}
+          </div>
+          <div className="flex items-center gap-1.5 ml-auto">
+            {measurePoints.length > 0 && (
+              <button
+                onClick={clearMeasurement}
+                className="px-2 py-1 rounded bg-surface hover:bg-surface/80 text-text-muted hover:text-white text-[10px] flex items-center gap-1"
+                title="Reset points"
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setIsMeasuring(false);
+                clearMeasurement();
+              }}
+              className="px-2 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold"
+            >
+              Exit Tool
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Map Container */}
       <div ref={mapContainerRef} className="w-full h-full z-0 select-none" />
 
       {/* Bottom Telemetry HUD Bar */}
-      <div className="absolute bottom-3 left-3 z-[1000] pointer-events-none">
-        <div className="pointer-events-auto bg-[#040806]/85 backdrop-blur-md border border-border/80 px-3 py-1.5 rounded-xl text-[10px] font-mono text-text-subtle flex items-center gap-3 shadow-xl">
+      <div className="absolute bottom-3 left-3 right-3 z-[1000] pointer-events-none flex items-center justify-between">
+        <div className="pointer-events-auto bg-[#040806]/90 backdrop-blur-md border border-border/80 px-3 py-1.5 rounded-xl text-[10px] font-mono text-text-subtle flex flex-wrap items-center gap-3 shadow-xl">
+          {/* Canadian Government FIP Emblem */}
+          <div className="flex items-center gap-1.5 text-white">
+            <svg className="h-3 w-5 shrink-0 rounded-[1px] overflow-hidden border border-white/20" viewBox="0 0 100 50">
+              <rect width="25" height="50" fill="#D8292F" />
+              <rect x="25" width="50" height="50" fill="#FFFFFF" />
+              <rect x="75" width="25" height="50" fill="#D8292F" />
+              <path
+                d="M 50 10 L 52 18 L 59 15 L 56 22 L 64 22 L 59 27 L 66 33 L 57 33 L 54 36 L 53 43 L 51 43 L 50 41 L 49 43 L 47 43 L 46 36 L 43 33 L 34 33 L 41 27 L 36 22 L 44 22 L 41 15 L 48 18 Z"
+                fill="#D8292F"
+              />
+            </svg>
+            <span className="font-bold text-white tracking-tight">NRCAN / ISED</span>
+          </div>
+
           <div className="flex items-center gap-1 text-aurora">
             <Navigation className="h-3 w-3 animate-pulse" />
-            <span>GEO-RADAR ACTIVE</span>
+            <span>GEODETIC TELEMETRY</span>
           </div>
+
           {cursorCoords ? (
             <div>
               LAT: <span className="text-white">{cursorCoords.lat}°</span> | LNG:{" "}
@@ -568,12 +1018,25 @@ export default function GeospatialMap({
           ) : (
             <div>SCANNING GEOGRAPHY</div>
           )}
+
           <div className="hidden sm:inline text-text-muted">
             ZOOM: <span className="text-aurora">{currentZoom}x</span>
           </div>
+
           <div className="hidden md:inline text-text-subtle/80">
-            PROJECTION: <span className="text-white">EPSG:3857 (SPHERICAL MERCATOR)</span>
+            DATUM: <span className="text-white">NAD83 / WGS84 (EPSG:3857)</span>
           </div>
+        </div>
+
+        {/* Layer Counter Indicator */}
+        <div className="hidden md:flex pointer-events-auto bg-[#040806]/90 backdrop-blur-md border border-border/80 px-3 py-1.5 rounded-xl text-[10px] font-mono text-text-subtle items-center gap-2 shadow-xl">
+          <span className="text-aurora font-bold">{projects.length}</span> projects
+          <span>•</span>
+          <span className="text-sky-300 font-bold">{GLOBAL_TRADE_ROUTES.length}</span> routes
+          <span>•</span>
+          <span className="text-red-400 font-bold">{CONFLICT_MARKERS.length}</span> chokepoints
+          <span>•</span>
+          <span className="text-amber-400 font-bold">{OPPORTUNITY_ZONES.length}</span> zones
         </div>
       </div>
 

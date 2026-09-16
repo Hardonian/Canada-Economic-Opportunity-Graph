@@ -58,6 +58,9 @@ func (s *stubStore) ListProjects(_ context.Context, _ database.ProjectFilter) ([
 		{ID: "proj-b", Slug: "project-b", Name: "Project B", Sector: domain.SectorMiningMetals, Province: "AB", CurrentStage: domain.StagePermitting, CapexCAD: 500000000, UpdatedAt: time.Now()},
 	}, 2, nil
 }
+func (s *stubStore) ListProjectsInBounds(_ context.Context, _, _, _, _ float64, _ int) ([]*domain.Project, error) {
+	return []*domain.Project{}, nil
+}
 func (s *stubStore) SaveEntity(_ context.Context, _ *domain.Entity) error { return nil }
 func (s *stubStore) GetEntity(_ context.Context, id string) (*domain.Entity, error) {
 	return nil, fmt.Errorf("entity %q not found", id)

@@ -303,12 +303,10 @@ func (m *MemoryStore) ListProjectsInBounds(ctx context.Context, minLat, maxLat, 
 
 	var result []*domain.Project
 	for _, p := range m.projects {
-		if p.Latitude == nil || p.Longitude == nil {
+		if p.Latitude == 0 && p.Longitude == 0 {
 			continue
 		}
-		lat := *p.Latitude
-		lng := *p.Longitude
-		if lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng {
+		if p.Latitude >= minLat && p.Latitude <= maxLat && p.Longitude >= minLng && p.Longitude <= maxLng {
 			result = append(result, p)
 		}
 	}
