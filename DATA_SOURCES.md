@@ -18,6 +18,43 @@ locator, retrieval/publication/effective dates, parser version, mapping version,
 and pipeline version. The adapter rejects detached lineage before ingestion.
 See `docs/DATA_CREDENTIALS.md` for the no-key/key-required access register.
 
+## Newly added sources (2026-09-15)
+
+Four additional sources broaden coverage into political disclosure, federal
+procurement, monetary policy, and housing. All four default to reviewed
+fixtures so the default build stays deterministic; each has an opt-in live mode
+documented below.
+
+| Adapter | Publisher | Live mode env | Access | Epistemic treatment |
+| :--- | :--- | :--- | :--- | :--- |
+| `bank_of_canada_valet` | Bank of Canada / Banque du Canada (Valet API) | `BANKOFCANADA_LIVE=1` | Key-free, public | `REPORTED` |
+| `open_canada_federal_contracts` | Open.Canada Federal Contracts (>$10K) | `FEDERAL_CONTRACTS_LIVE=1` | Key-free, public | `REPORTED` |
+| `lobbyist_registry` | Office of the Commissioner of Lobbying of Canada | `LOBBYIST_REGISTRY_LIVE=1` | Key-free, public registry | `REPORTED` |
+| `cmhc_housing` | Canada Mortgage and Housing Corporation | `CMHC_HOUSING_LIVE=1` | Key-free, public | `REPORTED` |
+
+**Series covered by `bank_of_canada_valet`:** CPI (Canada, Quebec, Ontario),
+GDP at market prices (chained 2017 dollars), and the overnight money market
+financing rate (policy rate). The Valet endpoint accepts a fixed allowlist; the
+adapter refuses any host outside `www.bankofcanada.ca` and bounds the response
+body to 2 MiB.
+
+**Records produced by `open_canada_federal_contracts`:** `Procurement` records
+with `RequirementClass = CONFIRMED`, bilingual buyer department names, and
+award dates parsed to `*time.Time`. This is federal award data, not tender
+notices — do not represent these as open opportunities.
+
+**Records produced by `lobbyist_registry`:** `Entity` records for active
+registrants only (inactive registrations are skipped, not silently zeroed).
+Jurisdiction is `CA:FED`. Subject matters carry both English and French.
+
+**Records produced by `cmhc_housing`:** `TradeMetric` records for housing
+starts (Canada, Ontario, Quebec, British Columbia), rental vacancy rate, and
+average 2-bedroom rent. Bilingual indicator names are preserved.
+
+Each of the four applies the same provenance contract as the World Bank
+adapter: a separately hashed `Evidence` record with HTTPS URL, publisher,
+retrieval timestamp, parser version, and SHA-256 of the parsed payload.
+
 ## Active snapshot sources
 
 | Source | Coverage in the default build | Mode | Epistemic treatment |
@@ -28,6 +65,11 @@ See `docs/DATA_CREDENTIALS.md` for the no-key/key-required access register.
 | Canada Infrastructure Bank and project issuer releases | Oneida capital and operating milestone | Human-reviewed primary/issuer snapshot | `VERIFIED` or `REPORTED` per assertion |
 
 The adapters for CanadaBuys, CER, IAAC, IDEaS and legacy NRCan fixture formats remain implementation scaffolds. Their empty fixtures are not represented as live polling, complete coverage, or confirmed tender feeds.
+
+The four sources in **Newly added sources** above are NOT scaffolds: they ship
+with substantive fixtures (not empty arrays) and tested parsers. Their default
+mode is `CURATED_SNAPSHOT`, which means the values come from a reviewed
+fixture — not live polling — and are labeled `REPORTED`, never `VERIFIED`.
 
 ## Refresh and reproduce
 
