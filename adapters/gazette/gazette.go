@@ -126,6 +126,7 @@ func NewLiveGazetteAdapter(province string, client *http.Client) (*GazetteAdapte
 	if client != nil {
 		adapter.client = client
 	}
+	adapter.fixturePath = ""
 	adapter.health.Mode = "LIVE"
 	adapter.health.RateLimitState = "AVAILABLE"
 	return adapter, nil
@@ -142,7 +143,7 @@ func (a *GazetteAdapter) Fetch(ctx context.Context) ([]byte, error) {
 	
 	a.health.LastAttempt = time.Now().UTC()
 	
-	if a.endpoints != nil && len(a.endpoints) > 0 && a.fixturePath == "" {
+	if a.health.Mode == "LIVE" || (len(a.endpoints) > 0 && a.fixturePath == "") {
 		// Live mode: fetch from authoritative provincial/federal gazette endpoint
 		client := a.client
 		if client == nil {
