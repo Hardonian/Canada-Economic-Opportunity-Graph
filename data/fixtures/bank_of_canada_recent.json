@@ -1,0 +1,225 @@
+{
+  "_provenance": {
+    "source": "Bank of Canada Valet API",
+    "source_url": "https://www.bankofcanada.ca/valet/observations/AVG.INTWO,CL.CDN.MOST.1DL,EPS_CPI_INFLATION/json?recent=12",
+    "licence": "Bank of Canada - terms at https://www.bankofcanada.ca/terms/",
+    "retrieved_at": "2026-09-15T00:00:00Z",
+    "series": {
+      "AVG.INTWO": "Canadian Overnight Repo Rate Average (CORRA) (%)",
+      "CL.CDN.MOST.1DL": "Overnight money market financing rate",
+      "EPS_CPI_INFLATION": "Consumer price index inflation"
+    },
+    "note": "Reviewed snapshot captured from the key-free public Valet endpoint. Set BANKOFCANADA_LIVE=1 to fetch live."
+  },
+  "seriesDetail": {
+    "AVG.INTWO": {
+      "label": "Canadian Overnight Repo Rate Average (CORRA) (%)",
+      "description": "Canadian Overnight Repo Rate Average (CORRA) (%)",
+      "dimension": {
+        "key": "d",
+        "name": "Date"
+      }
+    },
+    "CL.CDN.MOST.1DL": {
+      "label": "Overnight money market financing rate",
+      "description": "An estimate of the collateralized overnight rate compiled at the end of the day by the Bank of Canada through a survey of major participants in the overnight market. (V39050)",
+      "dimension": {
+        "key": "d",
+        "name": "Date"
+      }
+    },
+    "EPS_CPI_INFLATION": {
+      "label": "Consumer price index inflation",
+      "description": "Consumer price index inflation",
+      "dimension": {
+        "key": "d",
+        "name": "Date"
+      }
+    }
+  },
+  "observations": [
+    {
+      "d": "2018-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "2.0"
+      }
+    },
+    {
+      "d": "2017-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.9"
+      }
+    },
+    {
+      "d": "2016-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.5"
+      }
+    },
+    {
+      "d": "2015-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.6"
+      }
+    },
+    {
+      "d": "2014-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.5"
+      }
+    },
+    {
+      "d": "2013-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.2"
+      }
+    },
+    {
+      "d": "2012-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "0.8"
+      }
+    },
+    {
+      "d": "2011-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "2.3"
+      }
+    },
+    {
+      "d": "2010-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "2.3"
+      }
+    },
+    {
+      "d": "2009-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.3"
+      }
+    },
+    {
+      "d": "2008-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "1.2"
+      }
+    },
+    {
+      "d": "2007-01-01",
+      "EPS_CPI_INFLATION": {
+        "v": "2.3"
+      }
+    },
+    {
+      "d": "2026-09-14",
+      "AVG.INTWO": {
+        "v": "2.2800"
+      }
+    },
+    {
+      "d": "2026-09-11",
+      "AVG.INTWO": {
+        "v": "2.3000"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2650"
+      }
+    },
+    {
+      "d": "2026-09-10",
+      "AVG.INTWO": {
+        "v": "2.3000"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2819"
+      }
+    },
+    {
+      "d": "2026-09-09",
+      "AVG.INTWO": {
+        "v": "2.2900"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2844"
+      }
+    },
+    {
+      "d": "2026-09-08",
+      "AVG.INTWO": {
+        "v": "2.2900"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2763"
+      }
+    },
+    {
+      "d": "2026-09-04",
+      "AVG.INTWO": {
+        "v": "2.2900"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2710"
+      }
+    },
+    {
+      "d": "2026-09-03",
+      "AVG.INTWO": {
+        "v": "2.3000"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2785"
+      }
+    },
+    {
+      "d": "2026-09-02",
+      "AVG.INTWO": {
+        "v": "2.3000"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2748"
+      }
+    },
+    {
+      "d": "2026-09-01",
+      "AVG.INTWO": {
+        "v": "2.2900"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2649"
+      }
+    },
+    {
+      "d": "2026-08-31",
+      "AVG.INTWO": {
+        "v": "2.2700"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2468"
+      }
+    },
+    {
+      "d": "2026-08-28",
+      "AVG.INTWO": {
+        "v": "2.2500"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2399"
+      }
+    },
+    {
+      "d": "2026-08-27",
+      "AVG.INTWO": {
+        "v": "2.2500"
+      },
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2386"
+      }
+    },
+    {
+      "d": "2026-08-26",
+      "CL.CDN.MOST.1DL": {
+        "v": "2.2395"
+      }
+    }
+  ]
+}

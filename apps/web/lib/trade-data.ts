@@ -10,7 +10,7 @@ function normalizeMetric(value: unknown): TradeMetric | null {
     typeof item.metric_code !== "string" ||
     typeof item.metric_name !== "string" ||
     typeof item.reference_period !== "string" ||
-    !/^\d{4}$/.test(item.reference_period) ||
+    !/^\d{4}(-\d{2}(-\d{2})?)?$/.test(item.reference_period) ||
     typeof item.value !== "number" ||
     !Number.isFinite(item.value) ||
     typeof item.unit !== "string" ||

@@ -127,10 +127,11 @@ func TestFetchResponseShapeIsJSON(t *testing.T) {
 
 func TestInferUnit(t *testing.T) {
 	cases := map[string]string{
-		"CPI_W":   "index_2002=100",
-		"GDPPV":   "chained_2017_CAD_millions",
-		"IRST_FF01": "percent",
-		"UNKNOWN": "index",
+		"EPS_CPI_INFLATION": "percent_yoy",
+		"CPI_W":             "percent_yoy",
+		"AVG.INTWO":         "percent",
+		"CL.CDN.MOST.1DL":   "percent",
+		"UNKNOWN":           "index",
 	}
 	for in, want := range cases {
 		if got := inferUnit(in); got != want {

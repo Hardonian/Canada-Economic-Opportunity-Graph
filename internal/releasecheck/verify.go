@@ -31,6 +31,7 @@ var expectedArtifacts = []string{
 	"public/projects.csv",
 	"public/projects.geojson",
 	"public/projects.jsonl",
+	"public/procurements.jsonl",
 	"public/scores.jsonl",
 	"public/trade_metrics.jsonl",
 }
@@ -168,6 +169,7 @@ func verifyCounts(dataRoot string, counts map[string]int) error {
 		"evidence":      "public/evidence.jsonl",
 		"scores":        "public/scores.jsonl",
 		"trade_metrics": "public/trade_metrics.jsonl",
+		"procurements":  "public/procurements.jsonl",
 	}
 	if len(counts) != len(files) {
 		return fmt.Errorf("manifest has %d record counts; expected %d", len(counts), len(files))
