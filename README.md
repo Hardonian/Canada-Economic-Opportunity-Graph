@@ -130,10 +130,34 @@ $ cog search "nuclear ontario"
 # Display investor-grade project dossier
 $ cog project show darlington-small-modular-reactor-deployment-project
 
+# Run StatCan Multi-Regional Input-Output (MRIO) macro multiplier model
+$ cog project mrio darlington-small-modular-reactor-deployment-project
+
+# Run Bayesian Bent Flyvbjerg cost & schedule overrun hazard curve
+$ cog project flyvbjerg darlington-small-modular-reactor-deployment-project
+
+# Run Ultimate Beneficial Ownership (UBO) & Investment Canada Act screening
+$ cog project ubo darlington-small-modular-reactor-deployment-project
+
+# Evaluate electrical grid hosting capacity and queue feasibility
+$ cog project grid darlington-small-modular-reactor-deployment-project
+
+# Verify physical progress via satellite SAR and optical ground truth
+$ cog project earthobs darlington-small-modular-reactor-deployment-project
+
+# Execute Sovereign Capital Allocation Optimizer (MILP)
+$ cog planning optimize --obj MAX_SOVEREIGNTY
+
+# Simulate geopolitical macro shocks (USMCA tariffs, export bans, chokepoints)
+$ cog planning wargame --shock USMCA_2026_TARIFF_25
+
+# Generate regional Red Seal craft labor collision & shortage report
+$ cog planning labor --prov ON
+
 # Inspect recent economic momentum signals (last 30 days)
 $ cog changes --since 30d
 
-# View rankings by Buildability or Investability
+# View rankings by Buildability, Investability, or Trade Resilience
 $ cog rankings buildability
 
 # Export dossier in CEGS 0.1 canonical format
@@ -158,22 +182,32 @@ Public release snapshots are maintained under [`data/cegs/`](data/cegs/) and [`d
 - `data/cegs/projects.jsonl`: Verified major infrastructure projects.
 - `data/cegs/organizations.jsonl`: Proponents, Crown corporations, and regulators.
 - `data/cegs/events.jsonl`: Append-only transition events.
+- `data/public/procurements.jsonl`: 25 active CanadaBuys & DCC major tenders.
 - `data/public/trade_metrics.jsonl`: Official normalized trade and logistics score inputs with evidence IDs.
 - [`docs/DATA_CREDENTIALS.md`](docs/DATA_CREDENTIALS.md): Credential-free sources, required account keys, and secret-handling rules.
 
 ---
 
-## REST API Overview
+## REST & GraphQL API Overview
 
 Base URL: `http://localhost:8080/api/v1`
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/radar` | Flagship macro stats, moving capital, accelerating assets |
-| `GET` | `/projects` | Query major projects with sector/province filters |
+| `GET` | `/projects` | Query major projects with sector/province/stage filters |
 | `GET` | `/projects/{id}` | Complete project dossier with scores and events |
-| `GET` | `/projects/{id}/provenance` | Cryptographic evidence graph |
-| `GET` | `/projects/{id}/trust` | Evidence Quality and primary source coverage |
+| `GET` | `/projects/{id}/mrio` | StatCan Multi-Regional Input-Output macroeconomic metrics |
+| `GET` | `/projects/{id}/flyvbjerg` | Bayesian reference-class cost & schedule overrun hazard curve |
+| `GET` | `/projects/{id}/ubo` | Ultimate Beneficial Ownership & Investment Canada Act screening |
+| `GET` | `/projects/{id}/grid` | Electrical grid hosting capacity and queue feasibility |
+| `GET` | `/projects/{id}/earthobs` | Satellite SAR and optical ground-truth telemetry |
+| `GET` | `/procurements` | CanadaBuys & DCC tender notices with buyer and stage metadata |
+| `GET` | `/signals` | Verified economic momentum events and milestones |
+| `POST / GET` | `/planning/optimize` | Run Sovereign Capital Allocation Optimizer (MILP) |
+| `POST / GET` | `/planning/wargame` | Execute geopolitical shock stress-testing simulation |
+| `GET` | `/planning/labor` | Regional Red Seal craft labor collision & pinch-point report |
+| `POST / GET` | `/graphql` | Enterprise GraphQL API querying projects, entities & opportunities |
 | `GET` | `/capital/stack` | Canadian Capital Stack programs & stacking rules |
 | `GET` | `/ai-sovereignty` | Canadian AI Sovereignty Index benchmarks |
 | `GET` | `/rankings/{dim}` | Ranked projects by Buildability, Investability, etc. |
