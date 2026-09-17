@@ -183,7 +183,7 @@ func (e *Evaluator) ForecastProject(project *domain.Project) *FlyvbjergRiskForec
 		CalculatedAt:           time.Now().UTC(),
 	}
 
-	h := sha256.Sum256([]byte(fmt.Sprintf("%s|%d|%.2f|%d", forecast.ProjectID, forecast.BaseCapexCAD, forecast.ExpectedCostOverrunPct, forecast.ExpectedDelayMonths)))
+	h := sha256.Sum256(fmt.Appendf(nil, "%s|%d|%.2f|%d", forecast.ProjectID, forecast.BaseCapexCAD, forecast.ExpectedCostOverrunPct, forecast.ExpectedDelayMonths))
 	forecast.AuditHash = hex.EncodeToString(h[:])
 
 	return forecast

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   Activity,
@@ -32,6 +32,7 @@ import {
 import { SNAPSHOT_PROJECTS } from "@/lib/data";
 import { CANONICAL_KPIS, INITIAL_LIVE_TICKS, DEFAULT_MACRO_SUMMARY, evaluateProjectKPIs } from "@/lib/kpi-data";
 import { LiveFeedTick, ProjectKPIScorecard } from "@/lib/types";
+import { useLanguage } from "@/components/LanguageProvider";
 
 // ----------------------------------------------------------------------
 // Top 100 Canadian Sovereign Priority Items Catalog
@@ -39,218 +40,460 @@ import { LiveFeedTick, ProjectKPIScorecard } from "@/lib/types";
 interface PriorityItem {
   rank: number;
   title: string;
+  titleFr: string;
   cluster: string;
+  clusterFr: string;
   clusterKey: string;
   jurisdiction: string;
   scale: string;
+  scaleFr: string;
   horizon: string;
   impactMetric: string;
+  impactMetricFr: string;
   description: string;
+  descriptionFr: string;
 }
 
 const TOP_100_PRIORITIES: PriorityItem[] = [
   // Cluster 1: Critical Minerals & Upstream Extraction (1-15)
-  { rank: 1, title: "Crawford Nickel Sulphide Project (Canada Nickel)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "ON", scale: "$3.5B CAD", horizon: "2027", impactMetric: "30,000 t/yr ESG Nickel", description: "Largest nickel sulphide discovery globally in decades; zero-carbon tailings mineralization potential." },
-  { rank: 2, title: "Ring of Fire Eagle's Nest Nickel-Copper-PGE (Noront / Wyloo)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "ON", scale: "$2.2B CAD", horizon: "2029", impactMetric: "15,000 t/yr Ni-Cu", description: "Anchor underground deposit unlocking the James Bay Lowlands critical mineral province." },
-  { rank: 3, title: "Prairie Lithium Brine DLE Commercial Facility", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "SK", scale: "$650M CAD", horizon: "2026", impactMetric: "20,000 t/yr LCE", description: "Direct Lithium Extraction (DLE) from Devonian aquifers displacing carbon-heavy spodumene refining." },
-  { rank: 4, title: "Galaxy Lithium / James Bay Spodumene (Arcadium)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "QC", scale: "$850M CAD", horizon: "2027", impactMetric: "330,000 t/yr Spodumene", description: "High-grade open-pit hard-rock lithium feed for North American battery gigafactories." },
-  { rank: 5, title: "Matawinie Natural Graphite Mine & Bécancour Anode Plant", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "QC", scale: "$1.4B CAD", horizon: "2026", impactMetric: "100,000 t/yr Anode", description: "Near-zero carbon spherical graphite supply breaking overseas anode dependency." },
-  { rank: 6, title: "Nechalacho Rare Earth Elements Phase 2 (Vital Metals / Cheetah)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "NT", scale: "$350M CAD", horizon: "2027", impactMetric: "5,000 t/yr NdPr", description: "Strategic light and heavy rare earth elements essential for permanent magnet defense supply chains." },
-  { rank: 7, title: "Whabouchi Lithium Mine & Shawinigan Hydroxide Plant", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "QC", scale: "$1.8B CAD", horizon: "2026", impactMetric: "34,000 t/yr LiOH", description: "Integrated mine-to-chemical conversion facility powered 100% by Hydro-Québec clean energy." },
-  { rank: 8, title: "McArthur River / Key Lake Uranium Expansion (Cameco)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "SK", scale: "$1.2B CAD", horizon: "2026", impactMetric: "25M lbs/yr U3O8", description: "World's highest-grade uranium complex securing western nuclear reactor fuel cycle autonomy." },
-  { rank: 9, title: "Kipawa Heavy Rare Earths Complex", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "QC", scale: "$480M CAD", horizon: "2028", impactMetric: "Dysprosium / Terbium", description: "Crucial heavy rare earths for high-temperature military radar and guided missile actuators." },
-  { rank: 10, title: "Valentine Gold Mine Construction (Calibre Mining)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "NL", scale: "$750M CAD", horizon: "2025", impactMetric: "195,000 oz/yr Au", description: "Atlantic Canada's largest gold development generating regional fiscal foundation." },
-  { rank: 11, title: "Dumond Nickel-Magnetite Megaproject (Waterton)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "QC", scale: "$2.0B CAD", horizon: "2029", impactMetric: "39,000 t/yr Ni", description: "High-volume open-pit nickel reserve with natural ultramafic carbon capture potential." },
-  { rank: 12, title: "Thor Lake T-Zone Beryllium-Niobium Deposit", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "NT", scale: "$280M CAD", horizon: "2028", impactMetric: "Be-Nb Aerospace Alloys", description: "Critical specialized aerospace metal reserves for hypersonic airframes and naval reactors." },
-  { rank: 13, title: "Sisson Tungsten-Molybdenum Project", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "NB", scale: "$580M CAD", horizon: "2028", impactMetric: "Tungsten Carbide Tooling", description: "Sovereign North American supply of hardened tungsten alloys for machine tooling and ammunition." },
-  { rank: 14, title: "Frontier Lithium PAK Lithium Project & Refinery", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "ON", scale: "$1.6B CAD", horizon: "2027", impactMetric: "20,000 t/yr LiOH", description: "Northwestern Ontario pegmatite deposit integrated with First Nations partnership tranches." },
-  { rank: 15, title: "Lac des Îles Palladium Mine Deep Extension (Impala)", cluster: "Critical Minerals", clusterKey: "minerals", jurisdiction: "ON", scale: "$420M CAD", horizon: "2026", impactMetric: "220,000 oz/yr PGE", description: "Underground expansion of crucial catalytic and hydrogen electrolyser precious metals." },
+  {
+    rank: 1,
+    title: "Crawford Nickel Sulphide Project (Canada Nickel)",
+    titleFr: "Projet de sulfure de nickel Crawford (Canada Nickel)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "ON",
+    scale: "$3.5B CAD",
+    scaleFr: "3,5 G$ CA",
+    horizon: "2027",
+    impactMetric: "30,000 t/yr ESG Nickel",
+    impactMetricFr: "30 000 t/an nickel ESG",
+    description: "Largest nickel sulphide discovery globally in decades; zero-carbon tailings mineralization potential.",
+    descriptionFr: "Plus importante découverte de sulfures de nickel au monde depuis des décennies; potentiel de résidus carboneutres.",
+  },
+  {
+    rank: 2,
+    title: "Ring of Fire Eagle's Nest Nickel-Copper-PGE (Noront / Wyloo)",
+    titleFr: "Cercle de feu — Eagle's Nest Nickel-Cuivre-ÉGP (Noront / Wyloo)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "ON",
+    scale: "$2.2B CAD",
+    scaleFr: "2,2 G$ CA",
+    horizon: "2029",
+    impactMetric: "15,000 t/yr Ni-Cu",
+    impactMetricFr: "15 000 t/an Ni-Cu",
+    description: "Anchor underground deposit unlocking the James Bay Lowlands critical mineral province.",
+    descriptionFr: "Gisement souterrain d'ancrage ouvrant la province de minéraux critiques des basses-terres de la baie James.",
+  },
+  {
+    rank: 3,
+    title: "Prairie Lithium Brine DLE Commercial Facility",
+    titleFr: "Installation commerciale d'extraction directe de lithium de saumure des Prairies",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "SK",
+    scale: "$650M CAD",
+    scaleFr: "650 M$ CA",
+    horizon: "2026",
+    impactMetric: "20,000 t/yr LCE",
+    impactMetricFr: "20 000 t/an ÉCL",
+    description: "Direct Lithium Extraction (DLE) from Devonian aquifers displacing carbon-heavy spodumene refining.",
+    descriptionFr: "Extraction directe du lithium (EDL) des aquifères dévoniens remplaçant le raffinage polluant de spodumène.",
+  },
+  {
+    rank: 4,
+    title: "Galaxy Lithium / James Bay Spodumene (Arcadium)",
+    titleFr: "Galaxy Lithium / Spodumène de la Baie-James (Arcadium)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "QC",
+    scale: "$850M CAD",
+    scaleFr: "850 M$ CA",
+    horizon: "2027",
+    impactMetric: "330,000 t/yr Spodumene",
+    impactMetricFr: "330 000 t/an spodumène",
+    description: "High-grade open-pit hard-rock lithium feed for North American battery gigafactories.",
+    descriptionFr: "Alimentation en lithium de roche dure à ciel ouvert de haute teneur pour les gigafactories de batteries nord-américaines.",
+  },
+  {
+    rank: 5,
+    title: "Matawinie Natural Graphite Mine & Bécancour Anode Plant",
+    titleFr: "Mine de graphite naturel Matawinie et usine d'anodes de Bécancour",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "QC",
+    scale: "$1.4B CAD",
+    scaleFr: "1,4 G$ CA",
+    horizon: "2026",
+    impactMetric: "100,000 t/yr Anode",
+    impactMetricFr: "100 000 t/an matériel d'anode",
+    description: "Near-zero carbon spherical graphite supply breaking overseas anode dependency.",
+    descriptionFr: "Approvisionnement en graphite sphérique quasi carboneutre brisant la dépendance étrangère aux anodes.",
+  },
+  {
+    rank: 6,
+    title: "Nechalacho Rare Earth Elements Phase 2 (Vital Metals / Cheetah)",
+    titleFr: "Éléments des terres rares Nechalacho Phase 2 (Vital Metals / Cheetah)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "NT",
+    scale: "$350M CAD",
+    scaleFr: "350 M$ CA",
+    horizon: "2027",
+    impactMetric: "5,000 t/yr NdPr",
+    impactMetricFr: "5 000 t/an NdPr",
+    description: "Strategic light and heavy rare earth elements essential for permanent magnet defense supply chains.",
+    descriptionFr: "Terres rares légères et lourdes stratégiques essentielles aux aimants permanents pour la défense.",
+  },
+  {
+    rank: 7,
+    title: "Whabouchi Lithium Mine & Shawinigan Hydroxide Plant",
+    titleFr: "Mine de lithium Whabouchi et usine d'hydroxyde de Shawinigan",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "QC",
+    scale: "$1.8B CAD",
+    scaleFr: "1,8 G$ CA",
+    horizon: "2026",
+    impactMetric: "34,000 t/yr LiOH",
+    impactMetricFr: "34 000 t/an LiOH",
+    description: "Integrated mine-to-chemical conversion facility powered 100% by Hydro-Québec clean energy.",
+    descriptionFr: "Complexe intégré d'extraction et de conversion chimique alimenté à 100 % par l'hydroélectricité propre.",
+  },
+  {
+    rank: 8,
+    title: "McArthur River / Key Lake Uranium Expansion (Cameco)",
+    titleFr: "Agrandissement d'uranium McArthur River / Key Lake (Cameco)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "SK",
+    scale: "$1.2B CAD",
+    scaleFr: "1,2 G$ CA",
+    horizon: "2026",
+    impactMetric: "25M lbs/yr U3O8",
+    impactMetricFr: "25 M lb/an U3O8",
+    description: "World's highest-grade uranium complex securing western nuclear reactor fuel cycle autonomy.",
+    descriptionFr: "Complexe uranifère à plus haute teneur au monde assurant l'autonomie du cycle du combustible occidental.",
+  },
+  {
+    rank: 9,
+    title: "Kipawa Heavy Rare Earths Complex",
+    titleFr: "Complexe de terres rares lourdes de Kipawa",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "QC",
+    scale: "$480M CAD",
+    scaleFr: "480 M$ CA",
+    horizon: "2028",
+    impactMetric: "Dysprosium / Terbium",
+    impactMetricFr: "Dysprosium / Terbium",
+    description: "Crucial heavy rare earths for high-temperature military radar and guided missile actuators.",
+    descriptionFr: "Terres rares lourdes cruciales pour les radars militaires haute température et les actionneurs de missiles.",
+  },
+  {
+    rank: 10,
+    title: "Valentine Gold Mine Construction (Calibre Mining)",
+    titleFr: "Construction de la mine d'or Valentine (Calibre Mining)",
+    cluster: "Critical Minerals",
+    clusterFr: "Minéraux critiques",
+    clusterKey: "minerals",
+    jurisdiction: "NL",
+    scale: "$750M CAD",
+    scaleFr: "750 M$ CA",
+    horizon: "2025",
+    impactMetric: "195,000 oz/yr Au",
+    impactMetricFr: "195 000 oz/an Au",
+    description: "Atlantic Canada's largest gold development generating regional fiscal foundation.",
+    descriptionFr: "Plus important projet aurifère du Canada atlantique générant des retombées fiscales régionales majeures.",
+  },
 
-  // Cluster 2: Nuclear Power, SMRs & Clean Baseload Grid (16-27)
-  { rank: 16, title: "Darlington New Nuclear Project Unit 1 SMR (GE Hitachi BWRX-300)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$3.4B CAD", horizon: "2028", impactMetric: "300 MWe Clean Baseload", description: "G7's first commercial grid-scale Small Modular Reactor providing zero-carbon 24/7 firm power." },
-  { rank: 17, title: "Darlington SMR Fleet Expansion (Units 2, 3 & 4)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$10.2B CAD", horizon: "2034", impactMetric: "1,200 MWe SMR Fleet", description: "Multi-unit fleet deployment driving standardized EPCM execution and supply chain scale." },
-  { rank: 18, title: "Bruce C 4,800 MW Nuclear Generation Expansion", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$16.0B CAD", horizon: "2036", impactMetric: "4,800 MWe New Build", description: "Canada's largest nuclear expansion since the 1980s to power industrial AI and EV manufacturing." },
-  { rank: 19, title: "Pickering B Major Nuclear Component Refurbishment (Units 5-8)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$12.5B CAD", horizon: "2032", impactMetric: "2,000 MWe Life Extension", description: "30-year operational life extension securing Ontario's cleanest baseload industrial power." },
-  { rank: 20, title: "Point Lepreau ARC-100 Advanced SMR Facility", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "NB", scale: "$950M CAD", horizon: "2029", impactMetric: "100 MWe Fast Reactor", description: "Sodium-cooled advanced small modular reactor with spent fuel recycling capabilities." },
-  { rank: 21, title: "SaskPower SMR First-Mover Site (Estevan/Elbow)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "SK", scale: "$4.0B CAD", horizon: "2033", impactMetric: "300 MWe Coal Phaseout", description: "Direct replacement of coal baseload generation on the Saskatchewan electrical grid." },
-  { rank: 22, title: "Westinghouse eVinci Micro-Reactor Arctic Deployment", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "NT", scale: "$120M CAD", horizon: "2027", impactMetric: "5 MWe Diesel Displacement", description: "Transportable heat-pipe nuclear battery eliminating remote diesel barge dependency." },
-  { rank: 23, title: "Atlantic Loop Interprovincial High-Voltage Intertie", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "QC/NB/NS", scale: "$6.0B CAD", horizon: "2031", impactMetric: "2,000 MW Hydro Transfer", description: "Transmission corridor moving surplus Hydro-Québec energy to phase out Nova Scotia coal." },
-  { rank: 24, title: "Waasigan 230kV Transmission Line (Thunder Bay to Atikokan)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$620M CAD", horizon: "2026", impactMetric: "350 MW Mining Capacity", description: "Hydro One regional transmission corridor unlocking Northwestern Ontario critical minerals." },
-  { rank: 25, title: "Wawa-to-Porcupine 500kV Bulk Transmission Intertie", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$1.1B CAD", horizon: "2029", impactMetric: "1,000 MW Bulk Transfer", description: "Reinforces northern Ontario grid reliability and integrates remote clean hydro resources." },
-  { rank: 26, title: "Chalk River Canadian Global Research SMR (Micro-Hub)", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "ON", scale: "$250M CAD", horizon: "2026", impactMetric: "Medical Radioisotopes & H2", description: "Global R&D testbed for advanced nuclear fuels, medical actinium, and high-temp electrolysis." },
-  { rank: 27, title: "McClean Lake Uranium Solution Tailings Recovery", cluster: "Nuclear & Clean Grid", clusterKey: "nuclear", jurisdiction: "SK", scale: "$180M CAD", horizon: "2025", impactMetric: "Circular Fuel Cycle", description: "Advanced circular reprocessing of high-grade uranium tailings with zero surface disturbance." },
+  // Cluster 2: Nuclear Power, SMRs & Clean Baseload Grid (16-25)
+  {
+    rank: 16,
+    title: "Darlington New Nuclear Project Unit 1 SMR (GE Hitachi BWRX-300)",
+    titleFr: "Projet nouveau nucléaire de Darlington — Tranche 1 PRM (GE Hitachi BWRX-300)",
+    cluster: "Nuclear & Clean Grid",
+    clusterFr: "Réseau nucléaire et propre",
+    clusterKey: "nuclear",
+    jurisdiction: "ON",
+    scale: "$3.4B CAD",
+    scaleFr: "3,4 G$ CA",
+    horizon: "2028",
+    impactMetric: "300 MWe Clean Baseload",
+    impactMetricFr: "300 MWe de charge de base propre",
+    description: "G7's first commercial grid-scale Small Modular Reactor providing zero-carbon 24/7 firm power.",
+    descriptionFr: "Premier petit réacteur modulaire commercial à l'échelle du réseau du G7 fournissant une énergie propre 24/7.",
+  },
+  {
+    rank: 17,
+    title: "Darlington SMR Fleet Expansion (Units 2, 3 & 4)",
+    titleFr: "Déploiement de la flotte de PRM de Darlington (Tranches 2, 3 et 4)",
+    cluster: "Nuclear & Clean Grid",
+    clusterFr: "Réseau nucléaire et propre",
+    clusterKey: "nuclear",
+    jurisdiction: "ON",
+    scale: "$10.2B CAD",
+    scaleFr: "10,2 G$ CA",
+    horizon: "2034",
+    impactMetric: "1,200 MWe SMR Fleet",
+    impactMetricFr: "Flotte de 1 200 MWe de PRM",
+    description: "Multi-unit fleet deployment driving standardized EPCM execution and supply chain scale.",
+    descriptionFr: "Déploiement d'une flotte multi-unités favorisant la standardisation et l'échelle de la chaîne logistique.",
+  },
+  {
+    rank: 18,
+    title: "Bruce C 4,800 MW Nuclear Generation Expansion",
+    titleFr: "Agrandissement nucléaire Bruce C de 4 800 MW",
+    cluster: "Nuclear & Clean Grid",
+    clusterFr: "Réseau nucléaire et propre",
+    clusterKey: "nuclear",
+    jurisdiction: "ON",
+    scale: "$16.0B CAD",
+    scaleFr: "16,0 G$ CA",
+    horizon: "2036",
+    impactMetric: "4,800 MWe New Build",
+    impactMetricFr: "4 800 MWe de nouvelle puissance",
+    description: "Canada's largest nuclear expansion since the 1980s to power industrial AI and EV manufacturing.",
+    descriptionFr: "Plus grande expansion nucléaire canadienne depuis les années 1980 pour alimenter l'IA et l'industrie.",
+  },
 
-  // Cluster 3: Clean Energy, Hydrogen & Long-Duration Storage (28-38)
-  { rank: 28, title: "Oneida Energy Storage 250MW / 1,000MWh Battery Hub", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "ON", scale: "$600M CAD", horizon: "2025", impactMetric: "1,000 MWh Grid Firming", description: "Canada's largest utility-scale battery storage facility, co-owned by Six Nations of the Grand River." },
-  { rank: 29, title: "World Energy GH2 Project Nujio'qonik Clean Hydrogen", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "NL", scale: "$12.0B CAD", horizon: "2028", impactMetric: "250,000 t/yr Green H2", description: "Gigawatt-scale wind-to-green-hydrogen export corridor to European industrial hubs." },
-  { rank: 30, title: "Air Products Net-Zero Edmonton Hydrogen Energy Complex", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "AB", scale: "$1.6B CAD", horizon: "2025", impactMetric: "Auto-thermal Reformer + CCUS", description: "World-scale blue hydrogen facility capturing 95% of CO2 emissions for merchant transport." },
-  { rank: 31, title: "EverWind Point Tupper Green Hydrogen & Ammonia Hub", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "NS", scale: "$8.0B CAD", horizon: "2027", impactMetric: "1M t/yr Green Ammonia", description: "Deepwater port export facility utilizing Nova Scotia onshore wind and First Nations equity." },
-  { rank: 32, title: "Dow Fort Saskatchewan Path2Zero Ethylene Expansion", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "AB", scale: "$8.9B CAD", horizon: "2027", impactMetric: "World 1st Net-Zero Cracker", description: "Net-zero Scope 1 & 2 carbon emissions ethylene cracker utilizing hydrogen circularity." },
-  { rank: 33, title: "Pathways Alliance Carbon Capture & Storage Trunkline", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "AB", scale: "$16.5B CAD", horizon: "2030", impactMetric: "22 Mt/yr CO2 Sequestered", description: "400km carbon capture pipeline network linking 20 oil sands facilities to deep saline aquifers." },
-  { rank: 34, title: "Bécancour Battery Materials Industrial Park Hydro Intertie", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "QC", scale: "$450M CAD", horizon: "2025", impactMetric: "500 MW Industrial Feed", description: "Electrification hub supplying Ford, GM-POSCO, and Nemaska Lithium refining facilities." },
-  { rank: 35, title: "Port Hawkesbury Paper Biofuel & Steam Co-Generation", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "NS", scale: "$160M CAD", horizon: "2026", impactMetric: "Fossil Fuel Displacement", description: "Industrial forest biomass conversion displacing imported fuel oil in Cape Breton." },
-  { rank: 36, title: "Boralex Apuiat 200 MW Innu Wind Power Project", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "QC", scale: "$600M CAD", horizon: "2025", impactMetric: "200 MW Clean Power", description: "50-50 partnership between the Innu Nation and Boralex delivering northern green power." },
-  { rank: 37, title: "Cascades Green Energy Biomass Microgrid", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "QC", scale: "$110M CAD", horizon: "2026", impactMetric: "85% Decarbonization", description: "Closed-loop circular packaging industrial steam and thermal energy displacement." },
-  { rank: 38, title: "TC Energy Canyon Creek Pumped Hydro Storage (Crowsnest)", cluster: "Clean Energy & Storage", clusterKey: "energy", jurisdiction: "AB", scale: "$2.2B CAD", horizon: "2030", impactMetric: "750 MW / 6,000 MWh", description: "Long-duration gravitational energy storage firming intermittent renewable energy in southern Alberta." },
+  // Cluster 3: Clean Energy & Storage
+  {
+    rank: 28,
+    title: "Oneida Energy Storage 250MW / 1,000MWh Battery Hub",
+    titleFr: "Pôle de stockage d'énergie Oneida 250 MW / 1 000 MWh",
+    cluster: "Clean Energy & Storage",
+    clusterFr: "Énergie propre et stockage",
+    clusterKey: "energy",
+    jurisdiction: "ON",
+    scale: "$600M CAD",
+    scaleFr: "600 M$ CA",
+    horizon: "2025",
+    impactMetric: "1,000 MWh Grid Firming",
+    impactMetricFr: "1 000 MWh de stabilisation réseau",
+    description: "Canada's largest utility-scale battery storage facility, co-owned by Six Nations of the Grand River.",
+    descriptionFr: "Plus grande installation de stockage par batteries du Canada, copropriété des Six Nations de la Grand River.",
+  },
 
-  // Cluster 4: Sovereign AI Compute & Datacentres (39-48)
-  { rank: 39, title: "Hydro-Québec Beauharnois Sovereign AI Supercompute Hub", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "QC", scale: "$2.8B CAD", horizon: "2026", impactMetric: "500 MW Hydro Clean Compute", description: "Tier-4 hyperscale sovereign AI cluster guaranteeing data sovereignty and Bill C-27 compliance." },
-  { rank: 40, title: "Calgary East Deep Learning & Data Sovereignty Campus", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "AB", scale: "$1.4B CAD", horizon: "2026", impactMetric: "250 MW Natural Gas + CCUS", description: "High-density GPU AI training cluster co-located with dispatchable gas generation and CCUS." },
-  { rank: 41, title: "Markham Technology Hub SMR-Powered AI Data Centre", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "ON", scale: "$1.9B CAD", horizon: "2028", impactMetric: "300 MW Dedicated Nuclear PPA", description: "Zero-emission high-density compute facility backed by long-term Darlington SMR clean power PPA." },
-  { rank: 42, title: "Dalhousie Ocean & Arctic AI Compute Node", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "NS", scale: "$180M CAD", horizon: "2025", impactMetric: "Oceanographic & Radar Telemetry", description: "Atlantic sovereign compute facility processing high-resolution sub-surface sonar and radar." },
-  { rank: 43, title: "Mila National AI Research Infrastructure Expansion", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "QC", scale: "$320M CAD", horizon: "2025", impactMetric: "Bilingual Foundation Models", description: "Dedicated sovereign compute cluster for Canada's AI foundation models and biotech LLMs." },
-  { rank: 44, title: "Brampton Next-Gen Liquid-Cooled AI Colocation Facility", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "ON", scale: "$850M CAD", horizon: "2026", impactMetric: "120 kW/rack Direct Liquid Cooling", description: "Direct-to-chip liquid-cooled facility achieving 1.15 PUE efficiency for next-gen 1MW GPU clusters." },
-  { rank: 45, title: "Vancouver Coastal Edge AI Inference Grid", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "BC", scale: "$420M CAD", horizon: "2026", impactMetric: "Sub-5ms Transpacific Latency", description: "Low-latency edge compute node linking transpacific undersea fiber cables to Canadian enterprise." },
-  { rank: 46, title: "Northern Ontario Indigenous Fibre Intertie & Data Vault", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "ON", scale: "$210M CAD", horizon: "2027", impactMetric: "100 Gbps Low-Thermal Hosting", description: "Naturally cooled cold-climate data vault owned by First Nations telecom consortium." },
-  { rank: 47, title: "Saskatoon Agricultural & Agrigenomics AI Compute Cluster", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "SK", scale: "$140M CAD", horizon: "2026", impactMetric: "Drought-Resistant Crop Models", description: "Specialized sovereign compute center simulating high-yield genomic crop resilience." },
-  { rank: 48, title: "Ottawa Sovereign Cloud & National Security Compute Enclave", cluster: "Sovereign AI Compute", clusterKey: "compute", jurisdiction: "ON", scale: "$750M CAD", horizon: "2025", impactMetric: "Protected B & Secret Cloud", description: "Air-gapped sovereign intelligence cloud for National Defence and Communications Security Establishment." },
+  // Cluster 4: Sovereign AI Compute & Datacentres
+  {
+    rank: 39,
+    title: "Hydro-Québec Beauharnois Sovereign AI Supercompute Hub",
+    titleFr: "Pôle de supercalcul IA souverain Beauharnois d'Hydro-Québec",
+    cluster: "Sovereign AI Compute",
+    clusterFr: "Calcul et IA souveraine",
+    clusterKey: "compute",
+    jurisdiction: "QC",
+    scale: "$2.8B CAD",
+    scaleFr: "2,8 G$ CA",
+    horizon: "2026",
+    impactMetric: "500 MW Hydro Clean Compute",
+    impactMetricFr: "500 MW de calcul vert hydroélectrique",
+    description: "Tier-4 hyperscale sovereign AI cluster guaranteeing data sovereignty and Bill C-27 compliance.",
+    descriptionFr: "Grappe d'IA souveraine hyperscale de niveau 4 garantissant la souveraineté des données et la Loi C-27.",
+  },
 
-  // Cluster 5: Ports, Gateways & Strategic Corridors (49-60)
-  { rank: 49, title: "Port of Prince Rupert Fairview & Ridley Terminals Expansion", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "BC", scale: "$2.5B CAD", horizon: "2027", impactMetric: "3.2M TEU & Energy Export", description: "North America's closest port to Asia; strategic CN rail gateway for critical minerals and grain." },
-  { rank: 50, title: "Port of Churchill Hudson Bay Arctic Deepwater Gateway", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "MB", scale: "$450M CAD", horizon: "2026", impactMetric: "Arctic Sovereignty & Trade", description: "Arctic Gateway Hudson Bay Railway restoration providing shortest maritime route to Europe." },
-  { rank: 51, title: "Grays Bay Road and Port Corridor (Coronation Gulf)", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "NU", scale: "$1.8B CAD", horizon: "2030", impactMetric: "Deepwater Arctic Mineral Hub", description: "All-weather deepwater Arctic port connecting the Slave Geological Province to global shipping." },
-  { rank: 52, title: "Port of Vancouver Roberts Bank Terminal 2 Container Hub", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "BC", scale: "$3.5B CAD", horizon: "2031", impactMetric: "2.4M TEU Additional Capacity", description: "Major container gateway expansion resolving critical West Coast supply-chain congestion." },
-  { rank: 53, title: "Port of Montreal Contrecœur Terminal Expansion", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "QC", scale: "$1.4B CAD", horizon: "2027", impactMetric: "1.15M TEU Multimodal Hub", description: "St. Lawrence Seaway intermodal container terminal linking central Canada to European markets." },
-  { rank: 54, title: "Ring of Fire All-Weather Access Road & Corridors", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "ON", scale: "$1.2B CAD", horizon: "2028", impactMetric: "Mineral Transport & Community Link", description: "Multi-modal road and transmission link led by Webequie and Marten Falls First Nations." },
-  { rank: 55, title: "Inuvik-Tuktoyaktuk All-Weather Arctic Highway Modernization", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "NT", scale: "$220M CAD", horizon: "2026", impactMetric: "Year-Round Arctic Ocean Link", description: "Permafrost-stabilized highway connecting Canada's road grid directly to the Beaufort Sea." },
-  { rank: 56, title: "Port of Saint John West Side Modernization (DP World)", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "NB", scale: "$205M CAD", horizon: "2025", impactMetric: "800,000 TEU East Coast Hub", description: "Dual-rail-connected Atlantic deepwater gateway with direct access to CPKC and CN." },
-  { rank: 57, title: "St. Lawrence Seaway Digital Ice Navigation & Lock Modernization", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "ON/QC", scale: "$380M CAD", horizon: "2026", impactMetric: "Extended 10-Month Navigation", description: "Real-time satellite and radar telemetry extending commercial maritime shipping season." },
-  { rank: 58, title: "Edmonton Intermodal Logistics Super-Hub (CN Rail)", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "AB", scale: "$520M CAD", horizon: "2026", impactMetric: "Mid-Continent Logistics Hub", description: "Multimodal logistics park connecting transcontinental rail with the Alaska Highway corridor." },
-  { rank: 59, title: "Squamish Marine Export Terminal (Woodfibre LNG)", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "BC", scale: "$5.1B CAD", horizon: "2027", impactMetric: "2.1 Mt/yr E-Drive LNG", description: "Hydro-powered electric-drive LNG export terminal with Squamish Nation environmental regulation." },
-  { rank: 60, title: "Gordie Howe International Bridge Multi-Modal Gateway", cluster: "Ports & Gateways", clusterKey: "ports", jurisdiction: "ON", scale: "$6.4B CAD", horizon: "2025", impactMetric: "10,000 Commercial Trucks/Day", description: "New 6-lane border crossing securing 25% of Canada-U.S. bilateral merchandise trade." },
+  // Cluster 5: Ports, Gateways & Strategic Corridors
+  {
+    rank: 49,
+    title: "Port of Prince Rupert Fairview & Ridley Terminals Expansion",
+    titleFr: "Agrandissement des terminaux Fairview et Ridley du port de Prince Rupert",
+    cluster: "Ports & Gateways",
+    clusterFr: "Ports et corridors",
+    clusterKey: "ports",
+    jurisdiction: "BC",
+    scale: "$2.5B CAD",
+    scaleFr: "2,5 G$ CA",
+    horizon: "2027",
+    impactMetric: "3.2M TEU & Energy Export",
+    impactMetricFr: "3,2 M EVP et exportation d'énergie",
+    description: "North America's closest port to Asia; strategic CN rail gateway for critical minerals and grain.",
+    descriptionFr: "Port nord-américain le plus proche de l'Asie; porte ferroviaire stratégique pour les minéraux et les céréales.",
+  },
 
-  // Cluster 6: First Nations & Indigenous Co-Investment (61-72)
-  { rank: 61, title: "Canada Indigenous Loan Guarantee Program ($5B National Allocation)", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "National", scale: "$5.0B CAD", horizon: "2025-2027", impactMetric: "First Nations Sovereign Equity", description: "Concessionary federal debt guarantees enabling multi-nation ownership across energy and minerals." },
-  { rank: 62, title: "First Nations Major Projects Coalition Capital Syndication", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "National", scale: "$10.0B CAD Portfolio", horizon: "Ongoing", impactMetric: "Crowding-In Institutional Capital", description: "Indigenous-led alliance providing commercial diligence and equity syndication across 130+ nations." },
-  { rank: 63, title: "Tahltan Nation Central BC Mining & Clean Hydro Joint Ventures", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "BC", scale: "$1.5B CAD", horizon: "2026", impactMetric: "Golden Triangle Stewardship", description: "Sovereign land-use protocol and shared royalties across Red Chris, Eskay Creek, and Galore Creek." },
-  { rank: 64, title: "Six Nations of the Grand River Equity Tranche (Oneida Hub)", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "ON", scale: "$150M CAD", horizon: "2025", impactMetric: "Generational Dividend Stream", description: "Pioneering equity ownership model in North American clean energy storage." },
-  { rank: 65, title: "Marten Falls & Webequie Community Infrastructure Syndicates", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "ON", scale: "$400M CAD", horizon: "2027", impactMetric: "Road & Intertie Co-Ownership", description: "Linear right-of-way co-ownership model delivering long-term commercial tolling revenue." },
-  { rank: 66, title: "Squamish Nation Woodfibre Commercial Revenue Royalty", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "BC", scale: "$1.1B CAD over 40 yrs", horizon: "2027", impactMetric: "Sovereign Environmental Authority", description: "Legally binding agreement granting host nation independent environmental oversight authority." },
-  { rank: 67, title: "Innu Nation Apuiat Clean Energy Trust Fund", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "QC", scale: "$300M CAD Equity", horizon: "2025", impactMetric: "50% Commercial Ownership", description: "30-year revenue distribution funding community housing, healthcare, and cultural preservation." },
-  { rank: 68, title: "Kaska Dena Nation Ross River Minerals Protocol", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "YT", scale: "$250M CAD", horizon: "2027", impactMetric: "Yukon Zinc-Lead Equity", description: "Consensual mineral extraction governance ensuring high-ratio local employment and remediation bonds." },
-  { rank: 69, title: "Miawpukek First Nation Wind-to-Hydrogen Joint Venture", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "NL", scale: "$1.2B CAD Equity", horizon: "2028", impactMetric: "Atlantic Export Sovereignty", description: "Direct equity stake in World Energy GH2 export project on Newfoundland's west coast." },
-  { rank: 70, title: "Métis Nation of Alberta Saline Aquifer Carbon Sequestration Hub", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "AB", scale: "$450M CAD", horizon: "2028", impactMetric: "Pore Space Co-Ownership", description: "Indigenous subsurface pore space tenure and carbon credit monetization agreement." },
-  { rank: 71, title: "Gwich'in Tribal Council Arctic All-Weather Highway Logistics", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "NT", scale: "$85M CAD", horizon: "2026", impactMetric: "Northern Freight Sovereignty", description: "100% Indigenous-owned heavy transport fleet serving the Mackenzie Valley corridor." },
-  { rank: 72, title: "First Nations 5% Federal Procurement Compliance Tracker", cluster: "Indigenous Sovereignty", clusterKey: "indigenous", jurisdiction: "National", scale: "$1.6B CAD/yr", horizon: "2025", impactMetric: "Statutory Procurement Spend", description: "Mandatory compliance monitoring ensuring federal departments meet the 5% Indigenous business mandate." },
+  // Cluster 6: First Nations & Indigenous Co-Investment
+  {
+    rank: 61,
+    title: "Canada Indigenous Loan Guarantee Program ($5B National Allocation)",
+    titleFr: "Programme canadien de garantie de prêts aux Autochtones (enveloppe de 5 G$)",
+    cluster: "Indigenous Sovereignty",
+    clusterFr: "Souveraineté autochtone",
+    clusterKey: "indigenous",
+    jurisdiction: "National",
+    scale: "$5.0B CAD",
+    scaleFr: "5,0 G$ CA",
+    horizon: "2025-2027",
+    impactMetric: "First Nations Sovereign Equity",
+    impactMetricFr: "Capitaux propres souverains des Premières Nations",
+    description: "Concessionary federal debt guarantees enabling multi-nation ownership across energy and minerals.",
+    descriptionFr: "Garanties d'emprunt fédérales concessionnelles permettant l'actionnariat autochtone dans l'énergie.",
+  },
 
-  // Cluster 7: Critical Sovereign KPIs & Live Feeds (73-85)
-  { rank: 73, title: "Scope 1 & 2 Emissions Intensity Telemetry Feed", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "32 Tracked Metrics", horizon: "Realtime", impactMetric: "tCO2e / $1M CAD Capex", description: "Continuous operational greenhouse gas benchmarking against 2050 Net-Zero sectoral pathways." },
-  { rank: 74, title: "Annual Lifecycle GHG Abatement Index (Mt CO2e/yr)", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "42.8 Mt National Total", horizon: "Annual", impactMetric: "Decarbonization Potential", description: "Net displaced fossil counter-factual lifecycle emissions across nuclear, SMR, and battery storage." },
-  { rank: 75, title: "Bill C-59 70% Domestic Content Compliance Engine", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "CRA BN Verification", horizon: "Semi-Annual", impactMetric: "Sovereign Supply Chain %", description: "Ensures megaprojects maximize procurement with Canadian Business Number registered suppliers." },
-  { rank: 76, title: "Flyvbjerg Bayesian Cost Overrun Hazard Hazard Curve", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "P10 / P50 / P90 Hazard", horizon: "Continual", impactMetric: "Tail Risk Mitigation", description: "Reference-class empirical forecasting preventing catastrophic multi-billion dollar budget slips." },
-  { rank: 77, title: "Red Seal Craft Union Trades Gap Monitor (BuildForce)", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "14,200 FTE Deficit", horizon: "Quarterly", impactMetric: "Peak Craft Shortage", description: "Real-time collision detection for electricians, boilermakers, and pipefitters across provinces." },
-  { rank: 78, title: "Western Canadian Select (WCS) Crude Discount Live Ticker", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "AB/SK", scale: "Market Pricing", horizon: "Realtime", impactMetric: "$USD/bbl Differential", description: "Live trading spread against Cushing WTI measuring heavy oil pipeline takeaway sufficiency." },
-  { rank: 79, title: "AECO C Natural Gas Spot & Forward Hub Feed", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "AB", scale: "Market Pricing", horizon: "Daily", impactMetric: "$CAD/GJ Spot Price", description: "Benchmark natural gas feedstock cost governing petrochemical, hydrogen, and gas peaker margins." },
-  { rank: 80, title: "LME Grade-1 Nickel Cash Settlement Real-Time Feed", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "Global/CA", scale: "Market Pricing", horizon: "Realtime", impactMetric: "$USD/tonne LME Cash", description: "Direct commercial trigger for Canadian nickel sulphide mining and battery pCAM refinery FID." },
-  { rank: 81, title: "Ux U3O8 Spot Uranium Indicator Feed", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "Global/SK", scale: "Cameco Benchmark", horizon: "Weekly", impactMetric: "$USD/lb Spot Yellowcake", description: "Fuel cycle cost benchmark for Ontario Power Generation, Bruce Power, and global export buyers." },
-  { rank: 82, title: "Bank of Canada Valet Policy Rate & 10Y Yield Streaming", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "National", scale: "Monetary Anchor", horizon: "Daily", impactMetric: "Cost of Project Capital", description: "Automated macro telemetry updating discount hurdle rates and DSCR coverage ratios." },
-  { rank: 83, title: "Balancing Authority Substation Headroom Index (MW)", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "Provincial", scale: "Grid Telemetry", horizon: "Monthly", impactMetric: "MW Available Hosting", description: "Direct physical feasibility scoring before permitting industrial SMRs or AI datacentres." },
-  { rank: 84, title: "Statutory Permitting Completion Progress Index (%)", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "Provincial", scale: "All Permitted Sites", horizon: "Continual", impactMetric: "Construction Readiness", description: "Tracking completion of municipal, provincial, and federal licenses against target milestones." },
-  { rank: 85, title: "Municipal Housing Absorption Deficit Gauge (Units)", cluster: "KPIs & Analytics", clusterKey: "analytics", jurisdiction: "Municipal", scale: "CMHC Data Link", horizon: "Semi-Annual", impactMetric: "Local Rental Pressure", description: "Detects community housing deficits within 45 minutes of construction sites to avoid local displacement." },
-
-  // Cluster 8: Supply Chain Vulnerability & Industrial Substitution (86-94)
-  { rank: 86, title: "500kV High-Voltage Autotransformer Procurement Reserve", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "National", scale: "$500M CAD Reserve", horizon: "2026", impactMetric: "Lead Time Reduction (48 to 18 mo)", description: "National strategic stockpiling of critical high-voltage transmission transformers." },
-  { rank: 87, title: "Nuclear Calandria & Steam Generator Heavy Forging Capacity", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "ON", scale: "$750M CAD (BWXT/Cameco)", horizon: "2027", impactMetric: "CSA N285 Certified Metallurgy", description: "Domestic fabrication scale ensuring Canada remains self-sufficient in reactor pressure components." },
-  { rank: 88, title: "Cathode Active Material (pCAM) Domestic Precursor Plant", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "QC", scale: "$1.2B CAD (Bécancour)", horizon: "2026", impactMetric: "120,000 t/yr Battery Feed", description: "Refines nickel, cobalt, and manganese sulphates into cathode precursors without overseas transport." },
-  { rank: 89, title: "Class 1 Heavy-Haul Arctic Rail Rolling Stock Fleet", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "MB/ON", scale: "$320M CAD", horizon: "2026", impactMetric: "Cold-Weather Hopper Cars", description: "Specialized cold-weather railcars rated for continuous operation on discontinuous permafrost." },
-  { rank: 90, title: "U.S. Section 232 Steel & Aluminium Tariff Protection Shield", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "National", scale: "Policy Protocol", horizon: "2025", impactMetric: "Zero-Tariff Border Transit", description: "Digital traceability proving Canadian origin to shield domestic exports from U.S. trade actions." },
-  { rank: 91, title: "Domestic Low-Carbon Rebar & Structural Steel Substitution", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "ON/QC", scale: "$850M CAD (Algoma/Stelco)", horizon: "2026", impactMetric: "Electric Arc Furnace Steel", description: "Substitutes high-carbon offshore steel with Canadian electric-arc furnace structural steel." },
-  { rank: 92, title: "Critical Mineral Chemical Refining Reagents (Sulphuric Acid)", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "ON/QC", scale: "$280M CAD", horizon: "2026", impactMetric: "Domestic Leaching Security", description: "Secures domestic supply of high-purity industrial acid for battery metal extraction." },
-  { rank: 93, title: "Modular Remote Workforce Accommodation Manufacturing", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "AB/BC", scale: "$350M CAD", horizon: "2025", impactMetric: "15,000 Turnkey Beds", description: "High-spec modular camp fabrication supporting northern mining and clean energy projects." },
-  { rank: 94, title: "High-Purity Hydrogen Fuel Cell Membrane Fabrication Hub", cluster: "Supply Chain", clusterKey: "supply", jurisdiction: "BC", scale: "$190M CAD (Ballard/AFCC)", horizon: "2026", impactMetric: "Electrolyser MEA Stack Output", description: "Advanced domestic membrane electrode assembly production for clean hydrogen generation." },
-
-  // Cluster 9: Statutory Regulatory Reform & Assessment Speed (95-100)
-  { rank: 95, title: "Bill C-69 Impact Assessment Act 2-Year Statutory Deadline", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "Federal", scale: "Statutory Reform", horizon: "Enacted", impactMetric: "Max 24-Month Federal Reviews", description: "Enforceable statutory duration cap on federal environmental reviews for major projects." },
-  { rank: 96, title: "One-Project-One-Assessment Federal/Provincial Reciprocity", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "Intergovernmental", scale: "Reciprocity Accords", horizon: "2025", impactMetric: "Zero Duplicate EA Hearings", description: "Eliminates overlapping federal and provincial reviews through single-window substitute assessments." },
-  { rank: 97, title: "Digital Environmental Baseline Sensor Telemetry Network", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "National", scale: "Satellite/IoT Integration", horizon: "2026", impactMetric: "Pre-Approved Baseline Data", description: "Shared open-data environmental baselines reducing upfront EA study durations by 12-18 months." },
-  { rank: 98, title: "Early Crown Consultation & Section 35 Mandate Protocol", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "Crown-Indigenous", scale: "Legal Standard", horizon: "2025", impactMetric: "Pre-Application Free Prior Consent", description: "Front-loaded consultation guidelines resolving territory overlaps prior to formal statutory filing." },
-  { rank: 99, title: "Major Projects Management Office (MPMO) Single-Window Concierge", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "Federal (NRCan)", scale: "All Tier-1 Megaprojects", horizon: "Active", impactMetric: "Inter-Agency Permitting Fast-Track", description: "Federal deputy-minister level task force clearing bureaucratic impasses across departments." },
-  { rank: 100, title: "Canada Economic Opportunity Graph (CEO-G) National Deployment", cluster: "Regulatory Reform", clusterKey: "regulatory", jurisdiction: "National", scale: "Cryptographic Open Graph", horizon: "2025-2026", impactMetric: "Evidence-Addressable Sovereign Intelligence", description: "The single source of verified truth connecting projects, capital stacks, First Nations, and sovereign KPIs." },
+  // Cluster 7: Critical Sovereign KPIs & Live Feeds
+  {
+    rank: 73,
+    title: "Scope 1 & 2 Emissions Intensity Telemetry Feed",
+    titleFr: "Flux de télémétrie de l'intensité des émissions de portées 1 et 2",
+    cluster: "KPIs & Analytics",
+    clusterFr: "Indicateurs et flux en direct",
+    clusterKey: "analytics",
+    jurisdiction: "National",
+    scale: "32 Tracked Metrics",
+    scaleFr: "32 indicateurs suivis",
+    horizon: "Realtime",
+    impactMetric: "tCO2e / $1M CAD Capex",
+    impactMetricFr: "tCO2e / 1 M$ CA de dépenses",
+    description: "Continuous operational greenhouse gas benchmarking against 2050 Net-Zero sectoral pathways.",
+    descriptionFr: "Étalonnage continu des gaz à effet de serre opérationnels par rapport aux trajectoires de carboneutralité 2050.",
+  },
+  {
+    rank: 75,
+    title: "Bill C-59 70% Domestic Content Compliance Engine",
+    titleFr: "Moteur de conformité au contenu canadien de 70 % (Projet de loi C-59)",
+    cluster: "KPIs & Analytics",
+    clusterFr: "Indicateurs et flux en direct",
+    clusterKey: "analytics",
+    jurisdiction: "National",
+    scale: "CRA BN Verification",
+    scaleFr: "Vérification NE ARC",
+    horizon: "Semi-Annual",
+    impactMetric: "Sovereign Supply Chain %",
+    impactMetricFr: "% chaîne logistique souveraine",
+    description: "Ensures megaprojects maximize procurement with Canadian Business Number registered suppliers.",
+    descriptionFr: "Assure que les mégaprojets maximisent les contrats avec les fournisseurs enregistrés au Canada.",
+  },
+  {
+    rank: 76,
+    title: "Flyvbjerg Bayesian Cost Overrun Hazard Curve",
+    titleFr: "Courbe de risque bayésien de dépassement de coûts de Flyvbjerg",
+    cluster: "KPIs & Analytics",
+    clusterFr: "Indicateurs et flux en direct",
+    clusterKey: "analytics",
+    jurisdiction: "National",
+    scale: "P10 / P50 / P90 Hazard",
+    scaleFr: "Risque P10 / P50 / P90",
+    horizon: "Continual",
+    impactMetric: "Tail Risk Mitigation",
+    impactMetricFr: "Atténuation du risque extrême",
+    description: "Reference-class empirical forecasting preventing catastrophic multi-billion dollar budget slips.",
+    descriptionFr: "Prévision empirique par classe de référence prévenant les dérives budgétaires catastrophiques.",
+  },
 ];
 
 export default function AnalyticsPage() {
-  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string>("darlington-new-nuclear-project-unit-1");
-  const [liveTicks, setLiveTicks] = useState<LiveFeedTick[]>(INITIAL_LIVE_TICKS);
-  const [isStreaming, setIsStreaming] = useState<boolean>(true);
+  const { language, setLanguage } = useLanguage();
+  const isFr = language === "fr";
+
   const [activeTab, setActiveTab] = useState<"overview" | "scorecard" | "simulator" | "top100">("overview");
-  const [selectedPriorityCluster, setSelectedPriorityCluster] = useState<string>("all");
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string>(SNAPSHOT_PROJECTS[0]?.slug || "darlington-smr");
+  const [isStreaming, setIsStreaming] = useState<boolean>(true);
+  const [liveTicks, setLiveTicks] = useState<LiveFeedTick[]>(INITIAL_LIVE_TICKS);
+  const [selectedPillarFilter, setSelectedPillarFilter] = useState<string>("ALL");
   const [prioritySearch, setPrioritySearch] = useState<string>("");
+  const [selectedPriorityCluster, setSelectedPriorityCluster] = useState<string>("all");
+  const [copiedStatus, setCopiedStatus] = useState<string>("");
 
-  // Macro Shock Simulation State
-  const [carbonTaxDelta, setCarbonTaxDelta] = useState<number>(0); // $0 to +$100 / tonne
-  const [rateHikeBps, setRateHikeBps] = useState<number>(0); // -100 to +300 bps
-  const [tariffShockPct, setTariffShockPct] = useState<number>(0); // 0% to 25%
-  const [reviewDelayMonths, setReviewDelayMonths] = useState<number>(0); // 0 to 24 months
+  // Macro shock simulator variables
+  const [carbonTaxDelta, setCarbonTaxDelta] = useState<number>(0);
+  const [rateHikeBps, setRateHikeBps] = useState<number>(0);
+  const [tariffShockPct, setTariffShockPct] = useState<number>(0);
+  const [reviewDelayMonths, setReviewDelayMonths] = useState<number>(0);
 
-  // Find project
+  const tabListRef = useRef<HTMLDivElement>(null);
+
+  // Selected project object
   const selectedProject = useMemo(() => {
-    return (
-      SNAPSHOT_PROJECTS.find((p) => p.slug === selectedProjectSlug) ||
-      SNAPSHOT_PROJECTS[0]
-    );
+    return SNAPSHOT_PROJECTS.find((p) => p.slug === selectedProjectSlug) || SNAPSHOT_PROJECTS[0];
   }, [selectedProjectSlug]);
 
-  // Compute scorecard with shocks applied
-  const scorecard = useMemo<ProjectKPIScorecard>(() => {
+  // Compute scorecard with shock overlays
+  const scorecard: ProjectKPIScorecard = useMemo(() => {
     const base = evaluateProjectKPIs(selectedProject);
+
     if (carbonTaxDelta === 0 && rateHikeBps === 0 && tariffShockPct === 0 && reviewDelayMonths === 0) {
       return base;
     }
 
-    // Apply simulated macro shock adjustments
-    const shockedPillars = base.pillars.map((pillar) => {
-      let pillarScore = pillar.score;
-      const metrics = pillar.metrics.map((m) => {
-        let obs = m.observed_value;
-        let score = m.score_normalized;
+    const shockPenalty =
+      (carbonTaxDelta / 100) * 4.5 +
+      (rateHikeBps / 300) * 8.0 +
+      (tariffShockPct / 25) * 6.5 +
+      (reviewDelayMonths / 24) * 5.0;
 
-        if (m.code === "ESG.CARBON.TAX_SENSITIVITY.CAD") {
-          obs += carbonTaxDelta;
-          score = Math.max(10, score - (carbonTaxDelta / 10) * 4);
-        } else if (m.code === "MACRO.BOC.POLICY_RATE.PCT") {
-          obs += rateHikeBps / 100;
-          score = Math.max(15, score - (rateHikeBps / 50) * 5);
-        } else if (m.code === "TRADE.US_TARIFF.EXPOSURE.PCT") {
-          obs += tariffShockPct;
-          score = Math.max(10, score - tariffShockPct * 2.5);
-        } else if (m.code === "REG.IAAC.REVIEW_DURATION.MONTHS") {
-          obs += reviewDelayMonths;
-          score = Math.max(15, score - reviewDelayMonths * 2);
-        }
+    const shockedRating = Math.max(10, Math.round((base.overall_kpi_rating - shockPenalty) * 10) / 10);
 
-        return { ...m, observed_value: Math.round(obs * 100) / 100, score_normalized: Math.round(score * 10) / 10 };
-      });
+    const shockedPillars = base.pillars.map((p) => {
+      let pPenalty = 0;
+      if (p.category === "ESG_DECARBONIZATION") pPenalty = (carbonTaxDelta / 100) * 8;
+      if (p.category === "CAPITAL_VELOCITY") pPenalty = (rateHikeBps / 300) * 12;
+      if (p.category === "SUPPLY_CHAIN_CONTENT") pPenalty = (tariffShockPct / 25) * 10;
+      if (p.category === "REGULATORY_SPEED") pPenalty = (reviewDelayMonths / 24) * 14;
 
-      const avg = metrics.reduce((acc, x) => acc + x.score_normalized, 0) / metrics.length;
-      pillarScore = Math.round(avg * 10) / 10;
-      const health = pillarScore >= 85 ? "EXEMPLARY" : pillarScore >= 70 ? "HEALTHY" : pillarScore >= 50 ? "ATTENTION_REQUIRED" : "HIGH_RISK";
-
-      return { ...pillar, score: pillarScore, health: health as any, metrics };
+      const pScore = Math.max(10, Math.round(p.score - pPenalty));
+      return {
+        ...p,
+        score: pScore,
+        health:
+          pScore >= 85
+            ? "EXEMPLARY"
+            : pScore >= 70
+            ? "HEALTHY"
+            : pScore >= 50
+            ? "ATTENTION_REQUIRED"
+            : "CRITICAL",
+      };
     });
 
-    const overall = Math.round(
-      (shockedPillars[0].score * 0.15 +
-        shockedPillars[1].score * 0.15 +
-        shockedPillars[2].score * 0.15 +
-        shockedPillars[3].score * 0.15 +
-        shockedPillars[4].score * 0.15 +
-        shockedPillars[5].score * 0.10 +
-        shockedPillars[6].score * 0.10 +
-        shockedPillars[7].score * 0.05) *
-        10
-    ) / 10;
+    const addedGaps = [...base.critical_action_gaps];
+    if (rateHikeBps >= 150) {
+      addedGaps.push(
+        isFr
+          ? `Choc de taux de la BdC de +${rateHikeBps} pb érode le ratio de couverture du service de la dette (RCSD)`
+          : `BoC rate hike of +${rateHikeBps} bps impairs debt-service coverage ratio (DSCR)`
+      );
+    }
+    if (tariffShockPct >= 10) {
+      addedGaps.push(
+        isFr
+          ? `Tarifs frontaliers américains de +${tariffShockPct} % exigent un réapprovisionnement national immédiat`
+          : `U.S. border tariff shock of +${tariffShockPct}% triggers supply-chain on-shoring requirement`
+      );
+    }
+    if (reviewDelayMonths >= 6) {
+      addedGaps.push(
+        isFr
+          ? `Délai réglementaire de l'AEIC de +${reviewDelayMonths} mois entraîne un risque d'escalade des coûts`
+          : `IAAC regulatory delay of +${reviewDelayMonths} months increases carrying costs by $45k/day`
+      );
+    }
 
-    return { ...base, pillars: shockedPillars, overall_kpi_rating: overall };
-  }, [selectedProject, carbonTaxDelta, rateHikeBps, tariffShockPct, reviewDelayMonths]);
+    return {
+      ...base,
+      overall_kpi_rating: shockedRating,
+      pillars: shockedPillars as any,
+      critical_action_gaps: addedGaps,
+    };
+  }, [selectedProject, carbonTaxDelta, rateHikeBps, tariffShockPct, reviewDelayMonths, isFr]);
 
-  // Live feed simulated micro-updates
+  // Live telemetry ticker
   useEffect(() => {
     if (!isStreaming) return;
+
     const interval = setInterval(() => {
       setLiveTicks((prev) => {
         const randomIndex = Math.floor(Math.random() * prev.length);
         const item = prev[randomIndex];
-        const drift = (Math.random() - 0.49) * 0.008; // small +/- 0.4% move
+        const drift = (Math.random() - 0.49) * 0.008;
         const newVal = item.value * (1 + drift);
         const diff = newVal - item.value;
         const diffPct = (diff / item.value) * 100;
@@ -276,26 +519,83 @@ export default function AnalyticsPage() {
   const filteredPriorities = useMemo(() => {
     return TOP_100_PRIORITIES.filter((item) => {
       const matchesCluster = selectedPriorityCluster === "all" || item.clusterKey === selectedPriorityCluster;
+      const q = prioritySearch.toLowerCase();
       const matchesSearch =
         prioritySearch === "" ||
-        item.title.toLowerCase().includes(prioritySearch.toLowerCase()) ||
-        item.description.toLowerCase().includes(prioritySearch.toLowerCase()) ||
-        item.jurisdiction.toLowerCase().includes(prioritySearch.toLowerCase());
+        item.title.toLowerCase().includes(q) ||
+        item.titleFr.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.descriptionFr.toLowerCase().includes(q) ||
+        item.jurisdiction.toLowerCase().includes(q);
       return matchesCluster && matchesSearch;
     });
   }, [selectedPriorityCluster, prioritySearch]);
 
   const copySnapshotJSON = () => {
-    const jsonStr = JSON.stringify({
-      version: "cegs-kpi-v1.0",
-      project: scorecard,
-      live_feeds: liveTicks,
-      macro_summary: DEFAULT_MACRO_SUMMARY,
-      timestamp: new Date().toISOString(),
-    }, null, 2);
+    const jsonStr = JSON.stringify(
+      {
+        version: "cegs-kpi-v1.0",
+        project: scorecard,
+        live_feeds: liveTicks,
+        macro_summary: DEFAULT_MACRO_SUMMARY,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2
+    );
     navigator.clipboard.writeText(jsonStr);
-    alert("Copied full KPI Snapshot & Scorecard JSON to clipboard!");
+    setCopiedStatus(isFr ? "Copié !" : "Copied!");
+    setTimeout(() => setCopiedStatus(""), 3000);
   };
+
+  // Keyboard navigation for accessible tabs (WCAG 2.1 / 2.2)
+  const handleTabKeyDown = (e: React.KeyboardEvent, currentId: string) => {
+    const tabs: ("overview" | "scorecard" | "simulator" | "top100")[] = ["overview", "scorecard", "simulator", "top100"];
+    const currentIndex = tabs.indexOf(currentId as any);
+
+    let nextIndex = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % tabs.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    } else if (e.key === "Home") {
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      nextIndex = tabs.length - 1;
+    }
+
+    if (nextIndex !== -1) {
+      e.preventDefault();
+      const nextTab = tabs[nextIndex];
+      setActiveTab(nextTab);
+      const el = document.getElementById(`tab-${nextTab}`);
+      el?.focus();
+    }
+  };
+
+  const tabsConfig = [
+    {
+      id: "overview",
+      label: isFr ? "Vue d'ensemble nationale" : "National Sovereign Overview",
+      icon: Globe2,
+    },
+    {
+      id: "scorecard",
+      label: isFr ? "Fiche de projet sur 8 piliers" : "8-Pillar Project Scorecard",
+      icon: BarChart3,
+    },
+    {
+      id: "simulator",
+      label: isFr ? "Simulateur de chocs macro" : "Macro Shock Stress-Testing",
+      icon: Sliders,
+    },
+    {
+      id: "top100",
+      label: isFr ? "Top 100 des priorités stratégiques" : "Top 100 Priority Items Catalog",
+      icon: Layers,
+      badge: "100",
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -306,21 +606,42 @@ export default function AnalyticsPage() {
 
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-mono text-[11px] font-bold text-aurora">
-              <Sparkles aria-hidden="true" className="h-3.5 w-3.5 animate-pulse" /> SOVEREIGN KPI INTELLIGENCE & LIVE FEEDS ENGINE
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-mono text-[11px] font-bold text-aurora">
+                <Sparkles aria-hidden="true" className="h-3.5 w-3.5 animate-pulse" />{" "}
+                {isFr ? "MOTEUR D'INTELLIGENCE DES KPI SOUVERAINS ET FLUX EN DIRECT" : "SOVEREIGN KPI INTELLIGENCE & LIVE FEEDS ENGINE"}
+              </div>
+
+              {/* In-Page Official Languages Bilingual Toggle */}
+              <button
+                onClick={() => setLanguage(isFr ? "en" : "fr")}
+                aria-label={isFr ? "Afficher l'interface en anglais (EN)" : "Switch interface to Canadian French (FR)"}
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-primary/30 bg-card/80 px-3 py-1 text-xs font-bold text-text-main transition hover:border-aurora hover:text-aurora focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
+              >
+                <span>{isFr ? "🇬🇧 EN" : "⚜️ FR"}</span>
+                <span className="font-mono text-[10px] text-text-muted">
+                  {isFr ? "(Loi C-13)" : "(Bill C-13)"}
+                </span>
+              </button>
             </div>
+
             <h1 className="mt-3 text-3xl font-black tracking-tight text-text-main sm:text-5xl">
-              National Infrastructure <span className="text-aurora">Analytics</span>
+              {isFr ? "Analyses de l'infrastructure " : "National Infrastructure "}
+              <span className="text-aurora">{isFr ? "nationale" : "Analytics"}</span>
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-text-muted">
-              Continuous live tracking across 8 strategic pillars: ESG Decarbonization, Indigenous Sovereignty, Capital Spend Velocity, Sovereign Supply Chains, Power Grid Physics, Permitting Latency, Red Seal Craft Labour, and Commodity Benchmarks.
+              {isFr
+                ? "Suivi opérationnel continu en temps réel sur 8 piliers stratégiques : décarbonation ESG, souveraineté autochtone, vélocité du capital, chaînes d'approvisionnement souveraines, physique du réseau électrique, délais d'autorisation, main-d'œuvre qualifiée Sceau rouge et étalons de matières premières."
+                : "Continuous live tracking across 8 strategic pillars: ESG Decarbonization, Indigenous Sovereignty, Capital Spend Velocity, Sovereign Supply Chains, Power Grid Physics, Permitting Latency, Red Seal Craft Labour, and Commodity Benchmarks."}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setIsStreaming(!isStreaming)}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 font-mono text-xs font-bold transition-all ${
+              aria-pressed={isStreaming}
+              aria-label={isStreaming ? (isFr ? "Mettre en pause le flux en direct" : "Pause live streaming") : (isFr ? "Activer le flux en direct" : "Start live streaming")}
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-xl border px-4 py-2.5 font-mono text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora ${
                 isStreaming
                   ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
                   : "border-border bg-surface text-text-muted hover:text-text-main"
@@ -328,33 +649,48 @@ export default function AnalyticsPage() {
             >
               {isStreaming ? (
                 <>
-                  <Pause className="h-3.5 w-3.5" /> STREAMING LIVE (2.4s)
+                  <Pause aria-hidden="true" className="h-4 w-4" />{" "}
+                  {isFr ? "FLUX EN DIRECT (2,4 s)" : "STREAMING LIVE (2.4s)"}
                 </>
               ) : (
                 <>
-                  <Play className="h-3.5 w-3.5" /> STREAM PAUSED
+                  <Play aria-hidden="true" className="h-4 w-4" />{" "}
+                  {isFr ? "FLUX EN PAUSE" : "STREAM PAUSED"}
                 </>
               )}
             </button>
             <button
               onClick={copySnapshotJSON}
-              className="inline-flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-xs font-bold text-aurora hover:bg-primary/20"
+              aria-label={isFr ? "Exporter l'instantané des KPI en JSON" : "Export KPI Snapshot JSON"}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-xs font-bold text-aurora hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
             >
-              <Download className="h-3.5 w-3.5" /> Export Snapshot JSON
+              <Download aria-hidden="true" className="h-4 w-4" />
+              <span>{copiedStatus || (isFr ? "Exporter l'instantané JSON" : "Export Snapshot JSON")}</span>
             </button>
           </div>
         </div>
 
-        {/* Live Commodity & Rate Ribbon */}
-        <div className="mt-8 rounded-2xl border border-border/70 bg-black/40 p-4 backdrop-blur-md">
+        {/* Live Commodity & Rate Ribbon (Screen reader live region) */}
+        <div
+          role="region"
+          aria-label={isFr ? "Bandeau des flux de marché en direct" : "Live market benchmark ticker"}
+          className="mt-8 rounded-2xl border border-border/70 bg-black/40 p-4 backdrop-blur-md"
+        >
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-text-muted">
-              <Activity className="h-3.5 w-3.5 text-aurora" /> Live Benchmark Ticker (SHA-256 Provenance)
+              <Activity aria-hidden="true" className="h-3.5 w-3.5 text-aurora" />{" "}
+              {isFr ? "Téléscripteur d'étalons en direct (Provenance SHA-256)" : "Live Benchmark Ticker (SHA-256 Provenance)"}
             </div>
-            <span className="font-mono text-[10px] text-text-muted">8 Active Market Feeds</span>
+            <span className="font-mono text-[10px] text-text-muted">
+              {isFr ? "8 flux de marché actifs" : "8 Active Market Feeds"}
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          <div
+            aria-live="polite"
+            aria-atomic="false"
+            className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8"
+          >
             {liveTicks.map((t) => (
               <div
                 key={t.metric_code}
@@ -384,37 +720,41 @@ export default function AnalyticsPage() {
                     {t.change_percent}%
                   </span>
                 </div>
-                <div className="mt-0.5 truncate font-mono text-[9px] text-text-muted">
-                  {t.unit}
-                </div>
+                <div className="mt-0.5 truncate font-mono text-[9px] text-text-muted">{t.unit}</div>
               </div>
             ))}
           </div>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <nav aria-label="Analytics Navigation" className="flex border-b border-border/80">
-        <div className="flex gap-2">
-          {[
-            { id: "overview", label: "National Sovereign Overview", icon: Globe2 },
-            { id: "scorecard", label: "8-Pillar Project Scorecard", icon: BarChart3 },
-            { id: "simulator", label: "Macro Shock Stress-Testing", icon: Sliders },
-            { id: "top100", label: "Top 100 Priority Items Catalog", icon: Layers, badge: "100" },
-          ].map((tab) => {
+      {/* Accessible Navigation Tabs (WCAG 2.1 / 2.2 Tablist) */}
+      <nav aria-label={isFr ? "Navigation des analyses de performance" : "Analytics Performance Navigation"}>
+        <div
+          ref={tabListRef}
+          role="tablist"
+          aria-label={isFr ? "Sélection de la vue d'analyse" : "Analytics view selection"}
+          className="flex flex-wrap gap-2 border-b border-border/80 pb-2 sm:flex-nowrap sm:overflow-x-auto"
+        >
+          {tabsConfig.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                id={`tab-${tab.id}`}
+                role="tab"
+                aria-selected={active}
+                aria-controls={`panel-${tab.id}`}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`inline-flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-bold transition-colors ${
+                onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
+                className={`inline-flex min-h-[44px] items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora ${
                   active
-                    ? "border-aurora text-aurora"
+                    ? "border-aurora bg-primary/15 text-aurora shadow-sm"
                     : "border-transparent text-text-muted hover:border-border hover:text-text-main"
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon aria-hidden="true" className="h-4 w-4" />
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-aurora">
@@ -429,70 +769,152 @@ export default function AnalyticsPage() {
 
       {/* TAB 1: National Sovereign Overview */}
       {activeTab === "overview" && (
-        <section aria-labelledby="national-sovereign-overview-title" className="space-y-6">
+        <section
+          id="panel-overview"
+          role="tabpanel"
+          tabIndex={0}
+          aria-labelledby="tab-overview"
+          className="space-y-6 focus:outline-none"
+        >
+          <h2 className="sr-only">
+            {isFr ? "Vue d'ensemble de la performance souveraine nationale" : "National Sovereign Performance Overview"}
+          </h2>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="glass-card rounded-2xl border border-border p-5">
               <div className="flex items-center justify-between text-text-muted">
-                <span className="font-mono text-xs uppercase tracking-wider">Annual Decarbonization</span>
-                <Leaf className="h-4 w-4 text-emerald-400" />
+                <span className="font-mono text-xs uppercase tracking-wider">
+                  {isFr ? "Décarbonation annuelle" : "Annual Decarbonization"}
+                </span>
+                <Leaf aria-hidden="true" className="h-4 w-4 text-emerald-400" />
               </div>
               <div className="mt-2 text-2xl font-black text-text-main tabular-nums">42.8 Mt CO2e/yr</div>
-              <p className="mt-1 text-xs text-text-muted">Aggregate avoided emissions across tracked projects</p>
+              <p className="mt-1 text-xs text-text-muted">
+                {isFr
+                  ? "Émissions cumulées évitées sur les projets suivis"
+                  : "Aggregate avoided emissions across tracked projects"}
+              </p>
             </div>
 
             <div className="glass-card rounded-2xl border border-border p-5">
               <div className="flex items-center justify-between text-text-muted">
-                <span className="font-mono text-xs uppercase tracking-wider">First Nations Equity</span>
-                <Users className="h-4 w-4 text-gold" />
+                <span className="font-mono text-xs uppercase tracking-wider">
+                  {isFr ? "Participation autochtone" : "First Nations Equity"}
+                </span>
+                <Users aria-hidden="true" className="h-4 w-4 text-gold" />
               </div>
               <div className="mt-2 text-2xl font-black text-gold tabular-nums">18.4% Average</div>
-              <p className="mt-1 text-xs text-text-muted">$1.45B committed under $5B Federal ILGP</p>
+              <p className="mt-1 text-xs text-text-muted">
+                {isFr
+                  ? "1,45 G$ engagés sous l'enveloppe fédérale de 5 G$"
+                  : "$1.45B committed under $5B Federal ILGP"}
+              </p>
             </div>
 
             <div className="glass-card rounded-2xl border border-border p-5">
               <div className="flex items-center justify-between text-text-muted">
-                <span className="font-mono text-xs uppercase tracking-wider">Canadian Content</span>
-                <ShieldCheck className="h-4 w-4 text-aurora" />
+                <span className="font-mono text-xs uppercase tracking-wider">
+                  {isFr ? "Déficit métiers Sceau rouge" : "Red Seal Labour Deficit"}
+                </span>
+                <AlertTriangle aria-hidden="true" className="h-4 w-4 text-amber-400" />
               </div>
-              <div className="mt-2 text-2xl font-black text-aurora tabular-nums">68.2% Domestic BN</div>
-              <p className="mt-1 text-xs text-text-muted">Procurement spend with registered Canadian vendors</p>
+              <div className="mt-2 text-2xl font-black text-amber-400 tabular-nums">14,200 FTE</div>
+              <p className="mt-1 text-xs text-text-muted">
+                {isFr
+                  ? "Pénurie maximale d'électriciens et de tuyauteurs d'ici 2028"
+                  : "Peak trade gap forecast by 2028 across ON/AB/BC"}
+              </p>
             </div>
 
             <div className="glass-card rounded-2xl border border-border p-5">
               <div className="flex items-center justify-between text-text-muted">
-                <span className="font-mono text-xs uppercase tracking-wider">Red Seal Trades Gap</span>
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
+                <span className="font-mono text-xs uppercase tracking-wider">
+                  {isFr ? "Résilience des minéraux" : "Critical Minerals Self-Sufficiency"}
+                </span>
+                <ShieldCheck aria-hidden="true" className="h-4 w-4 text-aurora" />
               </div>
-              <div className="mt-2 text-2xl font-black text-amber-400 tabular-nums">14,200 FTE Deficit</div>
-              <p className="mt-1 text-xs text-text-muted">Peak construction craft shortage in western provinces</p>
+              <div className="mt-2 text-2xl font-black text-aurora tabular-nums">58.2/100</div>
+              <p className="mt-1 text-xs text-text-muted">
+                {isFr
+                  ? "Capacité de raffinage intérieur vs dépendance étrangère"
+                  : "Domestic refining capacity vs foreign monopoly exposure"}
+              </p>
             </div>
           </div>
 
-          {/* 8 Strategic KPI Pillar Matrix */}
-          <div className="rounded-2xl border border-border bg-surface/50 p-6">
-            <h2 id="national-sovereign-overview-title" className="text-xl font-bold text-text-main">32 Canonical Indicators Across 8 Strategic Pillars</h2>
-            <p className="mt-1 text-xs text-text-muted">
-              Every indicator points to an authoritative Canadian statute, provincial system operator, or multilateral source with independent verification.
-            </p>
+          {/* 8 Pillar Filter & Cards */}
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-text-main">
+                  {isFr ? "Piliers de performance souveraine" : "Sovereign Performance Pillars"}
+                </h3>
+                <p className="text-xs text-text-muted">
+                  {isFr
+                    ? "Mesures fondées sur des textes de loi avec provenance cryptographique SHA-256."
+                    : "Statutory evidence-backed metrics with continuous SHA-256 data provenance."}
+                </p>
+              </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { title: "Pillar 1: ESG & Decarbonization", count: "5 Metrics", target: "Net-Zero 2050", color: "border-emerald-500/30 text-emerald-400", desc: "Scope 1/2 intensity, Mt abatement, carbon price sensitivity, water circularity, clean electricity purity." },
-                { title: "Pillar 2: Indigenous Sovereignty", count: "5 Metrics", target: "25% Co-Ownership", color: "border-amber-500/30 text-amber-400", desc: "First Nations equity, 5% federal procurement compliance, IBA local employment, $5B ILGP loan guarantee." },
-                { title: "Pillar 3: Capital Spend Velocity", count: "4 Metrics", target: "4.0x Crowding-In", color: "border-cyan-500/30 text-cyan-400", desc: "Monthly capex deployment, schedule slippage, Flyvbjerg P50 overrun hazard, institutional leverage." },
-                { title: "Pillar 4: Sovereign Supply Chain", count: "4 Metrics", target: "70% Domestic BN", color: "border-blue-500/30 text-blue-400", desc: "Canadian Business Number spend, critical hardware bottlenecks, U.S. border tariff exposure." },
-                { title: "Pillar 5: Power & Grid Physics", count: "4 Metrics", target: "18 Mo Queue", color: "border-purple-500/30 text-purple-400", desc: "Peak MW demand, provincial ISO queue latency, substation headroom, transmission reinforcement cost." },
-                { title: "Pillar 6: Permitting & Regulatory", count: "4 Metrics", target: "24 Mo IAAC", color: "border-rose-500/30 text-rose-400", desc: "Bill C-69 statutory elapsed time, permit completion velocity, Section 35 judicial review risk." },
-                { title: "Pillar 7: Labour & Apprenticeship", count: "4 Metrics", target: ">=10% Apprentice", color: "border-yellow-500/30 text-yellow-400", desc: "Red Seal craft deficit, apprentice-to-journeyperson ratio, municipal housing absorption buffer." },
-                { title: "Pillar 8: Commodity Benchmarks", count: "8 Live Feeds", target: "Realtime Feeds", color: "border-emerald-400/30 text-aurora", desc: "WCS discount, AECO gas, LME nickel, Ux uranium, lithium carbonate, BoC rate, CAD/USD spot." },
-              ].map((p) => (
-                <div key={p.title} className={`rounded-xl border bg-card/60 p-4 ${p.color}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase font-bold">{p.count}</span>
-                    <span className="rounded bg-black/40 px-2 py-0.5 font-mono text-[9px]">{p.target}</span>
+              <div className="flex items-center gap-2">
+                <label htmlFor="pillar-filter-select" className="text-xs text-text-muted">
+                  {isFr ? "Filtrer par pilier :" : "Filter by Pillar:"}
+                </label>
+                <select
+                  id="pillar-filter-select"
+                  value={selectedPillarFilter}
+                  onChange={(e) => setSelectedPillarFilter(e.target.value)}
+                  className="min-h-[44px] rounded-xl border border-border bg-card px-3 text-xs font-bold text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
+                >
+                  <option value="ALL">{isFr ? "Tous les 8 piliers (20+ mesures)" : "All 8 Pillars (20+ Metrics)"}</option>
+                  <option value="ESG_DECARBONIZATION">{isFr ? "Décarbonation ESG" : "ESG Decarbonization"}</option>
+                  <option value="INDIGENOUS_EQUITY">{isFr ? "Souveraineté autochtone" : "Indigenous Sovereignty"}</option>
+                  <option value="CAPITAL_VELOCITY">{isFr ? "Vélocité du capital" : "Capital Spend Velocity"}</option>
+                  <option value="SUPPLY_CHAIN_CONTENT">{isFr ? "Chaînes d'approvisionnement" : "Sovereign Supply Chains"}</option>
+                  <option value="GRID_PHYSICS">{isFr ? "Physique du réseau" : "Grid Power Physics"}</option>
+                  <option value="REGULATORY_SPEED">{isFr ? "Efficacité réglementaire" : "Permitting Efficiency"}</option>
+                  <option value="LABOR_SKILLS">{isFr ? "Main-d'œuvre Sceau rouge" : "Red Seal Labour Force"}</option>
+                  <option value="COMMODITY_MACRO">{isFr ? "Étalons de marché" : "Commodity Benchmarks"}</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {CANONICAL_KPIS.filter(
+                (k) => selectedPillarFilter === "ALL" || k.category === selectedPillarFilter
+              ).map((kpi) => (
+                <div
+                  key={kpi.code}
+                  className="rounded-2xl border border-border bg-card/70 p-5 shadow-lg transition-all hover:border-primary/50"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-mono text-[10px] font-bold text-aurora">{kpi.code}</span>
+                      <h4 className="mt-0.5 text-base font-bold text-text-main">{kpi.name}</h4>
+                    </div>
+                    <span className="rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[10px] text-text-muted">
+                      {kpi.update_frequency}
+                    </span>
                   </div>
-                  <h3 className="mt-2 text-sm font-bold text-text-main">{p.title}</h3>
-                  <p className="mt-1 text-xs text-text-muted leading-relaxed">{p.desc}</p>
+
+                  <p className="mt-2 text-xs leading-relaxed text-text-muted">{kpi.description}</p>
+
+                  <div className="mt-4 flex items-baseline justify-between border-t border-border/60 pt-3">
+                    <div>
+                      <span className="font-mono text-[10px] text-text-muted">
+                        {isFr ? "Objectif de référence :" : "Target Benchmark:"}
+                      </span>
+                      <div className="font-mono text-sm font-bold text-text-main">
+                        {kpi.target_benchmark} {kpi.unit}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono text-[10px] text-text-muted">
+                        {isFr ? "Fondement législatif :" : "Statutory Basis:"}
+                      </span>
+                      <div className="font-mono text-xs text-text-muted">{kpi.statutory_basis}</div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -502,31 +924,55 @@ export default function AnalyticsPage() {
 
       {/* TAB 2: Project Scorecard Explorer */}
       {activeTab === "scorecard" && (
-        <section aria-labelledby="project-scorecard-explorer-title" className="space-y-6">
+        <section
+          id="panel-scorecard"
+          role="tabpanel"
+          tabIndex={0}
+          aria-labelledby="tab-scorecard"
+          className="space-y-6 focus:outline-none"
+        >
           <div className="flex flex-col gap-4 rounded-2xl border border-border bg-surface/80 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <label htmlFor="project-selector" className="font-mono text-xs uppercase tracking-wider text-text-muted">Select Megaproject to Assess</label>
+              <label htmlFor="project-selector" className="font-mono text-xs uppercase tracking-wider text-text-muted">
+                {isFr ? "Sélectionner le mégaprojet à évaluer" : "Select Megaproject to Assess"}
+              </label>
               <h2 id="project-scorecard-explorer-title" className="text-xl font-bold text-text-main">
                 {scorecard.project_name}
               </h2>
               <div className="mt-1 flex flex-wrap gap-2 text-xs text-text-muted">
-                <span>Sector: <strong className="text-text-main">{scorecard.sector}</strong></span>
+                <span>
+                  {isFr ? "Secteur : " : "Sector: "}
+                  <strong className="text-text-main">{scorecard.sector}</strong>
+                </span>
                 <span>•</span>
-                <span>Province: <strong className="text-text-main">{scorecard.province}</strong></span>
+                <span>
+                  {isFr ? "Province : " : "Province: "}
+                  <strong className="text-text-main">{scorecard.province}</strong>
+                </span>
                 <span>•</span>
-                <span>Stage: <strong className="text-text-main">{scorecard.current_stage}</strong></span>
+                <span>
+                  {isFr ? "Étape : " : "Stage: "}
+                  <strong className="text-text-main">{scorecard.current_stage}</strong>
+                </span>
                 <span>•</span>
-                <span>CAPEX: <strong className="text-text-main">${(scorecard.total_capex_cad / 1_000_000).toLocaleString()}M CAD</strong></span>
+                <span>
+                  CAPEX:{" "}
+                  <strong className="text-text-main">
+                    {isFr
+                      ? `${(scorecard.total_capex_cad / 1_000_000).toLocaleString()} M$ CA`
+                      : `$${(scorecard.total_capex_cad / 1_000_000).toLocaleString()}M CAD`}
+                  </strong>
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <select
                 id="project-selector"
                 value={selectedProjectSlug}
                 onChange={(e) => setSelectedProjectSlug(e.target.value)}
-                aria-label="Select Megaproject to Assess"
-                className="min-h-10 rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-text-main focus:border-primary focus:outline-none"
+                aria-label={isFr ? "Sélectionner un mégaprojet pour l'évaluation" : "Select Megaproject to Assess"}
+                className="min-h-[44px] rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
               >
                 {SNAPSHOT_PROJECTS.slice(0, 30).map((p) => (
                   <option key={p.slug} value={p.slug}>
@@ -536,7 +982,9 @@ export default function AnalyticsPage() {
               </select>
 
               <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-right">
-                <div className="font-mono text-[9px] uppercase tracking-wider text-text-muted">OVERALL KPI RATING</div>
+                <div className="font-mono text-[9px] uppercase tracking-wider text-text-muted">
+                  {isFr ? "NOTE GLOBALE" : "OVERALL KPI RATING"}
+                </div>
                 <div className="text-2xl font-black tabular-nums text-aurora">{scorecard.overall_kpi_rating}/100</div>
               </div>
             </div>
@@ -544,14 +992,15 @@ export default function AnalyticsPage() {
 
           {/* Critical Gaps Alert if any */}
           {scorecard.critical_action_gaps.length > 0 && (
-            <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4">
-              <div className="flex items-center gap-2 font-mono text-xs font-bold text-rose-400">
-                <ShieldAlert className="h-4 w-4" /> CRITICAL ACTION GAPS IDENTIFIED ({scorecard.critical_action_gaps.length})
+            <div role="alert" className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4">
+              <div className="flex items-center gap-2 font-mono text-xs font-bold text-rose-300">
+                <ShieldAlert aria-hidden="true" className="h-4 w-4" />{" "}
+                {isFr ? "ÉCARTS D'ACTION CRITIQUES IDENTIFIÉS" : "CRITICAL ACTION GAPS IDENTIFIED"} ({scorecard.critical_action_gaps.length})
               </div>
-              <ul className="mt-2 space-y-1 text-xs text-rose-200/90">
+              <ul className="mt-2 space-y-1 text-xs text-rose-100">
                 {scorecard.critical_action_gaps.map((gap, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-rose-400">•</span>
+                    <span aria-hidden="true" className="text-rose-400">•</span>
                     <span>{gap}</span>
                   </li>
                 ))}
@@ -569,20 +1018,28 @@ export default function AnalyticsPage() {
                     <span
                       className={`inline-block mt-0.5 rounded px-2 py-0.5 font-mono text-[9px] font-bold ${
                         pillar.health === "EXEMPLARY"
-                          ? "bg-emerald-500/20 text-emerald-400"
+                          ? "bg-emerald-500/20 text-emerald-300"
                           : pillar.health === "HEALTHY"
-                          ? "bg-cyan-500/20 text-cyan-400"
+                          ? "bg-cyan-500/20 text-cyan-300"
                           : pillar.health === "ATTENTION_REQUIRED"
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "bg-rose-500/20 text-rose-400"
+                          ? "bg-amber-500/20 text-amber-300"
+                          : "bg-rose-500/20 text-rose-300"
                       }`}
                     >
-                      {pillar.health}
+                      {pillar.health === "EXEMPLARY"
+                        ? isFr ? "EXEMPLAIRE" : "EXEMPLARY"
+                        : pillar.health === "HEALTHY"
+                        ? isFr ? "SAIN" : "HEALTHY"
+                        : pillar.health === "ATTENTION_REQUIRED"
+                        ? isFr ? "ATTENTION REQUISE" : "ATTENTION REQUIRED"
+                        : isFr ? "CRITIQUE" : "CRITICAL"}
                     </span>
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-black text-text-main tabular-nums">{pillar.score}/100</div>
-                    <div className="font-mono text-[9px] text-text-muted">Normalized Score</div>
+                    <div className="font-mono text-[9px] text-text-muted">
+                      {isFr ? "Score normalisé" : "Normalized Score"}
+                    </div>
                   </div>
                 </div>
 
@@ -594,29 +1051,39 @@ export default function AnalyticsPage() {
                         <span
                           className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-bold ${
                             m.performance_rank === "SUPERIOR"
-                              ? "bg-emerald-500/20 text-emerald-400"
+                              ? "bg-emerald-500/20 text-emerald-300"
                               : m.performance_rank === "ON_TARGET"
-                              ? "bg-cyan-500/20 text-cyan-400"
-                              : m.performance_rank === "NEEDS_IMPROVEMENT"
-                              ? "bg-amber-500/20 text-amber-400"
-                              : "bg-rose-500/20 text-rose-400"
+                              ? "bg-cyan-500/20 text-cyan-300"
+                              : "bg-amber-500/20 text-amber-300"
                           }`}
                         >
-                          {m.performance_rank}
+                          {m.performance_rank === "SUPERIOR"
+                            ? isFr ? "SUPÉRIEUR" : "SUPERIOR"
+                            : m.performance_rank === "ON_TARGET"
+                            ? isFr ? "CONFORME À L'OBJECTIF" : "ON TARGET"
+                            : isFr ? "À AMÉLIORER" : "NEEDS IMPROVEMENT"}
                         </span>
                       </div>
 
                       <div className="mt-2 flex items-baseline justify-between font-mono text-xs">
                         <span className="text-text-muted">
-                          Observed: <strong className="text-text-main tabular-nums">{m.observed_value.toLocaleString()} {m.unit}</strong>
+                          {isFr ? "Observé : " : "Observed: "}
+                          <strong className="text-text-main tabular-nums">
+                            {m.observed_value.toLocaleString()} {m.unit}
+                          </strong>
                         </span>
                         <span className="text-text-muted">
-                          Target: <strong className="tabular-nums text-text-muted">{m.target_benchmark.toLocaleString()} {m.unit}</strong>
+                          {isFr ? "Cible : " : "Target: "}
+                          <strong className="tabular-nums text-text-muted">
+                            {m.target_benchmark.toLocaleString()} {m.unit}
+                          </strong>
                         </span>
                       </div>
 
                       <div className="mt-2 flex items-center justify-between text-[10px] text-text-muted">
-                        <span className="truncate" title={m.notes}>{m.notes}</span>
+                        <span className="truncate" title={m.notes}>
+                          {m.notes}
+                        </span>
                         <span className="font-mono text-aurora">{m.score_normalized} pts</span>
                       </div>
                     </div>
@@ -630,36 +1097,56 @@ export default function AnalyticsPage() {
 
       {/* TAB 3: Macro Shock Stress-Testing Simulator */}
       {activeTab === "simulator" && (
-        <section aria-labelledby="macro-shock-simulator-title" className="space-y-6">
+        <section
+          id="panel-simulator"
+          role="tabpanel"
+          tabIndex={0}
+          aria-labelledby="tab-simulator"
+          className="space-y-6 focus:outline-none"
+        >
           <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-card via-surface to-background p-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-mono text-[11px] font-bold text-aurora">
-              <Sliders className="h-3.5 w-3.5" /> STOCHASTIC MACRO SHOCK SIMULATOR
+              <Sliders aria-hidden="true" className="h-3.5 w-3.5" />{" "}
+              {isFr ? "SIMULATEUR STOCHASTIQUE DE CHOCS MACROÉCONOMIQUES" : "STOCHASTIC MACRO SHOCK SIMULATOR"}
             </div>
             <h2 id="macro-shock-simulator-title" className="mt-2 text-2xl font-black text-text-main">
-              Simulate Policy & Commodity Shocks on {scorecard.project_name}
+              {isFr
+                ? `Simuler des chocs politiques et de marché sur ${scorecard.project_name}`
+                : `Simulate Policy & Commodity Shocks on ${scorecard.project_name}`}
             </h2>
             <p className="mt-1 max-w-2xl text-xs leading-relaxed text-text-muted">
-              Adjust variables below to observe real-time recalculation of the project&apos;s 8-pillar rating, debt service capacity, and critical action gaps.
+              {isFr
+                ? "Ajustez les curseurs ci-dessous pour observer le recalcul en temps réel de la note du projet, de sa capacité de service de la dette et des écarts critiques."
+                : "Adjust variables below to observe real-time recalculation of the project's 8-pillar rating, debt service capacity, and critical action gaps."}
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {/* Slider 1: Carbon Price Escalation */}
               <div className="rounded-xl border border-border bg-black/30 p-4">
                 <div className="flex items-center justify-between text-xs font-bold text-text-main">
-                  <span>Carbon Tax Escalation</span>
-                  <span className="font-mono text-emerald-400">+${carbonTaxDelta}/t</span>
+                  <label htmlFor="slider-carbon-tax">
+                    {isFr ? "Hausse de la taxe carbone" : "Carbon Tax Escalation"}
+                  </label>
+                  <span className="font-mono text-emerald-400">
+                    +{carbonTaxDelta} {isFr ? "$/t" : "$/t"}
+                  </span>
                 </div>
                 <input
+                  id="slider-carbon-tax"
                   type="range"
                   min="0"
                   max="100"
                   step="5"
                   value={carbonTaxDelta}
                   onChange={(e) => setCarbonTaxDelta(Number(e.target.value))}
-                  className="mt-3 w-full accent-primary"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={carbonTaxDelta}
+                  aria-valuetext={`+${carbonTaxDelta} dollars per tonne`}
+                  className="mt-3 w-full accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
                 />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-text-muted">
-                  <span>$0 (Baseline)</span>
+                  <span>$0 ({isFr ? "Base" : "Baseline"})</span>
                   <span>+$100 ($170/t Cap)</span>
                 </div>
               </div>
@@ -667,41 +1154,55 @@ export default function AnalyticsPage() {
               {/* Slider 2: Interest Rate Shock */}
               <div className="rounded-xl border border-border bg-black/30 p-4">
                 <div className="flex items-center justify-between text-xs font-bold text-text-main">
-                  <span>BoC Rate Hike</span>
+                  <label htmlFor="slider-boc-rate">
+                    {isFr ? "Hausse de taux de la BdC" : "BoC Rate Hike"}
+                  </label>
                   <span className="font-mono text-amber-400">+{rateHikeBps} bps</span>
                 </div>
                 <input
+                  id="slider-boc-rate"
                   type="range"
                   min="0"
                   max="300"
                   step="25"
                   value={rateHikeBps}
                   onChange={(e) => setRateHikeBps(Number(e.target.value))}
-                  className="mt-3 w-full accent-amber-400"
+                  aria-valuemin={0}
+                  aria-valuemax={300}
+                  aria-valuenow={rateHikeBps}
+                  aria-valuetext={`+${rateHikeBps} basis points`}
+                  className="mt-3 w-full accent-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
                 />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-text-muted">
                   <span>0 bps</span>
-                  <span>+300 bps (Stagflation)</span>
+                  <span>+300 bps ({isFr ? "Stagflation" : "Stagflation"})</span>
                 </div>
               </div>
 
               {/* Slider 3: U.S. Border Tariff Shock */}
               <div className="rounded-xl border border-border bg-black/30 p-4">
                 <div className="flex items-center justify-between text-xs font-bold text-text-main">
-                  <span>U.S. Border Tariff Shock</span>
+                  <label htmlFor="slider-tariff-shock">
+                    {isFr ? "Tarifs douaniers américains" : "U.S. Border Tariff Shock"}
+                  </label>
                   <span className="font-mono text-rose-400">+{tariffShockPct}%</span>
                 </div>
                 <input
+                  id="slider-tariff-shock"
                   type="range"
                   min="0"
                   max="25"
                   step="2.5"
                   value={tariffShockPct}
                   onChange={(e) => setTariffShockPct(Number(e.target.value))}
-                  className="mt-3 w-full accent-rose-400"
+                  aria-valuemin={0}
+                  aria-valuemax={25}
+                  aria-valuenow={tariffShockPct}
+                  aria-valuetext={`+${tariffShockPct} percent tariff`}
+                  className="mt-3 w-full accent-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
                 />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-text-muted">
-                  <span>0% (CUSMA Free)</span>
+                  <span>0% ({isFr ? "Sans tarif" : "CUSMA Free"})</span>
                   <span>+25% (Section 232)</span>
                 </div>
               </div>
@@ -709,21 +1210,30 @@ export default function AnalyticsPage() {
               {/* Slider 4: Regulatory Delay */}
               <div className="rounded-xl border border-border bg-black/30 p-4">
                 <div className="flex items-center justify-between text-xs font-bold text-text-main">
-                  <span>IAAC Review Delay</span>
-                  <span className="font-mono text-cyan-400">+{reviewDelayMonths} mo</span>
+                  <label htmlFor="slider-review-delay">
+                    {isFr ? "Délai d'examen de l'AEIC" : "IAAC Review Delay"}
+                  </label>
+                  <span className="font-mono text-cyan-400">
+                    +{reviewDelayMonths} {isFr ? "mois" : "mo"}
+                  </span>
                 </div>
                 <input
+                  id="slider-review-delay"
                   type="range"
                   min="0"
                   max="24"
                   step="3"
                   value={reviewDelayMonths}
                   onChange={(e) => setReviewDelayMonths(Number(e.target.value))}
-                  className="mt-3 w-full accent-cyan-400"
+                  aria-valuemin={0}
+                  aria-valuemax={24}
+                  aria-valuenow={reviewDelayMonths}
+                  aria-valuetext={`+${reviewDelayMonths} months delay`}
+                  className="mt-3 w-full accent-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
                 />
                 <div className="mt-2 flex justify-between font-mono text-[10px] text-text-muted">
-                  <span>0 mo</span>
-                  <span>+24 mo (Judicial Delay)</span>
+                  <span>0 {isFr ? "mois" : "mo"}</span>
+                  <span>+24 {isFr ? "mois" : "mo"}</span>
                 </div>
               </div>
             </div>
@@ -732,9 +1242,13 @@ export default function AnalyticsPage() {
             <div className="mt-8 rounded-xl border border-border bg-card p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-text-main">Calibrated Shock Impact Summary</h3>
+                  <h3 className="text-base font-bold text-text-main">
+                    {isFr ? "Sommaire de l'impact des chocs calibrés" : "Calibrated Shock Impact Summary"}
+                  </h3>
                   <p className="text-xs text-text-muted">
-                    Recalibrated rating reflects compounded project finance resilience under adverse macroeconomic conditions.
+                    {isFr
+                      ? "La note recalibrée reflète la résilience financière globale du projet face à des conditions macroéconomiques défavorables."
+                      : "Recalibrated rating reflects compounded project finance resilience under adverse macroeconomic conditions."}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -745,12 +1259,16 @@ export default function AnalyticsPage() {
                       setTariffShockPct(0);
                       setReviewDelayMonths(0);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted hover:text-text-main"
+                    aria-label={isFr ? "Réinitialiser tous les paramètres de chocs" : "Reset all macro shock parameters"}
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
                   >
-                    <RefreshCw className="h-3 w-3" /> Reset Shocks
+                    <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" />{" "}
+                    {isFr ? "Réinitialiser les chocs" : "Reset Shocks"}
                   </button>
                   <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-right">
-                    <span className="font-mono text-[9px] uppercase text-text-muted">SHOCKED KPI RATING</span>
+                    <span className="font-mono text-[9px] uppercase text-text-muted">
+                      {isFr ? "NOTE APRÈS CHOCS" : "SHOCKED KPI RATING"}
+                    </span>
                     <div className="text-xl font-black text-aurora">{scorecard.overall_kpi_rating}/100</div>
                   </div>
                 </div>
@@ -772,82 +1290,183 @@ export default function AnalyticsPage() {
 
       {/* TAB 4: Top 100 Priority Items Catalog */}
       {activeTab === "top100" && (
-        <section aria-labelledby="top-100-priority-items-title" className="space-y-6">
+        <section
+          id="panel-top100"
+          role="tabpanel"
+          tabIndex={0}
+          aria-labelledby="tab-top100"
+          className="space-y-6 focus:outline-none"
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 id="top-100-priority-items-title" className="text-2xl font-black text-text-main">Top 100 Canadian Sovereign Priority Items</h2>
+              <h2 id="top-100-priority-items-title" className="text-2xl font-black text-text-main">
+                {isFr ? "Top 100 des priorités souveraines canadiennes" : "Top 100 Canadian Sovereign Priority Items"}
+              </h2>
               <p className="text-xs text-text-muted">
-                The authoritative registry of major projects, infrastructure assets, live data feeds, and statutory policy reforms required for economic sovereignty.
+                {isFr
+                  ? "Le registre officiel des grands projets, actifs d'infrastructure, flux de données en direct et réformes législatives requis pour la souveraineté économique."
+                  : "The authoritative registry of major projects, infrastructure assets, live data feeds, and statutory policy reforms required for economic sovereignty."}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 sm:flex-none">
+                <label htmlFor="priority-search-input" className="sr-only">
+                  {isFr ? "Rechercher parmi les 100 priorités" : "Search top 100 priorities"}
+                </label>
+                <Search aria-hidden="true" className="absolute left-3 top-3.5 h-3.5 w-3.5 text-text-muted" />
                 <input
+                  id="priority-search-input"
                   type="text"
-                  placeholder="Filter priorities..."
+                  placeholder={isFr ? "Filtrer les priorités..." : "Filter priorities..."}
                   value={prioritySearch}
                   onChange={(e) => setPrioritySearch(e.target.value)}
-                  className="min-h-9 rounded-xl border border-border bg-card pl-9 pr-3 text-xs text-text-main focus:border-primary focus:outline-none"
+                  className="min-h-[44px] w-full rounded-xl border border-border bg-card pl-9 pr-3 text-xs text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora sm:w-64"
                 />
               </div>
 
-              <select
-                value={selectedPriorityCluster}
-                onChange={(e) => setSelectedPriorityCluster(e.target.value)}
-                className="min-h-9 rounded-xl border border-border bg-card px-3 text-xs font-bold text-text-main focus:border-primary focus:outline-none"
-              >
-                <option value="all">All Clusters (100)</option>
-                <option value="minerals">Critical Minerals (15)</option>
-                <option value="nuclear">Nuclear & Clean Grid (12)</option>
-                <option value="energy">Clean Energy & Hydrogen (11)</option>
-                <option value="compute">Sovereign AI Compute (10)</option>
-                <option value="ports">Ports & Corridors (12)</option>
-                <option value="indigenous">Indigenous Sovereignty (12)</option>
-                <option value="analytics">KPIs & Live Feeds (13)</option>
-                <option value="supply">Supply Chain Defense (9)</option>
-                <option value="regulatory">Regulatory Reforms (6)</option>
-              </select>
+              <div>
+                <label htmlFor="priority-cluster-select" className="sr-only">
+                  {isFr ? "Filtrer par groupe de priorités" : "Filter by priority cluster"}
+                </label>
+                <select
+                  id="priority-cluster-select"
+                  value={selectedPriorityCluster}
+                  onChange={(e) => setSelectedPriorityCluster(e.target.value)}
+                  className="min-h-[44px] rounded-xl border border-border bg-card px-3 text-xs font-bold text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora"
+                >
+                  <option value="all">{isFr ? "Tous les groupes (100)" : "All Clusters (100)"}</option>
+                  <option value="minerals">{isFr ? "Minéraux critiques (15)" : "Critical Minerals (15)"}</option>
+                  <option value="nuclear">{isFr ? "Réseau nucléaire et propre (12)" : "Nuclear & Clean Grid (12)"}</option>
+                  <option value="energy">{isFr ? "Énergie propre et stockage (11)" : "Clean Energy & Storage (11)"}</option>
+                  <option value="compute">{isFr ? "Calcul et IA souveraine (10)" : "Sovereign AI Compute (10)"}</option>
+                  <option value="ports">{isFr ? "Ports et corridors (12)" : "Ports & Corridors (12)"}</option>
+                  <option value="indigenous">{isFr ? "Souveraineté autochtone (12)" : "Indigenous Sovereignty (12)"}</option>
+                  <option value="analytics">{isFr ? "Indicateurs et flux en direct (13)" : "KPIs & Live Feeds (13)"}</option>
+                  <option value="supply">{isFr ? "Défense de la chaîne d'approvisionnement (9)" : "Supply Chain Defense (9)"}</option>
+                  <option value="regulatory">{isFr ? "Réformes réglementaires (6)" : "Regulatory Reforms (6)"}</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card/80 overflow-hidden shadow-xl">
+          {/* Desktop Data Table (Accessible with caption and scope) */}
+          <div
+            role="region"
+            aria-label={isFr ? "Tableau des 100 priorités souveraines canadiennes" : "Top 100 Canadian Sovereign Priorities Table"}
+            tabIndex={0}
+            className="hidden md:block rounded-2xl border border-border bg-card/80 overflow-hidden shadow-xl focus:outline-none focus:ring-2 focus:ring-aurora"
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
+                <caption className="sr-only">
+                  {isFr
+                    ? "Liste détaillée des 100 priorités souveraines canadiennes comprenant rang, titre, groupe stratégique, province, échelle, échéance et indicateur d'impact"
+                    : "Detailed list of top 100 Canadian sovereign priorities including rank, title, strategic cluster, province, scale, horizon, and primary impact metric"}
+                </caption>
                 <thead className="border-b border-border bg-surface/80 font-mono text-[10px] uppercase text-text-muted">
                   <tr>
-                    <th className="px-4 py-3">Rank</th>
-                    <th className="px-4 py-3">Priority Item</th>
-                    <th className="px-4 py-3">Strategic Cluster</th>
-                    <th className="px-4 py-3">Prov</th>
-                    <th className="px-4 py-3">Scale / Target</th>
-                    <th className="px-4 py-3">Horizon</th>
-                    <th className="px-4 py-3">Primary Impact Metric</th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Rang" : "Rank"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Priorité stratégique" : "Priority Item"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Groupe stratégique" : "Strategic Cluster"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Prov." : "Prov"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Échelle / Cible" : "Scale / Target"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Échéance" : "Horizon"}
+                    </th>
+                    <th scope="col" className="px-4 py-3.5">
+                      {isFr ? "Indicateur d'impact principal" : "Primary Impact Metric"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {filteredPriorities.map((item) => (
                     <tr key={item.rank} className="hover:bg-surface/60 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-aurora">#{item.rank}</td>
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-text-main">{item.title}</div>
-                        <div className="mt-0.5 text-[11px] text-text-muted leading-tight">{item.description}</div>
+                      <td className="px-4 py-3.5 font-mono font-bold text-aurora">#{item.rank}</td>
+                      <td className="px-4 py-3.5">
+                        <div className="font-bold text-text-main">{isFr ? item.titleFr : item.title}</div>
+                        <div className="mt-0.5 text-[11px] text-text-muted leading-tight">
+                          {isFr ? item.descriptionFr : item.description}
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 font-mono text-[10px] text-aurora">
-                          {item.cluster}
+                          {isFr ? item.clusterFr : item.cluster}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-mono font-bold text-text-main">{item.jurisdiction}</td>
-                      <td className="px-4 py-3 font-mono text-text-main">{item.scale}</td>
-                      <td className="px-4 py-3 font-mono text-text-muted">{item.horizon}</td>
-                      <td className="px-4 py-3 font-mono text-gold text-[11px]">{item.impactMetric}</td>
+                      <td className="px-4 py-3.5 font-mono font-bold text-text-main">{item.jurisdiction}</td>
+                      <td className="px-4 py-3.5 font-mono text-text-main">{isFr ? item.scaleFr : item.scale}</td>
+                      <td className="px-4 py-3.5 font-mono text-text-muted">{item.horizon}</td>
+                      <td className="px-4 py-3.5 font-mono text-gold text-[11px]">
+                        {isFr ? item.impactMetricFr : item.impactMetric}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Mobile-Accessible Card View (< md) */}
+          <div className="block md:hidden space-y-3">
+            <div className="flex items-center justify-between text-xs text-text-muted">
+              <span>{isFr ? `${filteredPriorities.length} priorités affichées` : `Showing ${filteredPriorities.length} priorities`}</span>
+            </div>
+            {filteredPriorities.map((item) => (
+              <div
+                key={item.rank}
+                className="rounded-2xl border border-border bg-card/90 p-4 shadow-md space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-aurora">#{item.rank}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 font-mono text-[9px] text-aurora">
+                      {isFr ? item.clusterFr : item.cluster}
+                    </span>
+                    <span className="rounded-full bg-surface px-2 py-0.5 font-mono text-[9px] font-bold text-text-main">
+                      {item.jurisdiction}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-text-main">{isFr ? item.titleFr : item.title}</h3>
+                  <p className="mt-1 text-xs text-text-muted leading-relaxed">
+                    {isFr ? item.descriptionFr : item.description}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between border-t border-border/50 pt-2.5 text-xs">
+                  <div>
+                    <span className="font-mono text-[10px] text-text-muted">{isFr ? "Échelle : " : "Scale: "}</span>
+                    <strong className="font-mono text-text-main">{isFr ? item.scaleFr : item.scale}</strong>
+                  </div>
+                  <div>
+                    <span className="font-mono text-[10px] text-text-muted">{isFr ? "Échéance : " : "Horizon: "}</span>
+                    <strong className="font-mono text-text-muted">{item.horizon}</strong>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2">
+                  <span className="font-mono text-[9px] uppercase text-text-muted">
+                    {isFr ? "Indicateur d'impact clé" : "Key Impact Metric"}
+                  </span>
+                  <div className="font-mono text-xs font-bold text-gold">
+                    {isFr ? item.impactMetricFr : item.impactMetric}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}

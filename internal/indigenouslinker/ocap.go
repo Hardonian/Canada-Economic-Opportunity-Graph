@@ -82,7 +82,7 @@ func (e *OCAPComplianceEngine) ValidateLink(business *domain.Entity, project *do
 	if !ok {
 		// Default rule: Publicly registered business in official Indigenous Business Directory
 		// is compliant for public procurement matching, provided traditional knowledge is absent.
-		h := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s", business.ID, project.ID, requestedUseCase)))
+		h := sha256.Sum256(fmt.Appendf(nil, "%s:%s:%s", business.ID, project.ID, requestedUseCase))
 		return OCAPEvaluationResult{
 			Compliant:   true,
 			AuditHash:   hex.EncodeToString(h[:]),
@@ -123,7 +123,7 @@ func (e *OCAPComplianceEngine) ValidateLink(business *domain.Entity, project *do
 		}
 	}
 
-	h := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%s:%s", business.ID, project.ID, consent.AuthorizedSigner, now.Format(time.RFC3339))))
+	h := sha256.Sum256(fmt.Appendf(nil, "%s:%s:%s:%s", business.ID, project.ID, consent.AuthorizedSigner, now.Format(time.RFC3339)))
 	return OCAPEvaluationResult{
 		Compliant:   true,
 		AuditHash:   hex.EncodeToString(h[:]),
