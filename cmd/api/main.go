@@ -34,7 +34,18 @@ func main() {
 	}
 	processContext, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stopSignals()
-	store := database.NewMemoryStore()
+	var store database.Store
+	if cfg.StorageMode == "persistent" {
+		pStore, pErr := database.OpenPersistentStore(cfg.StorageDir, true)
+		if pErr != nil {
+			log.Fatalf("[FATAL] Failed to initialize persistent storage engine in %s: %v", cfg.StorageDir, pErr)
+		}
+		defer pStore.Close()
+		store = pStore
+		log.Printf("[INFO] Initialized ACID persistent store in %s", cfg.StorageDir)
+	} else {
+		store = database.NewMemoryStore()
+	}
 
 	// Register authoritative adapters (raw, unwrapped).
 	adapterList := []adapters.Adapter{
