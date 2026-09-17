@@ -126,3 +126,28 @@ func TestBuildRoot_SortedLeaves(t *testing.T) {
 		}
 	}
 }
+
+func TestInclusionProofVerification(t *testing.T) {
+	anchor := NewStateAnchor()
+	leaves := []string{
+		"leaf-hash-0",
+		"leaf-hash-1",
+		"leaf-hash-2",
+		"leaf-hash-3",
+	}
+
+	proof, err := anchor.GenerateProof(2, leaves)
+	if err != nil {
+		t.Fatalf("failed to generate inclusion proof: %v", err)
+	}
+
+	if !VerifyInclusionProof(proof) {
+		t.Errorf("expected valid inclusion proof to verify")
+	}
+
+	// Tampered proof
+	proof.LeafHash = "tampered-leaf"
+	if VerifyInclusionProof(proof) {
+		t.Errorf("expected tampered leaf to fail verification")
+	}
+}

@@ -50,4 +50,21 @@ func TestEconometricsMRIOAndShock(t *testing.T) {
 			t.Fatalf("Viability shift must be negative under adverse macro conditions")
 		}
 	})
+
+	t.Run("TariffShockSimulator evaluates cross-border tariffs", func(t *testing.T) {
+		sim := NewTariffShockSimulator()
+		res := sim.Simulate(TariffShockRequest{
+			TariffRatePct:   15.0,
+			AffectedSectors: []string{"STEEL", "ALUMINUM", "ENERGY", "CRITICAL_MINERALS"},
+		})
+		if res.AnnualGDPLossCADM <= 0 {
+			t.Errorf("expected positive GDP loss, got %f", res.AnnualGDPLossCADM)
+		}
+		if res.DirectJobsAtRisk <= 0 {
+			t.Errorf("expected jobs at risk > 0, got %d", res.DirectJobsAtRisk)
+		}
+		if len(res.WorstHitProvinces) == 0 {
+			t.Errorf("expected worst hit provinces identified")
+		}
+	})
 }

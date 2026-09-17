@@ -338,7 +338,8 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
-		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/"))
+		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/") ||
+		strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/"))
 	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
@@ -468,6 +469,9 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/kpis/project/{id}", s.handleKPIProject)
 	s.mux.HandleFunc("GET /api/v1/kpis/summary", s.handleKPISummary)
 	s.mux.HandleFunc("GET /api/v1/kpis/snapshot", s.handleKPISnapshot)
+
+	// Palantir-Grade Sovereign Capabilities (Pillars 1, 2, 3, 4, 5, 7, 8, 10)
+	s.registerPalantirGradeRoutes()
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

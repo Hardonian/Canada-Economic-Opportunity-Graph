@@ -58,4 +58,15 @@ func TestCanonicalGateways(t *testing.T) {
 			t.Errorf("expected valid audit hash for %s", g.PortName)
 		}
 	}
+
+	t.Run("DarkFleetDetector identifies suspicious ship-to-ship rendezvous", func(t *testing.T) {
+		detector := NewDarkFleetDetector()
+		alerts := detector.EvaluateVessel("999888777", "Shadow Tanker", "PA", 6.5, 35.0, 3)
+		if len(alerts) != 3 {
+			t.Fatalf("expected 3 alerts (blackout, STS, flag hopping), got %d", len(alerts))
+		}
+		if alerts[1].Anomaly != AnomalyShipToShipTransfer {
+			t.Errorf("expected STS anomaly, got %s", alerts[1].Anomaly)
+		}
+	})
 }

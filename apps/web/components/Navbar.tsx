@@ -24,6 +24,7 @@ import {
   ShieldCheck,
   Target,
   Menu,
+  Network,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -47,6 +48,7 @@ export default function Navbar() {
   const navItems = [
     { href: "/briefing", label: lang === "en" ? "Executive Brief" : "Note exécutive", icon: Landmark, badge: lang === "en" ? "ANALYSIS" : "ANALYSE" },
     { href: "/briefing/memo", label: lang === "en" ? "Cabinet Memo" : "Mémoire Cabinet", icon: FileText },
+    { href: "/investigate", label: lang === "en" ? "Investigate" : "Enquête", icon: Network, badge: "GOTHAM" },
     { href: "/", label: lang === "en" ? "Capital Radar" : "Radar du capital", icon: Radar },
     { href: "/analytics", label: lang === "en" ? "KPI Analytics" : "Analytique KPI", icon: BarChart3, badge: "LIVE" },
     { href: "/syndication", label: lang === "en" ? "Syndication & PPA" : "Syndication et PPA", icon: Coins, badge: "NEW" },

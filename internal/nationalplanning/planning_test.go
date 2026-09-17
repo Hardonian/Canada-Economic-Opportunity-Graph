@@ -103,4 +103,21 @@ func TestNationalPlanningSuite(t *testing.T) {
 			t.Fatalf("Expected positive 30-year wealth, got $%d", m.ThirtyYearCumulativeWealth)
 		}
 	})
+
+	t.Run("ChokepointWargamer models critical transport corridor outage", func(t *testing.T) {
+		cw := NewChokepointWargamer()
+		res, err := cw.SimulateDisruption(ChokepointVancouverGateway, 7)
+		if err != nil {
+			t.Fatalf("chokepoint simulation err: %v", err)
+		}
+		if res.DirectStrandedLossM <= 0 {
+			t.Errorf("expected positive stranded loss, got %f", res.DirectStrandedLossM)
+		}
+		if res.TotalEconomicShockM <= res.DirectStrandedLossM {
+			t.Errorf("total economic shock must exceed direct stranded loss due to multiplier")
+		}
+		if res.NationalSupplyFreeze != "SYSTEMIC_PARALYSIS" && res.NationalSupplyFreeze != "SEVERE" {
+			t.Errorf("expected severe or systemic paralysis for 7-day Port of Vancouver strike, got %s", res.NationalSupplyFreeze)
+		}
+	})
 }

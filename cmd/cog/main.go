@@ -73,6 +73,22 @@ func main() {
 		handleDemo()
 	case "extract":
 		handleExtract(os.Args[2:])
+	case "ontology":
+		handleOntology(os.Args[2:])
+	case "lakehouse":
+		handleLakehouse(os.Args[2:])
+	case "gql":
+		handleGQL(os.Args[2:])
+	case "earthobs":
+		handleEarthObsCLI(os.Args[2:])
+	case "ai":
+		handleAICLI(os.Args[2:])
+	case "security":
+		handleSecurityCLI(os.Args[2:])
+	case "ubo":
+		handleUBOCLI(os.Args[2:])
+	case "audit":
+		handleAuditCLI(os.Args[2:])
 	default:
 		fmt.Printf("Unknown command: %s\n\n", cmd)
 		printUsage()
@@ -117,6 +133,14 @@ func printUsage() {
 	fmt.Println("  cog cegs validate <file>               Validate document against CEGS 0.1 standard")
 	fmt.Println("  cog cegs inspect <file>                Inspect CEGS document & evidence trust profile")
 	fmt.Println("  cog cegs diff <old.json> <new.json>    Semantic diff between two CEGS states")
+	fmt.Println("  cog ontology <branch|action>           Manage git-like ontology branches and transactional actions")
+	fmt.Println("  cog lakehouse <query|quality>          Vectorized zero-copy OLAP query & quality SLA firewall")
+	fmt.Println("  cog gql <query|gnn|communities>        ISO GQL parsing, GNN link prediction & Louvain clusters")
+	fmt.Println("  cog earthobs <insar|ais|audit> [id]    Sentinel-1 InSAR, AIS port congestion & filing reconciliation")
+	fmt.Println("  cog ai <copilot|ppa> [options]         Sovereign AIP multi-agent peer review & bilateral PPA optimizer")
+	fmt.Println("  cog security <auth|dlp> [options]      ABAC security clearance checks & real-time DLP redaction")
+	fmt.Println("  cog ubo <trace|darkfleet|ica>          Beneficial ownership unraveling, dark fleet & ICA s.25.3 review")
+	fmt.Println("  cog audit <c59|c69|trc92|merkle> [id]  Bill C-59 ITC, C-69 clock, TRC 92 scorecard & Merkle root")
 	fmt.Println("  cog demo                               Run instant offline demonstration")
 }
 
