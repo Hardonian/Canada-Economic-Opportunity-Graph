@@ -1,0 +1,83 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cog-airgap-isolation
+  namespace: cog-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: canada-economic-opportunity-graph
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic within the cog-system namespace
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 3000
+    # Allow ingress controller traffic
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+  egress:
+    # Allow intra-namespace traffic
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow CoreDNS lookups
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cog-ingress
+  namespace: cog-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - opportunity.canada.ca
+        - api.opportunity.canada.ca
+      secretName: cog-tls-certificate
+  rules:
+    - host: opportunity.canada.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cog-web
+                port:
+                  number: 3000
+    - host: api.opportunity.canada.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cog-api
+                port:
+                  number: 8080

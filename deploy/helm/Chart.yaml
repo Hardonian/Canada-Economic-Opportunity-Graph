@@ -1,0 +1,18 @@
+apiVersion: v2
+name: canada-economic-opportunity-graph
+description: Enterprise Sovereign Helm Chart for the Canada Economic Opportunity Graph (CEO-G)
+type: application
+version: 1.0.0
+appVersion: "2026.1"
+keywords:
+  - canada
+  - sovereign-intelligence
+  - palantir-grade
+  - critical-infrastructure
+  - cegs
+home: https://github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph
+sources:
+  - https://github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph
+maintainers:
+  - name: Canadian Sovereign Data Mesh Team
+    email: sovereign@opportunity.canada.ca

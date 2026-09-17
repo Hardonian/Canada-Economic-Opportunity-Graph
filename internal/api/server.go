@@ -29,6 +29,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/readiness"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/reconciliation"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/sovereignty"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/telemetry"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/trust"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/verifier"
 	"github.com/google/uuid"
@@ -534,6 +535,7 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "# HELP cog_verifier_attestations Total verifier attestations recorded\n")
 	fmt.Fprintf(w, "# TYPE cog_verifier_attestations counter\n")
 	fmt.Fprintf(w, "cog_verifier_attestations %d\n", attCount)
+	fmt.Fprint(w, telemetry.DefaultCollector.RenderPrometheus())
 }
 
 func (s *Server) handleRadar(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cog-api
+  namespace: cog-system
+  labels:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cog-web
+  namespace: cog-system
+  labels:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+    app.kubernetes.io/component: web
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+    app.kubernetes.io/component: web
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

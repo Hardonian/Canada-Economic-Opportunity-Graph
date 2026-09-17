@@ -25,6 +25,8 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     pids_limit: 128
+    volumes:
+      - cog-data:/app/data/store
     networks: [app]
 
   web:
@@ -51,3 +53,7 @@ services:
 networks:
   app:
     internal: true
+
+volumes:
+  cog-data:
+

@@ -1,0 +1,18 @@
+{{- if and .Values.api.enabled (eq .Values.api.storage.mode "persistent") }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "canada-economic-opportunity-graph.fullname" . }}-wal-data
+  labels:
+    app.kubernetes.io/name: {{ include "canada-economic-opportunity-graph.name" . }}
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.api.storage.size }}
+  {{- if .Values.api.storage.storageClassName }}
+  storageClassName: {{ .Values.api.storage.storageClassName }}
+  {{- end }}
+{{- end }}

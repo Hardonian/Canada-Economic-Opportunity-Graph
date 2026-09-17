@@ -47,6 +47,8 @@ jobs:
         run: go vet ./...
       - name: Audit production web dependencies
         run: pnpm --dir apps/web audit --prod --audit-level=moderate
+      - name: Test web E2E integration suite
+        run: pnpm --dir apps/web test
       - name: Typecheck and build web
         run: |
           pnpm --dir apps/web typecheck

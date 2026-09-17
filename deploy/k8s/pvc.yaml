@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cog-wal-data
+  namespace: cog-system
+  labels:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: premium-rwo # High-IOPS NVMe backed block storage for WAL engine
