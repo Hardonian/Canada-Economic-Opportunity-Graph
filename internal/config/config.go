@@ -44,6 +44,7 @@ type Config struct {
 	IdleTimeout          time.Duration
 	ShutdownTimeout      time.Duration
 	InitialIngestTimeout time.Duration
+	StorageDir           string
 }
 
 // RuntimeSummary is safe to emit to application logs.
@@ -76,6 +77,7 @@ func LoadValidated() (*Config, error) {
 	cfg.Env = strings.ToLower(strings.TrimSpace(getEnv("ENV", cfg.Env)))
 	cfg.BindAddress = strings.TrimSpace(getEnv("BIND_ADDRESS", cfg.BindAddress))
 	cfg.StorageMode = strings.ToLower(strings.TrimSpace(getEnv("STORAGE_MODE", cfg.StorageMode)))
+	cfg.StorageDir = strings.TrimSpace(getEnv("STORAGE_DIR", cfg.StorageDir))
 	if strings.TrimSpace(os.Getenv("DATABASE_URL")) != "" {
 		return nil, fmt.Errorf("DATABASE_URL is not supported by this snapshot runtime; unset it instead of assuming writes are durable")
 	}
@@ -170,8 +172,8 @@ func LoadValidated() (*Config, error) {
 	if !oneOf(cfg.LogLevel, "debug", "info", "warn", "error") {
 		return nil, fmt.Errorf("LOG_LEVEL must be one of debug, info, warn, or error")
 	}
-	if cfg.StorageMode != "snapshot" {
-		return nil, fmt.Errorf("STORAGE_MODE must be snapshot; no durable database adapter is shipped")
+	if cfg.StorageMode != "snapshot" && cfg.StorageMode != "persistent" {
+		return nil, fmt.Errorf("STORAGE_MODE must be one of snapshot or persistent")
 	}
 	if err := validateHTTPOrigin(cfg.PublicURL); err != nil {
 		return nil, fmt.Errorf("PUBLIC_URL: %w", err)
@@ -186,6 +188,7 @@ func defaults() *Config {
 		BindAddress:          "0.0.0.0",
 		Port:                 defaultPort,
 		StorageMode:          "snapshot",
+		StorageDir:           "data/store",
 		LogLevel:             "info",
 		CORSOrigin:           "*",
 		CORSOrigins:          []string{"*"},
