@@ -34,7 +34,11 @@ func main() {
 	}
 	processContext, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stopSignals()
-	var store database.Store
+	type appStore interface {
+		database.Store
+		database.SourceStore
+	}
+	var store appStore
 	if cfg.StorageMode == "persistent" {
 		pStore, pErr := database.OpenPersistentStore(cfg.StorageDir, true)
 		if pErr != nil {
