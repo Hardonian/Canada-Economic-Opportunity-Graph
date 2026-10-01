@@ -54,3 +54,43 @@ groups:
         annotations:
           summary: "No decentralized auditor nodes connected"
           description: "The decentralized verifier network has zero connected provincial auditor nodes. Milestone notarizations are suspended."
+
+      - alert: COGDeadLetterQueueGrowing
+        expr: cog_ingestion_dlq_size > 20
+        for: 5m
+        labels:
+          severity: warning
+          tier: ingestion
+        annotations:
+          summary: "Ingestion Dead Letter Queue (DLQ) item count is elevated"
+          description: "Over 20 malformed or unparseable source payloads have accumulated in the quarantine DLQ. Check upstream source feed adapters."
+
+      - alert: COGRateLimitSaturation
+        expr: sum(rate(cog_http_requests_total{status="429"}[5m])) > 10
+        for: 3m
+        labels:
+          severity: warning
+          tier: security
+        annotations:
+          summary: "API rate limiting saturation or volumetric abuse detected"
+          description: "Elevated rate of HTTP 429 Too Many Requests (>10 req/s over 3m) indicates potential scraping surge or misconfigured external client."
+
+      - alert: COGReconciliationConflictsSpike
+        expr: rate(cog_reconciliation_conflicts_total[10m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          tier: integrity
+        annotations:
+          summary: "Surge in multi-source factual reconciliation conflicts"
+          description: "Cross-registry reconciliation between provincial, federal, and satellite datasets is encountering elevated conflicts requiring human adjudication."
+
+      - alert: COGC69StatutoryClockBreach
+        expr: cog_c69_statutory_clock_breaches_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: compliance
+        annotations:
+          summary: "Bill C-69 statutory assessment timeline breach detected"
+          description: "One or more designated major projects have exceeded the 180-day or 300-day statutory milestone review window under the Impact Assessment Act."

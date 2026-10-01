@@ -519,7 +519,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/kpis/summary", s.handleKPISummary)
 	s.mux.HandleFunc("GET /api/v1/kpis/snapshot", s.handleKPISnapshot)
 
-	// Palantir-Grade Sovereign Capabilities (Pillars 1, 2, 3, 4, 5, 7, 8, 10)
+	// Palantir-Grade Sovereign Capabilities (Pillars 1 through 10 Complete)
 	s.registerPalantirGradeRoutes()
 }
 

@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/matching"
 	"github.com/google/uuid"
 )
 
@@ -549,5 +551,69 @@ func TestSovereigntyPillarsEndpoints(t *testing.T) {
 		if !strings.Contains(rec.Body.String(), "HYDRO_QUEBEC") {
 			t.Fatalf("expected HYDRO_QUEBEC in compute sovereignty response: %s", rec.Body.String())
 		}
+	}
+}
+
+func TestDealPrecedents_CanonicalProfiles(t *testing.T) {
+	store := database.NewMemoryStore()
+	ctx := context.Background()
+
+	p := &domain.Project{
+		ID:           "crawford-nickel",
+		Slug:         "crawford-nickel",
+		Name:         "Crawford Nickel Sulphide Project",
+		Sector:       domain.SectorCriticalMinerals,
+		Subsector:    "Nickel & Cobalt Mining",
+		Province:     "ON",
+		CurrentStage: domain.StageFEED,
+		CapexCAD:     2_500_000_000,
+		EvidenceIDs:  []string{"ev-crawford"},
+	}
+	if err := store.SaveProject(ctx, p); err != nil {
+		t.Fatal(err)
+	}
+
+	server := mustServer(t, store, testOptions())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/projects/crawford-nickel/precedents", nil)
+	rec := httptest.NewRecorder()
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp struct {
+		ProjectID  string                    `json:"project_id"`
+		Precedents []*matching.PrecedentMatch `json:"precedents"`
+		Status     string                    `json:"status"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if resp.ProjectID != "crawford-nickel" {
+		t.Fatalf("expected project_id crawford-nickel, got %q", resp.ProjectID)
+	}
+	if len(resp.Precedents) == 0 {
+		t.Fatal("expected non-empty precedents for crawford-nickel")
+	}
+
+	top := resp.Precedents[0]
+	if top.SimilarityPct < 30.0 {
+		t.Fatalf("expected top precedent similarity >= 30%%, got %.1f%%", top.SimilarityPct)
+	}
+	if len(top.MatchedOn) == 0 {
+		t.Fatal("expected non-empty matched dimensions")
+	}
+
+	mReq := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	mRec := httptest.NewRecorder()
+	server.ServeHTTP(mRec, mReq)
+	if mRec.Code != http.StatusOK {
+		t.Fatalf("expected /metrics 200, got %d", mRec.Code)
+	}
+	if !strings.Contains(mRec.Body.String(), "cog_ingestion_dlq_size") {
+		t.Fatal("expected cog_ingestion_dlq_size in /metrics response")
 	}
 }

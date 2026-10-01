@@ -45,6 +45,11 @@ func (s *Server) registerPalantirGradeRoutes() {
 	s.mux.HandleFunc("POST /api/v1/ai/copilot/run", s.handleAICopilotRun)
 	s.mux.HandleFunc("POST /api/v1/ai/negotiate/ppa", s.handleAINegotiatePPA)
 
+	// Pillar 6: Linear Corridors & Maritime Gateways
+	s.mux.HandleFunc("GET /api/v1/corridor/pathfind", s.handleCorridorRoute)
+	s.mux.HandleFunc("POST /api/v1/corridor/pathfind", s.handleCorridorRoute)
+	s.mux.HandleFunc("GET /api/v1/corridor/gateways", s.handleLogisticsPorts)
+
 	// Pillar 7: Sovereign Security & ABAC
 	s.mux.HandleFunc("POST /api/v1/security/authorize", s.handleSecurityAuthorize)
 	s.mux.HandleFunc("POST /api/v1/security/dlp/scan", s.handleSecurityDLPScan)
@@ -53,6 +58,13 @@ func (s *Server) registerPalantirGradeRoutes() {
 	s.mux.HandleFunc("GET /api/v1/counter-intel/ubo/trace", s.handleCounterIntelUBOTrace)
 	s.mux.HandleFunc("GET /api/v1/counter-intel/dark-fleet", s.handleCounterIntelDarkFleet)
 	s.mux.HandleFunc("POST /api/v1/counter-intel/ica/screen", s.handleCounterIntelICAScreen)
+
+	// Pillar 9: Sovereign Capital Allocation & Geoeconomic War Game
+	s.mux.HandleFunc("GET /api/v1/palantir/planning/optimize", s.handlePlanningOptimize)
+	s.mux.HandleFunc("POST /api/v1/palantir/planning/optimize", s.handlePlanningOptimize)
+	s.mux.HandleFunc("GET /api/v1/palantir/planning/wargame", s.handlePlanningWarGame)
+	s.mux.HandleFunc("POST /api/v1/palantir/planning/wargame", s.handlePlanningWarGame)
+	s.mux.HandleFunc("GET /api/v1/palantir/planning/labor", s.handlePlanningLabor)
 
 	// Pillar 10: Sovereign Compliance & Merkle Root
 	s.mux.HandleFunc("GET /api/v1/compliance/c59/audit/{id}", s.handleComplianceC59Audit)

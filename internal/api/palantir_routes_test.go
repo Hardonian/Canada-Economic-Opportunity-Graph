@@ -101,6 +101,19 @@ func TestPalantirGradeEndpoints(t *testing.T) {
 			path:           "/api/v1/ai/negotiate/ppa",
 			expectedStatus: http.StatusOK,
 		},
+		// Pillar 6: Linear Corridors & Maritime Gateways
+		{
+			name:           "POST /api/v1/corridor/pathfind",
+			method:         http.MethodPost,
+			path:           "/api/v1/corridor/pathfind",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "GET /api/v1/corridor/gateways",
+			method:         http.MethodGet,
+			path:           "/api/v1/corridor/gateways",
+			expectedStatus: http.StatusOK,
+		},
 		// Pillar 7: Sovereign Security & ABAC
 		{
 			name:           "POST /api/v1/security/authorize",
@@ -133,6 +146,27 @@ func TestPalantirGradeEndpoints(t *testing.T) {
 			name:           "POST /api/v1/counter-intel/ica/screen",
 			method:         http.MethodPost,
 			path:           "/api/v1/counter-intel/ica/screen",
+			expectedStatus: http.StatusOK,
+		},
+		// Pillar 9: Sovereign Capital Allocation & Geoeconomic War Game
+		{
+			name:           "POST /api/v1/palantir/planning/optimize",
+			method:         http.MethodPost,
+			path:           "/api/v1/palantir/planning/optimize",
+			body:           map[string]interface{}{"objective": "MAX_CROWDING_IN"},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "POST /api/v1/palantir/planning/wargame",
+			method:         http.MethodPost,
+			path:           "/api/v1/palantir/planning/wargame",
+			body:           map[string]interface{}{"scenario": "SHOCK_USMCA_TARIFFS"},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "GET /api/v1/palantir/planning/labor",
+			method:         http.MethodGet,
+			path:           "/api/v1/palantir/planning/labor",
 			expectedStatus: http.StatusOK,
 		},
 		// Pillar 10: Compliance & Merkle

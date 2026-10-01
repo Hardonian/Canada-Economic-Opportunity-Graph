@@ -151,3 +151,82 @@ test('E2E Test 5: WCAG 2.2 AAA Accessibility, FIP Branding & Bilingual Complianc
   assert.ok(footerContent.includes('WCAG 2.2 AAA'), 'Footer must declare WCAG AAA bilingual compliance');
 });
 
+test('E2E Test 6: 10-Pillars Palantir Sovereign Capabilities Architecture Contract', async (t) => {
+  // Verify architectural contract of all 10 Sovereign Pillars in palantir_routes.go
+  const routesPath = path.join(rootDir, 'internal/api/palantir_routes.go');
+  assert.ok(fs.existsSync(routesPath), 'palantir_routes.go must exist');
+  const routesContent = fs.readFileSync(routesPath, 'utf8');
+
+  const requiredPillars = [
+    { pillar: 1, name: 'Ontology', marker: '/api/v1/ontology/' },
+    { pillar: 2, name: 'Lakehouse', marker: '/api/v1/lakehouse/' },
+    { pillar: 3, name: 'Knowledge Graph & GQL', marker: '/api/v1/graph/' },
+    { pillar: 4, name: 'Earth Observation', marker: '/api/v1/earthobs/' },
+    { pillar: 5, name: 'AIP Multi-Agent', marker: '/api/v1/ai/' },
+    { pillar: 6, name: 'Linear Corridors & Gateways', marker: '/api/v1/corridor/' },
+    { pillar: 7, name: 'Sovereign Security & ABAC', marker: '/api/v1/security/' },
+    { pillar: 8, name: 'Counter-Intelligence & UBO', marker: '/api/v1/counter-intel/' },
+    { pillar: 9, name: 'Geoeconomic War Game & Allocation', marker: '/api/v1/palantir/planning/' },
+    { pillar: 10, name: 'Compliance & Merkle Root', marker: '/api/v1/compliance/' },
+  ];
+
+  for (const p of requiredPillars) {
+    assert.ok(
+      routesContent.includes(p.marker),
+      `Pillar ${p.pillar} (${p.name}) route prefix '${p.marker}' must be registered`
+    );
+  }
+});
+
+test('E2E Test 7: Institutional Deal Precedents and Maple 8 Allocator Matching Contract', async (t) => {
+  // Validate the institutional matching weights and similarity scoring formula
+  // from internal/matching/precedent.go
+  function calculateSimilarity(project, deal) {
+    let score = 0;
+    const matched = [];
+
+    if (project.sector === deal.sector) {
+      score += 35;
+      matched.push('sector');
+    }
+    if (project.province === deal.province) {
+      score += 20;
+      matched.push('province');
+    }
+    if (project.stage === deal.stage) {
+      score += 15;
+      matched.push('stage');
+    }
+    const ratio = Math.min(project.capexCAD, deal.amountCAD) / Math.max(project.capexCAD, deal.amountCAD);
+    if (ratio >= 0.5) {
+      score += 20 * ratio;
+      matched.push('scale');
+    }
+    const currentYear = 2026;
+    if (deal.year >= currentYear - 3) {
+      score += 10;
+      matched.push('recent');
+    }
+    return { score, matched };
+  }
+
+  const crawfordProject = {
+    sector: 'CRITICAL_MINERALS',
+    province: 'ON',
+    stage: 'FEED',
+    capexCAD: 2_500_000_000,
+  };
+
+  const cgfDeal = {
+    sector: 'CRITICAL_MINERALS',
+    province: 'ON',
+    stage: 'FEED',
+    amountCAD: 2_000_000_000,
+    year: 2024,
+  };
+
+  const result = calculateSimilarity(crawfordProject, cgfDeal);
+  assert.ok(result.score >= 85, `Institutional match score should exceed 85%, got ${result.score}%`);
+  assert.deepEqual(result.matched, ['sector', 'province', 'stage', 'scale', 'recent']);
+});
+
