@@ -14,12 +14,14 @@ function Show-Help {
     Write-Host "Targets:" -ForegroundColor Yellow
     Write-Host "  build           - Build all Go binaries (cog, api, worker)"
     Write-Host "  test            - Run all Go unit and integration tests"
+	Write-Host "  lint            - Verify Go formatting and lint Go and web code"
     Write-Host "  cegs-validate   - Validate all spec schemas, examples, and public datasets"
     Write-Host "  release-check   - Verify release hashes, counts, ordering, and references"
     Write-Host "  seed            - Ingest authoritative adapters and generate public snapshots"
     Write-Host "  demo            - Run instant deterministic demo via CLI"
     Write-Host "  api             - Run the REST API server on :8080"
     Write-Host "  web-build       - Build the Next.js institutional web frontend"
+	Write-Host "  web-test        - Run the web integration suite"
     Write-Host "  web-dev         - Run Next.js dev server on :3000"
     Write-Host "  verify          - Complete end-to-end release verification"
 }
@@ -37,8 +39,18 @@ switch ($Target.ToLower()) {
         Write-Host "[TEST] Running Go test suite with race detector..." -ForegroundColor Cyan
         go test -v -race ./...
     }
+	"lint" {
+		Write-Host "[LINT] Checking Go formatting, Go analysis, and web lint..." -ForegroundColor Cyan
+		$unformatted = @(gofmt -l (Get-ChildItem -Path . -Recurse -Filter *.go -File | ForEach-Object { $_.FullName }))
+		if ($unformatted.Count -gt 0) {
+			throw "Go files need gofmt: $($unformatted -join ', ')"
+		}
+		go vet ./...
+		pnpm --dir apps/web lint
+	}
     "cegs-validate" {
         Write-Host "[CEGS] Validating all specification examples and public manifests..." -ForegroundColor Cyan
+		& $PSCommandPath build
         go test -v ./internal/cegs -run TestSpecExamples
         .\bin\cog.exe cegs validate spec/cegs/examples/project.json
         .\bin\cog.exe cegs validate spec/cegs/examples/organization.json
@@ -59,6 +71,7 @@ switch ($Target.ToLower()) {
     }
     "demo" {
         Write-Host "[DEMO] Running deterministic demo..." -ForegroundColor Cyan
+		& $PSCommandPath build
         .\bin\cog.exe demo
     }
     "api" {
@@ -72,6 +85,10 @@ switch ($Target.ToLower()) {
         pnpm build
         Set-Location "../.."
     }
+	"web-test" {
+		Write-Host "[WEB] Running web integration tests..." -ForegroundColor Cyan
+		pnpm --dir apps/web test
+	}
     "web-dev" {
         Write-Host "[WEB] Launching Next.js dev server on :3000..." -ForegroundColor Cyan
         Set-Location "apps/web"
@@ -82,10 +99,12 @@ switch ($Target.ToLower()) {
         Write-Host "=== CanadaOpportunityGraph Full Verification Suite ===" -ForegroundColor Cyan
         & $PSCommandPath build
         & $PSCommandPath seed
+		& $PSCommandPath lint
         & $PSCommandPath test
         & $PSCommandPath release-check
         & $PSCommandPath cegs-validate
         & $PSCommandPath demo
+		& $PSCommandPath web-test
         & $PSCommandPath web-build
         Write-Host "=== VERIFICATION COMPLETE: ALL GATES PASSED ===" -ForegroundColor Green
     }

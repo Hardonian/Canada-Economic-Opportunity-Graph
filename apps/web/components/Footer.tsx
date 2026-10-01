@@ -95,7 +95,7 @@ export default function Footer() {
               </h2>
               <div className="space-y-2 font-mono text-[11px]">
                 <div className="select-all rounded-md border border-border bg-surface p-2.5 leading-5 text-text-muted">
-                  <span aria-hidden="true" className="text-aurora">$</span> cog search "nuclear ontario"<br />
+                  <span aria-hidden="true" className="text-aurora">$</span> cog search &quot;nuclear ontario&quot;<br />
                   <span aria-hidden="true" className="text-aurora">$</span> cog cegs validate file.json
                 </div>
                 <p className="font-sans text-[10px] leading-relaxed text-text-muted">

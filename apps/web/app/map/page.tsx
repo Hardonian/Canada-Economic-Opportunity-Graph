@@ -392,7 +392,7 @@ export default function MapPage() {
             <div className="border-b border-borderSubtle pb-4">
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-aurora font-bold">
-                  {activeProject.province} // {activeProject.current_stage}
+                  {activeProject.province}{" // "}{activeProject.current_stage}
                 </span>
                 <span className="text-text-subtle font-mono text-[10px]">{activeProject.id}</span>
               </div>

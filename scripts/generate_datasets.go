@@ -210,10 +210,14 @@ func main() {
 	files["cegs/manifest.json"] = manifestBytes
 	files["public/manifest.json"] = manifestBytes
 
+	// Historical releases are immutable. Validate every artifact before writing
+	// the mutable current snapshot so a version conflict can never leave a
+	// partially refreshed working tree behind.
+	releaseRoot := filepath.Join("data", "releases", datasetVersion)
+	must(validateHistoricalArtifacts(releaseRoot, files))
 	for name, data := range files {
 		must(writeCurrent(filepath.Join("data", filepath.FromSlash(name)), data))
 	}
-	releaseRoot := filepath.Join("data", "releases", datasetVersion)
 	for name, data := range files {
 		must(writeHistorical(filepath.Join(releaseRoot, filepath.FromSlash(name)), data))
 	}
@@ -243,6 +247,26 @@ func writeCurrent(path string, data []byte) error {
 		return err
 	}
 	return os.WriteFile(path, data, 0o644)
+}
+
+// validateHistoricalArtifacts checks an existing immutable release before any
+// current artifacts are changed. A missing release is valid: writeHistorical
+// will create it with O_EXCL after current artifacts have been generated.
+func validateHistoricalArtifacts(releaseRoot string, files map[string][]byte) error {
+	for name, data := range files {
+		path := filepath.Join(releaseRoot, filepath.FromSlash(name))
+		existing, err := os.ReadFile(path)
+		if err == nil {
+			if !bytes.Equal(existing, data) {
+				return fmt.Errorf("refusing to overwrite historical release %s", path)
+			}
+			continue
+		}
+		if !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
 }
 
 func writeHistorical(path string, data []byte) error {

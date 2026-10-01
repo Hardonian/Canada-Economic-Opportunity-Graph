@@ -1,4 +1,4 @@
-.PHONY: all bootstrap build test bench vet lint cegs-validate release-check seed demo api worker web-build web-dev verify clean
+.PHONY: all bootstrap build test bench vet lint cegs-validate release-check seed demo api worker web-lint web-test web-build web-dev verify clean
 
 all: build test
 
@@ -22,6 +22,7 @@ vet:
 	go vet ./...
 
 lint: vet
+	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './.git/*'))" || (echo "Go files need gofmt" && exit 1)
 	@which staticcheck >/dev/null 2>&1 && staticcheck ./... || echo "staticcheck not installed; skipping"
 
 cegs-validate: build
@@ -49,13 +50,19 @@ api:
 worker:
 	go run ./cmd/worker
 
+web-lint:
+	cd apps/web && pnpm lint
+
+web-test:
+	cd apps/web && pnpm test
+
 web-build:
 	cd apps/web && pnpm typecheck && pnpm build
 
 web-dev:
 	cd apps/web && pnpm dev
 
-verify: build vet test bench release-check cegs-validate demo web-build
+verify: build lint test bench release-check cegs-validate demo web-lint web-test web-build
 	@echo "=== ALL VERIFICATION GATES PASSED ==="
 
 clean:

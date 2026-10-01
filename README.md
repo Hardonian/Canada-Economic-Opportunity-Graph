@@ -6,7 +6,7 @@
 [![CEGS Standard](https://img.shields.io/badge/CEGS-0.1%20Compliant-00F2FE?style=flat-square&logo=json)](spec/cegs/README.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat-square)](LICENSE)
 [![Data Terms](https://img.shields.io/badge/data-source--specific-4ade80?style=flat-square)](DATA_SOURCES.md)
-[![Go Version](https://img.shields.io/badge/Go-1.24%2B-00ADD8?style=flat-square&logo=go)](cmd/)
+[![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8?style=flat-square&logo=go)](cmd/)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-black?style=flat-square&logo=next.js)](apps/web/)
 
 Canada is entering a multi-trillion dollar nation-building and infrastructure cycle spanning critical minerals, nuclear Small Modular Reactors (SMRs), clean electricity grids, sovereign AI compute, defence and Arctic modernization, port expansions, and industrial gigafactories.
@@ -232,6 +232,7 @@ Base URL: `http://localhost:8080/api/v1`
 - [Scoring Methodology & Mathematical Formulas](docs/SCORING.md)
 - [Security Threat Model & SSRF Defenses](docs/SECURITY.md)
 - [Commercialization & Entitlement Architecture](docs/COMMERCIAL.md)
+- [Operations Runbook](docs/OPERATIONS.md)
 
 ---
 
