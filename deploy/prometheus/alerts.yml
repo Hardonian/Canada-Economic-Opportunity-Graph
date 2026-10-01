@@ -1,0 +1,56 @@
+groups:
+  - name: canada-opportunity-graph-alerts
+    rules:
+      - alert: COGHighErrorRate
+        expr: |
+          sum(rate(cog_http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(cog_http_requests_total[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          tier: api
+        annotations:
+          summary: "COG API error rate is above 1% for 5 minutes"
+          description: "High error rate detected on CanadaOpportunityGraph API: {{ $value | humanizePercentage }} of requests are failing with 5xx."
+
+      - alert: COGHighLatencyP99
+        expr: |
+          histogram_quantile(0.99, sum(rate(cog_http_request_duration_seconds_bucket[5m])) by (le)) > 0.500
+        for: 5m
+        labels:
+          severity: warning
+          tier: api
+        annotations:
+          summary: "COG API p99 latency exceeds 500ms"
+          description: "99th percentile response latency has exceeded 500ms on production endpoints for 5 minutes."
+
+      - alert: COGDLPSpikeDetected
+        expr: rate(cog_dlp_redactions_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          tier: security
+        annotations:
+          summary: "Surge in DLP token redactions detected"
+          description: "The automated DLP scanner is detecting and masking sensitive tokens at an elevated rate (>30/min). Verify upstream ingestion sanitization."
+
+      - alert: COGStorageWALUncheckpointed
+        expr: cog_storage_wal_writes_total - cog_storage_checkpoints_total * 5000 > 10000
+        for: 15m
+        labels:
+          severity: warning
+          tier: persistence
+        annotations:
+          summary: "High volume of uncheckpointed WAL transactions"
+          description: "Write-ahead log entries exceed 10,000 without a synced snapshot checkpoint. Risk of extended recovery time."
+
+      - alert: COGZeroAuditorPeers
+        expr: cog_active_auditor_peers == 0
+        for: 10m
+        labels:
+          severity: critical
+          tier: trust
+        annotations:
+          summary: "No decentralized auditor nodes connected"
+          description: "The decentralized verifier network has zero connected provincial auditor nodes. Milestone notarizations are suspended."

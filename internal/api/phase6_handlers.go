@@ -11,7 +11,9 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/filings"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/memoexport"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/projectfinance"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/security"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/syndication"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/telemetry"
 )
 
 func (s *Server) handleSyndicationInvestors(w http.ResponseWriter, r *http.Request) {
@@ -135,6 +137,16 @@ func (s *Server) handleExportMemo(w http.ResponseWriter, r *http.Request) {
 	gen := memoexport.NewMemoGenerator()
 	memo := gen.GenerateCabinetMemo(project, mType)
 
+	// Real-time DLP scrubbing on Cabinet Memo exports
+	dlp := security.NewDLPScanner()
+	if scrubbed, findings := dlp.ScrubText(memo.MarkdownContent); len(findings) > 0 {
+		memo.MarkdownContent = scrubbed
+		telemetry.DefaultCollector.IncDLPRedaction()
+		w.Header().Set("X-DLP-Redactions-Applied", strconv.Itoa(len(findings)))
+	}
+
+	sub := ExtractSubject(r)
+	w.Header().Set("X-Security-Classification", string(sub.Clearance))
 	writeJSON(w, http.StatusOK, memo)
 }
 

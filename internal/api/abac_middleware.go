@@ -103,7 +103,7 @@ func RedactProjectForSubject(p *domain.Project, sub security.SecuritySubject) *d
 	}
 	if subRank < security.ClearanceRank[security.ClassSecret] {
 		// If sensitivity marker is SECRET or TOP_SECRET, redact internal audit notes or defense identifiers
-		if strings.Contains(strings.ToUpper(clone.Sector), "DEFENCE") || strings.Contains(strings.ToUpper(clone.Subsector), "MILITARY") {
+		if strings.Contains(strings.ToUpper(string(clone.Sector)), "DEFENCE") || strings.Contains(strings.ToUpper(clone.Subsector), "MILITARY") {
 			clone.Summary = "[SUMMARY RESTRICTED - REQUIRES CANADIAN SECRET CLEARANCE]"
 		}
 	}

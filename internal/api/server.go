@@ -24,10 +24,12 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/forecast"
 	graphqlhandler "github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/graphql"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/indicators"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/matching"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/publication"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/readiness"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/reconciliation"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/security"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/sovereignty"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/telemetry"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/trust"
@@ -345,6 +347,22 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
 	}
+
+	// CSRF Origin verification for state mutations
+	if (r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodDelete) && !s.allowAnyOrigin {
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			norm, err := normalizeAllowedOrigin(origin)
+			if err != nil {
+				writeError(w, r, http.StatusForbidden, "forbidden_origin", "Invalid request origin.")
+				return false
+			}
+			if _, ok := s.allowedOrigins[norm]; !ok {
+				writeError(w, r, http.StatusForbidden, "forbidden_origin", "Cross-site state mutations are forbidden.")
+				return false
+			}
+		}
+	}
 	return true
 }
 
@@ -365,6 +383,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /ready", s.handleReady)
 	s.mux.HandleFunc("GET /metrics", s.handleMetrics)
 	s.mux.HandleFunc("GET /api/v1/openapi.json", s.handleOpenAPI)
+	s.mux.HandleFunc("GET /api/v1/ingestion/dlq", s.handleIngestionDLQ)
 
 	// Flagship Capital Radar
 	s.mux.HandleFunc("GET /api/v1/radar", s.handleRadar)
@@ -718,8 +737,11 @@ func (s *Server) handleGetProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sub := ExtractSubject(r)
+	redactedProj := RedactProjectForSubject(bundle.Project, sub)
+
 	resp := map[string]interface{}{
-		"project":              bundle.Project,
+		"project":              redactedProj,
 		"scores":               bundle.Scores,
 		"events":               bundle.Events,
 		"relationships":        bundle.Relationships,
@@ -732,6 +754,7 @@ func (s *Server) handleGetProject(w http.ResponseWriter, r *http.Request) {
 		"status":               domain.StatusHealthy,
 	}
 
+	w.Header().Set("X-Security-Classification", string(sub.Clearance))
 	writeJSON(w, http.StatusOK, resp)
 }
 
@@ -1040,11 +1063,22 @@ func (s *Server) handleExportProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sub := ExtractSubject(r)
+	dlp := security.NewDLPScanner()
+	w.Header().Set("X-Security-Classification", string(sub.Clearance))
+
 	switch strings.ToLower(format) {
 	case "markdown", "md":
 		w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
-		_, _ = w.Write([]byte(bundle.ToMarkdown()))
+		md := bundle.ToMarkdown()
+		scrubbed, findings := dlp.ScrubText(md)
+		if len(findings) > 0 {
+			telemetry.DefaultCollector.IncDLPRedaction()
+			w.Header().Set("X-DLP-Redactions-Applied", strconv.Itoa(len(findings)))
+		}
+		_, _ = w.Write([]byte(scrubbed))
 	case "cegs":
+		bundle.Project = RedactProjectForSubject(bundle.Project, sub)
 		cegsProj, err := bundle.ToCEGSExport()
 		if err != nil {
 			writeError(w, r, 500, "export_failed", "CEGS export failed.")
@@ -1052,6 +1086,7 @@ func (s *Server) handleExportProject(w http.ResponseWriter, r *http.Request) {
 		}
 		writeJSON(w, http.StatusOK, cegsProj)
 	default:
+		bundle.Project = RedactProjectForSubject(bundle.Project, sub)
 		writeJSON(w, http.StatusOK, bundle)
 	}
 }
@@ -1097,6 +1132,14 @@ func (s *Server) handleCEGSExport(w http.ResponseWriter, r *http.Request) {
 		"manifest_id":  "cegs:manifest:ca:live-export",
 		"generated_at": time.Now().Format(time.RFC3339),
 		"projects":     cegsList,
+	})
+}
+
+func (s *Server) handleIngestionDLQ(w http.ResponseWriter, r *http.Request) {
+	entries := ingestion.DefaultDLQ.List(50)
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"quarantined_records": entries,
+		"total_count":         ingestion.DefaultDLQ.Count(),
 	})
 }
 

@@ -118,3 +118,36 @@ test('E2E Test 4: Multi-Level ABAC Security Clearance Redaction', async (t) => {
   assert.equal(secretView.capexCAD, 3_200_000_000, 'capex visible in secret view');
   assert.equal(secretView.uboSanctionRisk, 'HIGH_IRANIAN_FRONT_PROXY');
 });
+
+test('E2E Test 5: WCAG 2.2 AAA Accessibility, FIP Branding & Bilingual Compliance', async (t) => {
+  const layoutPath = path.join(__dirname, '../app/layout.tsx');
+  assert.ok(fs.existsSync(layoutPath), 'layout.tsx must exist');
+  const layoutContent = fs.readFileSync(layoutPath, 'utf8');
+
+  // Skip link verification
+  assert.ok(layoutContent.includes('href="#main-content"'), 'must include skip-to-content anchor');
+  assert.ok(layoutContent.includes('id="main-content"'), 'must include target main content landmark');
+  assert.ok(layoutContent.includes('skip-link'), 'must style skip link for keyboard focus');
+
+  // Bilingual and language provider
+  assert.ok(layoutContent.includes('LanguageProvider'), 'must wrap application in LanguageProvider');
+  assert.ok(layoutContent.includes('lang="en-CA"'), 'must declare default Canadian English locale');
+
+  // FIP Navbar and Footer compliance
+  const navbarPath = path.join(__dirname, '../components/Navbar.tsx');
+  const footerPath = path.join(__dirname, '../components/Footer.tsx');
+  assert.ok(fs.existsSync(navbarPath), 'Navbar.tsx must exist');
+  assert.ok(fs.existsSync(footerPath), 'Footer.tsx must exist');
+
+  const navbarContent = fs.readFileSync(navbarPath, 'utf8');
+  const footerContent = fs.readFileSync(footerPath, 'utf8');
+
+  // Verify Canadian Flag SVG and bilingual aria-label
+  assert.ok(navbarContent.includes('Flag of Canada / Drapeau du Canada'), 'Navbar must include bilingual flag accessibility label');
+  assert.ok(footerContent.includes('Flag of Canada / Drapeau du Canada'), 'Footer must include bilingual flag accessibility label');
+
+  // Verify Open Government Licence - Canada compliance notice
+  assert.ok(footerContent.includes('Open Government Licence - Canada'), 'Footer must cite OGL-Canada licence');
+  assert.ok(footerContent.includes('WCAG 2.2 AAA'), 'Footer must declare WCAG AAA bilingual compliance');
+});
+
