@@ -45,49 +45,65 @@ export default function Footer() {
 
           <nav aria-labelledby="intelligence-links-title">
             <h2 id="intelligence-links-title" className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
-              Intelligence lenses
+              Core Lenses
             </h2>
             <ul className="space-y-2.5" role="list">
               <li><Link href="/" className={footerLinkClass}>Capital Radar</Link></li>
-              <li><Link href="/planning" className={footerLinkClass}>Decision Planning</Link></li>
               <li><Link href="/projects" className={footerLinkClass}>Major Projects Directory</Link></li>
               <li><Link href="/map" className={footerLinkClass}>Geospatial Infrastructure Map</Link></li>
+              <li><Link href="/planning" className={footerLinkClass}>Decision Planning</Link></li>
               <li><Link href="/capital" className={footerLinkClass}>Canadian Capital Stack</Link></li>
               <li><Link href="/procurement" className={footerLinkClass}>Procurement Pipeline</Link></li>
-              <li><Link href="/sources" className={footerLinkClass}>Public Data Explorer</Link></li>
-              <li><Link href="/apis" className={footerLinkClass}>Public API Directory</Link></li>
               <li><Link href="/trade" className={footerLinkClass}>Global Trade & Supply Chains</Link></li>
               <li><Link href="/ai-sovereignty" className={footerLinkClass}>AI Sovereignty Index</Link></li>
             </ul>
           </nav>
 
-          <nav aria-labelledby="standards-links-title">
-            <h2 id="standards-links-title" className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
-              Standards & assurance
+          <nav aria-labelledby="sovereign-suite-title">
+            <h2 id="sovereign-suite-title" className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
+              Analytics & Executive
             </h2>
             <ul className="space-y-2.5" role="list">
-              <li><Link href="/cegs" className={footerLinkClass}>CEGS specification v0.1</Link></li>
-              <li><Link href="/cegs/adopt" className={footerLinkClass}>Adoption Guide</Link></li>
-              <li><Link href="/methodology" className={footerLinkClass}>Scoring Methodology</Link></li>
-              <li><Link href="/apis" className={footerLinkClass}>Registered Public APIs</Link></li>
-              <li><Link href="/admin" className={footerLinkClass}>Public Data Mesh Status</Link></li>
+              <li><Link href="/briefing" className={footerLinkClass}>Executive Brief</Link></li>
+              <li><Link href="/briefing/memo" className={footerLinkClass}>Cabinet Policy Memo</Link></li>
+              <li><Link href="/investigate" className={footerLinkClass}>Gotham Workbench</Link></li>
+              <li><Link href="/analytics" className={footerLinkClass}>KPI Analytics & Live Feeds</Link></li>
+              <li><Link href="/syndication" className={footerLinkClass}>Syndication & PPA Matching</Link></li>
+              <li><Link href="/corridors" className={footerLinkClass}>Corridors & Ports</Link></li>
+              <li><Link href="/finance" className={footerLinkClass}>Project Finance & Tax</Link></li>
             </ul>
           </nav>
 
-          <section aria-labelledby="developer-tools-title">
-            <h2 id="developer-tools-title" className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
-              Developer tools
-            </h2>
-            <div className="space-y-3 font-mono text-[11px]">
-              <div className="select-all rounded-md border border-border bg-surface p-3 leading-5 text-text-muted">
-                <span aria-hidden="true" className="text-aurora">$</span> cog search "nuclear ontario"<br />
-                <span aria-hidden="true" className="text-aurora">$</span> cog cegs validate file.json
+          <div className="space-y-6">
+            <nav aria-labelledby="standards-links-title">
+              <h2 id="standards-links-title" className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
+                Standards & Assurance
+              </h2>
+              <ul className="space-y-2.5" role="list">
+                <li><Link href="/cegs" className={footerLinkClass}>CEGS Specification v0.1</Link></li>
+                <li><Link href="/cegs/adopt" className={footerLinkClass}>Adoption Guide</Link></li>
+                <li><Link href="/methodology" className={footerLinkClass}>Scoring Methodology</Link></li>
+                <li><Link href="/sources" className={footerLinkClass}>Public Data Explorer</Link></li>
+                <li><Link href="/apis" className={footerLinkClass}>Registered Public APIs</Link></li>
+                <li><Link href="/admin" className={footerLinkClass}>Public Data Mesh Status</Link></li>
+              </ul>
+            </nav>
+
+            <section aria-labelledby="developer-tools-title">
+              <h2 id="developer-tools-title" className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-text-main">
+                Developer Tools
+              </h2>
+              <div className="space-y-2 font-mono text-[11px]">
+                <div className="select-all rounded-md border border-border bg-surface p-2.5 leading-5 text-text-muted">
+                  <span aria-hidden="true" className="text-aurora">$</span> cog search "nuclear ontario"<br />
+                  <span aria-hidden="true" className="text-aurora">$</span> cog cegs validate file.json
+                </div>
+                <p className="font-sans text-[10px] leading-relaxed text-text-muted">
+                  Apache-2.0 • Data CC BY 4.0
+                </p>
               </div>
-              <p className="font-sans leading-relaxed text-text-muted">
-                Software is released under Apache-2.0; public datasets use CC BY 4.0 with attribution.
-              </p>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
 
         <section aria-labelledby="legal-notice-title" className="legal-rule border-y border-borderSubtle bg-card/45 py-5 pl-5 pr-4 text-[11px] leading-relaxed text-text-muted">
