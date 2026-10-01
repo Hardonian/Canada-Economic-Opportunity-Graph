@@ -16,6 +16,8 @@ import {
   Landmark,
   Scale,
   Zap,
+  Plane,
+  Leaf,
 } from "lucide-react";
 import { FALLBACK_PROJECTS, SNAPSHOT_MANIFEST } from "@/lib/data";
 
@@ -159,6 +161,34 @@ export default function ExecutiveBriefingPage() {
           </dl>
         </div>
       </header>
+
+      {/* Flagship Carney Initiative Executive Spotlight */}
+      <div className="relative overflow-hidden rounded-2xl border border-gold/40 bg-gradient-to-r from-card via-[#1c1605] to-surface p-6 shadow-2xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-mono font-bold text-gold">
+              <Plane className="h-3.5 w-3.5" />
+              SPECIAL EXECUTIVE DOSSIER · THE RIGHT HONOURABLE MARK CARNEY
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-text-main">
+              National Airports System ($18B Concession) & <span className="text-gold">Transition Finance Taxonomy</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+              Explore the dedicated quantitative simulator modeling 40-year institutional ground lease concessions across YYZ, YVR, YUL, YYC, and YEG alongside the GFANZ / SFAC Canadian Transition Taxonomy engine.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <Link
+              href="/briefing/carney"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-xs font-bold text-surfaceDark shadow-lg shadow-gold/20 hover:bg-gold/90 transition-all"
+            >
+              <span>Launch Carney Dossier</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <section aria-labelledby="portfolio-heading" className="space-y-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">

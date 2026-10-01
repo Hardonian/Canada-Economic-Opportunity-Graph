@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Calculator,
   TrendingUp,
@@ -242,6 +243,13 @@ export default function ProjectFinancePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/briefing/carney"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all shadow-md"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Carney Dossier & NAS Sim
+              </Link>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 10,000 Stochastic Iterations

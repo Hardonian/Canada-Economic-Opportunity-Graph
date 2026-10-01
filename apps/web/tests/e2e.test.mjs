@@ -290,3 +290,50 @@ test('E2E Test 10: Cryptographic Merkle KMS Attestation and SSE Streaming Contra
   assert.ok(sedarContent.includes('CanonicalSEDARFilings'), 'adapter must provide CanonicalSEDARFilings');
 });
 
+test('E2E Test 11: Mark Carney Briefing Suite: National Airports System Concession and GFANZ Transition Taxonomy', async (t) => {
+  const concessionPath = path.join(rootDir, 'internal/concession/airports.go');
+  const taxonomyPath = path.join(rootDir, 'internal/transitionfinance/taxonomy.go');
+  const carneyHandlersPath = path.join(rootDir, 'internal/api/carney_handlers.go');
+  const dossierCompPath = path.join(__dirname, '../components/finance/CarneyBriefingDossier.tsx');
+  const carneyPagePath = path.join(__dirname, '../app/briefing/carney/page.tsx');
+
+  assert.ok(fs.existsSync(concessionPath), 'airports.go must exist');
+  assert.ok(fs.existsSync(taxonomyPath), 'taxonomy.go must exist');
+  assert.ok(fs.existsSync(carneyHandlersPath), 'carney_handlers.go must exist');
+  assert.ok(fs.existsSync(dossierCompPath), 'CarneyBriefingDossier.tsx must exist');
+  assert.ok(fs.existsSync(carneyPagePath), 'briefing/carney/page.tsx must exist');
+
+  // Verify National Airports System concession mechanics
+  const concessionContent = fs.readFileSync(concessionPath, 'utf8');
+  assert.ok(concessionContent.includes('HubYYZ'), 'concession must model Toronto Pearson YYZ');
+  assert.ok(concessionContent.includes('HubYVR'), 'concession must model Vancouver YVR');
+  assert.ok(concessionContent.includes('HubYUL'), 'concession must model Montreal YUL');
+  assert.ok(concessionContent.includes('HubYYC'), 'concession must model Calgary YYC');
+  assert.ok(concessionContent.includes('HubYEG'), 'concession must model Edmonton YEG');
+  assert.ok(concessionContent.includes('18_000_000_000'), 'concession must total $18B CAD target capex');
+  assert.ok(concessionContent.includes('Maple8AllocationsCAD'), 'concession must allocate to Canadian Maple 8 pensions');
+
+  // Verify GFANZ / SFAC Transition Taxonomy logic
+  const taxonomyContent = fs.readFileSync(taxonomyPath, 'utf8');
+  assert.ok(taxonomyContent.includes('CategoryGreen'), 'taxonomy must define CategoryGreen');
+  assert.ok(taxonomyContent.includes('CategoryTransition'), 'taxonomy must define CategoryTransition');
+  assert.ok(taxonomyContent.includes('CategoryEnabling'), 'taxonomy must define CategoryEnabling');
+  assert.ok(taxonomyContent.includes('TransitionCredibilityIndex'), 'taxonomy must score TransitionCredibilityIndex');
+  assert.ok(taxonomyContent.includes('MarginalAbatementCostCAD'), 'taxonomy must compute MAC curve');
+
+  // Verify API route registrations
+  const serverPath = path.join(rootDir, 'internal/api/server.go');
+  const serverContent = fs.readFileSync(serverPath, 'utf8');
+  assert.ok(serverContent.includes('/api/v1/finance/transition-taxonomy'), 'server must register transition-taxonomy endpoint');
+  assert.ok(serverContent.includes('/api/v1/finance/concession/airports'), 'server must register concession/airports endpoint');
+
+  // Verify UI Dossier completeness
+  const dossierContent = fs.readFileSync(dossierCompPath, 'utf8');
+  assert.ok(dossierContent.includes('CANONICAL_AIRPORTS'), 'dossier must define CANONICAL_AIRPORTS');
+  assert.ok(dossierContent.includes('TRANSITION_BENCHMARKS'), 'dossier must define TRANSITION_BENCHMARKS');
+  assert.ok(dossierContent.includes('CPPIB'), 'dossier must reference CPPIB');
+  assert.ok(dossierContent.includes('CDPQ'), 'dossier must reference CDPQ');
+  assert.ok(dossierContent.includes('Brookfield'), 'dossier must reference Brookfield');
+});
+
+

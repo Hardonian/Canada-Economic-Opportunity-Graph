@@ -107,23 +107,35 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 - **SEDAR+ Public Markets Ingestion Adapter**: Full statutory adapter (`adapters/sedar/`) ingesting Canadian public issuer capital disclosures, MD&As, and NI 43-101 technical reports into CEGS domain records.
 - **Hardware-Grade KMS Merkle Attestation**: NIST P-256 ECDSA digital signing engine (`internal/merkle/signer.go`) cryptographically signing transparency roots with tamper-detection verification.
 
+## Phase 9 Updates: Prime Ministerial & Advisory Briefing Suite: Carney Growth Initiatives (v3.5)
+
+- **GFANZ & SFAC Canadian Transition Finance Taxonomy Engine**: Domain engine (`internal/transitionfinance/`) classifying projects into Green, Transition (hard-to-abate with zero emissions lock-in), Enabling, and Managed Phase-Out. Evaluates 0–100 Transition Credibility Index, Marginal Abatement Cost (MAC in CAD/tonne CO2e), and private capital crowding-in efficiency.
+- **National Airports System (NAS) Ground Lease Concession Simulator**: Mathematical concession engine (`internal/concession/`) modeling 30-to-50-year commercial ground lease concessions across Canada's 5 gateway hubs (YYZ, YVR, YUL, YYC, YEG) totaling $18.0B CAD modernization capex. Computes upfront federal concession proceeds, cumulative 40-year federal royalty streams, project/equity IRRs, and Canadian Maple 8 co-investment allocations (CPPIB, CDPQ, OMERS, Brookfield, PSP, BCI, AIMCo).
+- **Executive REST Endpoints**: Routes (`POST /api/v1/finance/transition-taxonomy`, `GET /api/v1/finance/transition-taxonomy/{id}`, `GET /api/v1/finance/concession/airports`, `POST /api/v1/finance/concession/airports/simulate`) registered in `internal/api/` with payload validation and CSRF origin verification.
+- **Interactive Carney Briefing Dossier & Web Console**: Institutional executive briefing environment (`apps/web/components/finance/CarneyBriefingDossier.tsx` and `/briefing/carney`) with parameter sliders, hub deep-dives, Maple 8 syndication tables, and Memorandum to Cabinet (MC) export.
+
 ## Verification Commands
 
 ```bash
 go build ./...              # all packages compile
-go vet ./...                # static analysis
-go test ./...               # full test suite
+go vet ./...                # static analysis (0 warnings)
+go test ./...               # full test suite (all packages pass)
 go test -race ./...         # race detector (0 data races)
-npm --prefix apps/web test  # 10/10 E2E tests pass
-npm --prefix apps/web run typecheck # TypeScript clean
-npm --prefix apps/web run build     # 39/39 Next.js pages build
+npm --prefix apps/web test  # 11/11 E2E tests pass
+npm --prefix apps/web run typecheck # TypeScript clean (0 errors)
+npm --prefix apps/web run build     # production Next.js build
 ```
 
 ## Relevant Files
 
-- `ROADMAP.md` — strategic roadmap (phases 1-8, all [x])
+- `ROADMAP.md` — strategic roadmap (phases 1-9, all [x])
 - `Makefile` — build/test/verify/bench/vet/lint targets
 - `HANDOFF.md` — this file
+- `internal/transitionfinance/` — GFANZ / SFAC Canadian Transition Finance Taxonomy engine and tests
+- `internal/concession/` — National Airports System (NAS) commercial ground lease concession simulator and tests
+- `internal/api/carney_handlers.go` — Carney briefing REST handlers
+- `apps/web/components/finance/CarneyBriefingDossier.tsx` — Interactive briefing dossier UI component
+- `apps/web/app/briefing/carney/page.tsx` — Executive briefing portal for Carney meeting
 - `deploy/helm/templates/` — Helm deployment, ingress, hpa, pvc, service templates
 - `deploy/k8s/` — Kubernetes deployment, ingress, hpa, pdb, networkpolicy, pvc, service manifests
 - `internal/eventsse/` — Server-Sent Events streaming hub, subscriber channels, and HTTP handler
@@ -134,7 +146,7 @@ npm --prefix apps/web run build     # 39/39 Next.js pages build
 - `internal/api/palantir_routes.go` — 10-Pillar Palantir Sovereign routes and handlers
 - `internal/matching/precedent.go` — Institutional deal precedent matching engine
 - `deploy/prometheus/alerts.yml` — Prometheus alerting mesh
-- `apps/web/tests/e2e.test.mjs` — Automated 10-test E2E verification contracts
+- `apps/web/tests/e2e.test.mjs` — Automated 11-test E2E verification contracts
 - `cmd/worker/main.go` — worker daemon with polling, reconciliation, merkle, indigenous linker
 - `cmd/api/main.go` — API server wiring
 - `cmd/cog/main.go` — CLI with `extract` subcommand
