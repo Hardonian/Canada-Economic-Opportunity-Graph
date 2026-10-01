@@ -94,8 +94,3 @@ This document outlines the phased milestone roadmap for CanadaOpportunityGraph a
 * [x] **Live Public Markets Ingestion Adapter (SEDAR+)**: Official statutory adapter (`adapters/sedar/`) ingesting Canadian public issuer capital market disclosures (MD&As, NI 43-101 technical reports, prospectuses) extracting capital requirements, proponent entities, and verified evidence hashes.
 * [x] **Hardware-Grade KMS Merkle Attestation & Cryptographic Signing**: ECDSA P-256 digital signature engine (`internal/merkle/signer.go`) signing daily Merkle roots with tamper-detection verification and cloud KMS / HSM abstraction.
 * [x] **Extended Automated E2E Verification**: 10 comprehensive contract tests passing in `apps/web/tests/e2e.test.mjs` verifying the entire full-stack platform.
-
-
-
-
-

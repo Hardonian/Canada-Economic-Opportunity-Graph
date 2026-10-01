@@ -3,6 +3,7 @@
 ## Quick Summary
 
 All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieved.
+
 - Zero open TODOs across the entire repository.
 - `go build ./...`, `go vet ./...`, `go test ./...`, and `go test -race ./...` all pass across 40+ packages.
 - Release manifests and cryptographic checksums verified with deterministic LF line-ending normalization (`.gitattributes`).
@@ -13,8 +14,9 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 ## What Was Done This Session
 
 ### Geospatial Satellite Engine & Global Perspective
+
 | Component | Path | Purpose |
-|-----------|------|---------|
+| :--- | :--- | :--- |
 | Geospatial Data Module | `apps/web/lib/geospatial.ts` | Defines global trade routes, conflict/choke point markers, opportunity zones, and tile providers |
 | Interactive Leaflet Map | `apps/web/components/GeospatialMap.tsx` | High-res optical satellite imagery (Esri + Google Maps), geodesic trade routes, conflict radars, HUD telemetry |
 | Dynamic SSR Wrapper | `apps/web/components/GeospatialMapWrapper.tsx` | SSR-safe dynamic import preventing Leaflet hydration mismatch |
@@ -22,18 +24,19 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 | Content Security Policy | `apps/web/next.config.ts` | Whitelisted ArcGIS, CartoDB, OpenStreetMap, and Google Maps tile and script servers |
 
 ### Canadian Government FIP UX/UI Compliance
+
 - **Federal Identity Program (FIP) Banner**: Canadian Flag motif, official bilingual signature (`Government of Canada / Gouvernement du Canada`), department descriptor, and red accent line.
 - **FIP Canada Wordmark Footer**: Official Canada wordmark, bilingual federal links, and OGL-Canada licensing notice.
 
 ### QA & Adapter Closure
+
 - **Live Gazette Scraping**: Implemented live HTTP polling and streaming in `adapters/gazette/gazette.go` with `httptest` unit tests (`TestLiveGazetteAdapter`).
 - **Cryptographic Checksum Protection**: Added `.gitattributes` to enforce deterministic LF line endings across Windows and Unix.
-
 
 ### New Packages Created
 
 | Package | Path | Purpose |
-|---------|------|---------|
+| :--- | :--- | :--- |
 | Connector Factory | `internal/connector/factory.go` | Wraps adapters with retry/circuit-breaker/cache/dedup/instrumented middleware |
 | Merkle Log | `internal/merkle/merkle.go` | Deterministic transparency log over evidence hashes |
 | Reconciliation | `internal/reconciliation/` | Multi-jurisdiction record matching with merge/link/conflict actions |
@@ -49,7 +52,7 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 ### Optimization Areas Completed
 
 | Area | Work | Status |
-|------|------|--------|
+| :--- | :--- | :--- |
 | 1 — Verifier Persistent Store + REST | `internal/verifier/store.go`, `internal/api/verifier_handler.go`, `internal/verifier/verifier_test.go` | ✅ |
 | 2 — GraphQL Field Projection | `internal/graphql/server.go` (parseQuery captures sub-fields), `internal/graphql/resolver.go` (marshalX accept `[]string`), 6 new projection tests | ✅ |
 | 3 — MemoryStore Secondary Indexes | `signalsByProject`, `eventsByProject` indexes; `cachedTotalCapex` + `capexDirty` cache; `recomputeCapexLocked()` | ✅ |
@@ -91,12 +94,14 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 - **RadarStats**: fields are `AcceleratingProjectsCount` and `StalledProjectsCount` (not `AcceleratingProjects`/`StalledProjects`).
 
 ## Phase 7 Updates: Sovereign Production Hardening & Assurance
+
 - **10-Pillars Palantir Sovereign Capabilities Architecture**: Fully registered, tested, and validated routes across all 10 pillars (Pillar 6 `/api/v1/corridor/pathfind`, `/api/v1/corridor/gateways` and Pillar 9 `/api/v1/palantir/planning/optimize`, `/api/v1/palantir/planning/wargame`, `/api/v1/palantir/planning/labor`).
 - **Institutional Precedent Matching**: Canonical institutional investor profiles across Maple 8 pensions (CPPIB, CDPQ, OTPP, OMERS, AIMCo), Crown corporations (CIB, CGF), and sovereign allocators with 5-dimensional similarity scoring.
 - **Production Metrics & Alerts**: Real-time request telemetry with status & duration histograms, `cog_ingestion_dlq_size` gauge, and Prometheus alert rules (`COGDeadLetterQueueGrowing`, `COGRateLimitSaturation`, `COGReconciliationConflictsSpike`, `COGC69StatutoryClockBreach`).
 - **Comprehensive E2E Suite**: Extended to 10 full automated tests in `apps/web/tests/e2e.test.mjs`.
 
 ## Phase 8 Updates: Cloud-Native Mesh, Real-Time Streaming & Provenance (v3.0)
+
 - **Cloud-Native Deployment & Helm Orchestration**: Production Helm templates (`deploy/helm/templates/deployment.yaml`, `ingress.yaml`, `hpa.yaml`) and Kubernetes manifests (`deploy/k8s/ingress.yaml`, `pdb.yaml`) supporting zero-downtime rolling updates, cert-manager TLS, and PodDisruptionBudgets.
 - **Real-Time Event Streaming Hub (SSE)**: High-throughput Server-Sent Events broadcaster (`internal/eventsse/`) wired to `GET /api/v1/stream/events` with React hook client (`apps/web/lib/useLiveEvents.ts`).
 - **SEDAR+ Public Markets Ingestion Adapter**: Full statutory adapter (`adapters/sedar/`) ingesting Canadian public issuer capital disclosures, MD&As, and NI 43-101 technical reports into CEGS domain records.
