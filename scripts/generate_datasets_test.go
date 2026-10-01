@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
 )
 
 func TestValidateHistoricalArtifacts(t *testing.T) {
@@ -34,5 +37,19 @@ func TestValidateHistoricalArtifacts(t *testing.T) {
 	err := validateHistoricalArtifacts(releaseRoot, files)
 	if err == nil || !strings.Contains(err.Error(), "refusing to overwrite historical release") {
 		t.Fatalf("mismatched release error = %v", err)
+	}
+}
+
+func TestIsSnapshotGeneratedEvidence(t *testing.T) {
+	generated := &domain.Evidence{Publisher: "Bank of Canada / Banque du Canada"}
+	if !isSnapshotGeneratedEvidence(generated) {
+		t.Fatal("Bank of Canada fixture evidence should use the collection timestamp")
+	}
+	primary := &domain.Evidence{Publisher: "Natural Resources Canada", RetrievalTimestamp: time.Now()}
+	if isSnapshotGeneratedEvidence(primary) {
+		t.Fatal("primary-source fixture evidence must retain its source timestamp")
+	}
+	if isSnapshotGeneratedEvidence(nil) {
+		t.Fatal("nil evidence cannot be snapshot-generated")
 	}
 }

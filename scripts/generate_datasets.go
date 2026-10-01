@@ -29,8 +29,9 @@ import (
 )
 
 const (
-	datasetVersion = "2026-09-16-1"
-	datasetTime    = "2026-09-16T00:00:00Z"
+	datasetVersion      = "2026-09-16-1"
+	datasetTime         = "2026-09-16T00:00:00Z"
+	collectionTimestamp = "2026-09-16T20:14:29.6423758Z"
 )
 
 func main() {
@@ -48,6 +49,8 @@ func main() {
 	})
 	ctx := context.Background()
 	report, err := pipeline.Run(ctx)
+	must(err)
+	collectedAt, err := time.Parse(time.RFC3339Nano, collectionTimestamp)
 	must(err)
 
 	projects, _, err := store.ListProjects(ctx, database.ProjectFilter{Limit: 1000})
@@ -94,6 +97,13 @@ func main() {
 	must(err)
 	sort.Slice(procurements, func(i, j int) bool { return procurements[i].ID < procurements[j].ID })
 	for _, proc := range procurements {
+		// Fixture-backed adapter records intentionally share the collection time
+		// of this immutable snapshot. Adapter health timings may use wall-clock
+		// time, but released evidence must not.
+		if isSnapshotGeneratedEvidence(proc.Evidence) {
+			proc.CreatedAt = collectedAt
+			proc.Evidence.RetrievalTimestamp = collectedAt
+		}
 		if proc.EvidenceID == "" {
 			continue
 		}
@@ -118,6 +128,9 @@ func main() {
 	}
 	var evidence []*domain.Evidence
 	for _, item := range evidenceByID {
+		if isSnapshotGeneratedEvidence(item) {
+			item.RetrievalTimestamp = collectedAt
+		}
 		evidence = append(evidence, item)
 	}
 	sort.Slice(evidence, func(i, j int) bool { return evidence[i].ID < evidence[j].ID })
@@ -229,6 +242,25 @@ func must(err error) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[ERROR]", err)
 		os.Exit(1)
+	}
+}
+
+// isSnapshotGeneratedEvidence identifies fixture-backed adapters that derive
+// record timestamps during parsing. Primary-source fixtures retain their own
+// retrieval timestamps as evidence provenance.
+func isSnapshotGeneratedEvidence(evidence *domain.Evidence) bool {
+	if evidence == nil {
+		return false
+	}
+	switch evidence.Publisher {
+	case "Bank of Canada / Banque du Canada",
+		"CanadaBuys / Public Services and Procurement Canada",
+		"Open.Canada / Government of Canada",
+		"Office of the Commissioner of Lobbying of Canada / Commissaire au lobbying du Canada",
+		"Canada Mortgage and Housing Corporation / Société canadienne d'hypothèques et de logement":
+		return true
+	default:
+		return false
 	}
 }
 
