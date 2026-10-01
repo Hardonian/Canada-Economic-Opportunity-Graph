@@ -142,21 +142,21 @@ func (a *SEDARAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {
 		result.Evidence = append(result.Evidence, evidence)
 
 		// Create Proponent Entity
-		entityID := identity.NormalizeEntityID(rec.IssuerName)
+		entityID := identity.StableID("entity", "ca", rec.IssuerName)
 		entity := &domain.Entity{
-			ID:          entityID,
-			Slug:        entityID,
-			LegalName:   rec.IssuerName,
-			CommonName:  rec.IssuerName,
-			EntityType:  "Corporation",
+			ID:           entityID,
+			Slug:         identity.Slug(rec.IssuerName),
+			LegalName:    rec.IssuerName,
+			CommonName:   rec.IssuerName,
+			EntityType:   "Corporation",
 			Jurisdiction: "CA",
 			Identifiers: map[string]string{
 				"Ticker":   rec.Ticker,
 				"Exchange": rec.Exchange,
 			},
 			Description: fmt.Sprintf("Public issuer listed on %s (%s)", rec.Exchange, rec.Ticker),
-			SourceIDs:   []string{adapterName},
-			EvidenceIDs: []string{evidenceID},
+			EvidenceID:  evidenceID,
+			Evidence:    evidence,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -164,7 +164,7 @@ func (a *SEDARAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {
 
 		// Create Project if specified
 		if rec.ProjectName != "" {
-			projID := identity.NormalizeProjectID(rec.ProjectName)
+			projID := identity.StableID("project", adapterName, rec.ProjectName)
 			sec := parseSector(rec.Sector)
 			capex := rec.DeclaredCapexCAD
 			if capex == 0 {
@@ -173,14 +173,15 @@ func (a *SEDARAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {
 
 			project := &domain.Project{
 				ID:           projID,
-				Slug:         projID,
+				Slug:         identity.Slug(rec.ProjectName),
 				Name:         rec.ProjectName,
+				Summary:      rec.Summary,
 				Sector:       sec,
 				Subsector:    rec.DocumentType,
 				Province:     rec.Province,
 				CurrentStage: domain.StageFEED,
 				CapexCAD:     capex,
-				SourceIDs:    []string{adapterName},
+				Confidence:   domain.ConfidenceVerified,
 				EvidenceIDs:  []string{evidenceID},
 				CreatedAt:    now,
 				UpdatedAt:    now,
@@ -192,8 +193,8 @@ func (a *SEDARAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {
 				capItem := &domain.CapitalItem{
 					ID:               "cap-sedar-" + rec.FilingID,
 					ProjectID:        projID,
-					Category:         domain.CapitalCategoryPrivate,
-					Status:           domain.CapitalStatusCommitted,
+					Category:         domain.CapitalCategoryEquity,
+					Status:           domain.CapitalCommitted,
 					AmountCAD:        capex,
 					AmountType:       "estimated",
 					ProviderName:     rec.IssuerName,
