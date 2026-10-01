@@ -22,7 +22,7 @@ vet:
 	go vet ./...
 
 lint: vet
-	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './.git/*'))" || (echo "Go files need gofmt" && exit 1)
+	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './.git/*' -not -path './.kilo/*'))" || (echo "Go files need gofmt" && exit 1)
 	@which staticcheck >/dev/null 2>&1 && staticcheck ./... || echo "staticcheck not installed; skipping"
 
 cegs-validate: build

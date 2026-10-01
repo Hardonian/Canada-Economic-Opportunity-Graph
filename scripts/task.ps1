@@ -41,7 +41,7 @@ switch ($Target.ToLower()) {
     }
 	"lint" {
 		Write-Host "[LINT] Checking Go formatting, Go analysis, and web lint..." -ForegroundColor Cyan
-		$unformatted = @(gofmt -l (Get-ChildItem -Path . -Recurse -Filter *.go -File | ForEach-Object { $_.FullName }))
+		$unformatted = @(Get-ChildItem -Path . -Recurse -Filter *.go -File | Where-Object { $_.FullName -notmatch '[\\/]\.kilo[\\/]' } | ForEach-Object { & gofmt -l $_.FullName })
 		if ($unformatted.Count -gt 0) {
 			throw "Go files need gofmt: $($unformatted -join ', ')"
 		}

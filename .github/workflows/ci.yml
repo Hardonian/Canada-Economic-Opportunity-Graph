@@ -46,7 +46,7 @@ jobs:
       - name: Vet Go
         run: go vet ./...
       - name: Verify Go formatting
-        run: test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
+        run: test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*' -not -path './.kilo/*'))"
       - name: Audit production web dependencies
         run: pnpm --dir apps/web audit --prod --audit-level=moderate
       - name: Lint web application
