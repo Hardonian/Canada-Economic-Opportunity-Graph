@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/corridor"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
@@ -189,5 +190,8 @@ func (s *Server) handleFilingsRecent(w http.ResponseWriter, _ *http.Request) {
 		"recent_ea_notices":  eaNotices,
 		"recent_amendments":  amendments,
 		"total_count":        len(disclosures) + len(eaNotices) + len(amendments),
+		"data_mode":          "DEMONSTRATION_SNAPSHOT",
+		"generated_at":       filings.DemonstrationSnapshotTime.Format(time.RFC3339),
+		"notice":             "Demonstration records; not a live registry or continuous-disclosure feed.",
 	})
 }

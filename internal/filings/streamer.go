@@ -121,10 +121,15 @@ func (s *Streamer) ParseFiling(issuer, ticker, exchange string, fType FilingType
 	return rec
 }
 
-// CanonicalDisclosures returns a curated list of representative continuous disclosure records across sectors.
+// DemonstrationSnapshotTime anchors the checked-in filing demonstration data.
+// It must never be replaced with the process clock: doing so would make sample
+// records appear to be newly published on every request.
+var DemonstrationSnapshotTime = time.Date(2026, time.September, 16, 0, 0, 0, 0, time.UTC)
+
+// CanonicalDisclosures returns a checked-in demonstration dataset. It is not a
+// live SEDAR+ feed and callers must identify it as such to users.
 func CanonicalDisclosures() []*FilingRecord {
 	streamer := NewStreamer()
-	now := time.Now().UTC()
 	return []*FilingRecord{
 		streamer.ParseFiling(
 			"Canada Nickel Company Inc.",
@@ -134,7 +139,7 @@ func CanonicalDisclosures() []*FilingRecord {
 			"Crawford Nickel-Cobalt Project - Q3 2026 MD&A Disclosure",
 			"Positive Final Investment Decision reached for Crawford Mine. Early works capital expenditure estimate revised upward to $1.8B CAD. Major EPC contract awarded to Ausenco Engineering for FEED and site preparation.",
 			"https://sedarplus.ca/filings/10049281.pdf",
-			now.Add(-12*time.Hour),
+			DemonstrationSnapshotTime.Add(-12*time.Hour),
 		),
 		streamer.ParseFiling(
 			"World Energy GH2 Inc.",
@@ -144,7 +149,7 @@ func CanonicalDisclosures() []*FilingRecord {
 			"Nujio'qonik Green Hydrogen - Project Financing & EPC Notice",
 			"Environmental assessment approved with decision statement issued. Board approved $4.5B CAD capex program. EPC contract awarded to SK ecoplant consortium.",
 			"https://sedarplus.ca/filings/10052981.pdf",
-			now.Add(-36*time.Hour),
+			DemonstrationSnapshotTime.Add(-36*time.Hour),
 		),
 		streamer.ParseFiling(
 			"Cedar LNG Limited Partnership",
@@ -154,7 +159,7 @@ func CanonicalDisclosures() []*FilingRecord {
 			"Cedar Floating LNG Facility - Annual Information Form",
 			"Asset transition to commercial operational readiness following final investment decision. Total capital cost revised to $3.4B CAD with Samsung Heavy Industries EPC contract.",
 			"https://sedarplus.ca/filings/10061204.pdf",
-			now.Add(-72*time.Hour),
+			DemonstrationSnapshotTime.Add(-72*time.Hour),
 		),
 	}
 }

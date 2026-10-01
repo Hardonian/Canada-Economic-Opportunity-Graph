@@ -41,7 +41,7 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
   const [selectedBuyerType, setSelectedBuyerType] = useState<string>("ALL");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState((initialFilings || CANONICAL_FILINGS_SNAPSHOT).data_mode === "LIVE_UPSTREAM_API");
 
   const stages = useMemo(() => {
     const list = Array.from(new Set(procurements.map((p) => p.stage)));
@@ -95,10 +95,10 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
         const fData = await fRes.json();
         if (Array.isArray(fData.recent_disclosures)) {
           setFilings(fData);
+          setIsLive(fData.data_mode === "LIVE_UPSTREAM_API");
         }
       }
       setLastRefreshed(new Date());
-      setIsLive(true);
     } catch {
       // Retain current data
     } finally {
@@ -121,7 +121,7 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
         <div className="flex items-center gap-3">
           <span className="flex h-2.5 w-2.5 rounded-full bg-aurora animate-pulse" />
           <span className="font-mono text-xs font-bold uppercase tracking-wider text-text-main">
-            {isLive ? "CONTINUOUS DISCLOSURE & PROCUREMENT RADAR ACTIVE" : "SNAPSHOT FEED"}
+            {isLive ? "CONTINUOUS DISCLOSURE & PROCUREMENT RADAR ACTIVE" : "REVIEWED SNAPSHOT FEED"}
           </span>
           <span className="text-text-subtle text-xs">•</span>
           <span className="font-mono text-[11px] text-text-muted">
@@ -144,6 +144,17 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
           </button>
         </div>
       </div>
+
+      {!isLive && (
+        <div role="status" className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs leading-relaxed text-text-muted">
+          <BadgeAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+          <div>
+            <span className="font-bold text-text-main">Demonstration snapshot:</span>{" "}
+            {filings.notice || "This deployment is not connected to a live filings or registry feed."}
+            {filings.generated_at && ` Snapshot as of ${new Date(filings.generated_at).toLocaleDateString("en-CA")}.`}
+          </div>
+        </div>
+      )}
 
       {/* Navigation Sub-Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border/70 pb-3">
@@ -370,8 +381,10 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
           <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-xs text-text-muted flex items-start gap-3">
             <FileText className="h-5 w-5 text-aurora shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-text-main">Automated Continuous Disclosure Parser:</span>{" "}
-              Streaming Canadian public company MD&A, AIF, and Material Change filings from SEDAR+. Disclosures are scanned for capex adjustments, FID declarations, and major EPC contract awards with deterministic SHA-256 cryptographic provenance.
+              <span className="font-bold text-text-main">Continuous Disclosure Dataset:</span>{" "}
+              {isLive
+                ? "Live upstream records are parsed for capex adjustments, FID declarations, and major EPC contract awards with deterministic SHA-256 provenance."
+                : "The checked-in demonstration records are shown for interface validation only and are not live SEDAR+ filings."}
             </div>
           </div>
 
@@ -467,7 +480,9 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
             <Scale className="h-5 w-5 text-aurora shrink-0 mt-0.5" />
             <div>
               <span className="font-bold text-text-main">Provincial & Federal EA Registries:</span>{" "}
-              Live milestone feeds from the BC Environmental Assessment Office (EAO), Ontario Environmental Registry (ERO), Alberta AER, and the Impact Assessment Agency of Canada (IAAC). Tracks active public comment deadlines and certificate approvals.
+              {isLive
+                ? "Live registry milestones track public-comment deadlines and certificate approvals."
+                : "The checked-in demonstration records are not a live registry feed and must not be used for deadlines or decisions."}
             </div>
           </div>
 
@@ -540,7 +555,9 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
             <Clock className="h-5 w-5 text-aurora shrink-0 mt-0.5" />
             <div>
               <span className="font-bold text-text-main">CanadaBuys & DCC Solicitation Amendments:</span>{" "}
-              Live tracking of closing date extensions, technical Q&A addenda, and final contract award notices issued to engineering and construction proponents.
+              {isLive
+                ? "Live tracking of closing-date extensions, technical addenda, and final award notices."
+                : "The checked-in demonstration records are not live procurement notices."}
             </div>
           </div>
 
@@ -606,8 +623,10 @@ export default function ProcurementExplorer({ initialProcurements, initialFiling
       <div className="p-4 rounded-xl border border-borderSubtle bg-surface text-xs leading-relaxed text-text-muted flex items-start gap-3">
         <ShieldCheck className="h-5 w-5 text-aurora shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-text-main">Official Continuous Disclosure & Government Procurement Provenance:</span>{" "}
-          All tender notices, amendments, continuous corporate disclosures, and environmental assessment milestones are ingested from authoritative Open Data, SEDAR+, PSPC CanadaBuys, DCC, and provincial registry systems. Every record maintains SHA-256 cryptographic provenance and immutable change tracking.
+          <span className="font-bold text-text-main">Disclosure & Procurement Provenance:</span>{" "}
+          {isLive
+            ? "Live records are sourced from configured authoritative publishers and retain cryptographic provenance."
+            : "This deployment is serving a reviewed demonstration snapshot. Verify current filings, deadlines, and procurement notices with the originating authority."}
         </div>
       </div>
     </div>

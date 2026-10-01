@@ -40,7 +40,17 @@ jobs:
           context: .
           target: runner
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/ceo-g-api:${{ github.ref_name }},ghcr.io/${{ github.repository_owner }}/ceo-g-api:latest
+          tags: ghcr.io/${{ github.repository_owner }}/ceo-g-api:${{ github.ref_name }}
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and push web container image
+        id: build-web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: web-runner
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/ceo-g-web:${{ github.ref_name }}
           platforms: linux/amd64,linux/arm64
 
       - name: Generate CycloneDX SBOM for API
@@ -51,4 +61,17 @@ jobs:
 
       - name: Sign container image with Cosign
         run: |
-          cosign sign --yes ghcr.io/${{ github.repository_owner }}/ceo-g-api:${{ github.ref_name }}
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/ceo-g-api@${{ steps.build-api.outputs.digest }}
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/ceo-g-web@${{ steps.build-web.outputs.digest }}
+
+      - name: Publish immutable image references
+        run: |
+          printf '{"api":"ghcr.io/%s/ceo-g-api@%s","web":"ghcr.io/%s/ceo-g-web@%s"}\n' \
+            '${{ github.repository_owner }}' '${{ steps.build-api.outputs.digest }}' \
+            '${{ github.repository_owner }}' '${{ steps.build-web.outputs.digest }}' > image-digests.json
+
+      - name: Upload signed image references
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-digests
+          path: image-digests.json

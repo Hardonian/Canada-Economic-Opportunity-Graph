@@ -341,6 +341,9 @@ export interface FilingsResponse {
   recent_ea_notices: EARecord[];
   recent_amendments: TenderAmendment[];
   total_count: number;
+  data_mode?: "LIVE_UPSTREAM_API" | "DEMONSTRATION_SNAPSHOT";
+  generated_at?: string;
+  notice?: string;
 }
 
 export type KPICategory =
@@ -463,4 +466,3 @@ export interface KPISnapshot {
   macro_summary: MacroKPISummary;
   audit_hash: string;
 }
-

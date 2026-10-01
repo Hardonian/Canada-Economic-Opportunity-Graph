@@ -45,6 +45,9 @@ type Config struct {
 	ShutdownTimeout      time.Duration
 	InitialIngestTimeout time.Duration
 	StorageDir           string
+	// AdapterAdminSecret protects the small set of adapter-sandbox mutation
+	// endpoints. It is intentionally excluded from RuntimeSummary and logging.
+	AdapterAdminSecret string
 }
 
 // RuntimeSummary is safe to emit to application logs.
@@ -78,6 +81,7 @@ func LoadValidated() (*Config, error) {
 	cfg.BindAddress = strings.TrimSpace(getEnv("BIND_ADDRESS", cfg.BindAddress))
 	cfg.StorageMode = strings.ToLower(strings.TrimSpace(getEnv("STORAGE_MODE", cfg.StorageMode)))
 	cfg.StorageDir = strings.TrimSpace(getEnv("STORAGE_DIR", cfg.StorageDir))
+	cfg.AdapterAdminSecret = strings.TrimSpace(os.Getenv("ADAPTER_ADMIN_SECRET"))
 	if strings.TrimSpace(os.Getenv("DATABASE_URL")) != "" {
 		return nil, fmt.Errorf("DATABASE_URL is not supported by this snapshot runtime; unset it instead of assuming writes are durable")
 	}
@@ -174,6 +178,9 @@ func LoadValidated() (*Config, error) {
 	}
 	if cfg.StorageMode != "snapshot" && cfg.StorageMode != "persistent" {
 		return nil, fmt.Errorf("STORAGE_MODE must be one of snapshot or persistent")
+	}
+	if cfg.AdapterAdminSecret != "" && len(cfg.AdapterAdminSecret) < 32 {
+		return nil, fmt.Errorf("ADAPTER_ADMIN_SECRET must be at least 32 characters when configured")
 	}
 	if err := validateHTTPOrigin(cfg.PublicURL); err != nil {
 		return nil, fmt.Errorf("PUBLIC_URL: %w", err)

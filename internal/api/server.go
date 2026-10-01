@@ -64,6 +64,9 @@ type Options struct {
 	// AdapterRegistry exposes the community adapter sandbox via REST endpoints.
 	// When nil, the sandbox endpoints respond with 503.
 	AdapterRegistry *adaptersandbox.Registry
+	// AdapterAdminSecret authorizes mutation of the adapter sandbox. An empty
+	// value deliberately disables its write endpoints.
+	AdapterAdminSecret string
 	// VerifierStore persists verifier attestations and is surfaced by
 	// GET /api/v1/verifier/attestations. When nil, the endpoint responds 503.
 	VerifierStore *verifier.AttestationStore
@@ -84,22 +87,23 @@ func DefaultOptions() Options {
 }
 
 type Server struct {
-	store            database.Store
-	mux              *http.ServeMux
-	allowedOrigins   map[string]struct{}
-	allowAnyOrigin   bool
-	enableHSTS       bool
-	trustedProxies   []*net.IPNet
-	maxRequestBody   int64
-	requestTimeout   time.Duration
-	readinessTimeout time.Duration
-	limiter          *rateLimiter
-	logger           Logger
-	adapterRegistry  *adaptersandbox.Registry
-	attStore         *verifier.AttestationStore
-	verifierNet      *verifier.Network
-	kpiFeedEngine    *indicators.LiveFeedEngine
-	kpiEvaluator     *indicators.ProjectEvaluator
+	store              database.Store
+	mux                *http.ServeMux
+	allowedOrigins     map[string]struct{}
+	allowAnyOrigin     bool
+	enableHSTS         bool
+	trustedProxies     []*net.IPNet
+	maxRequestBody     int64
+	requestTimeout     time.Duration
+	readinessTimeout   time.Duration
+	limiter            *rateLimiter
+	logger             Logger
+	adapterRegistry    *adaptersandbox.Registry
+	adapterAdminSecret string
+	attStore           *verifier.AttestationStore
+	verifierNet        *verifier.Network
+	kpiFeedEngine      *indicators.LiveFeedEngine
+	kpiEvaluator       *indicators.ProjectEvaluator
 }
 
 func NewServer(store database.Store) *Server {
@@ -122,19 +126,20 @@ func NewServerWithOptions(store database.Store, options Options) (*Server, error
 	}
 
 	s := &Server{
-		store:            store,
-		mux:              http.NewServeMux(),
-		allowedOrigins:   make(map[string]struct{}, len(options.AllowedOrigins)),
-		enableHSTS:       options.EnableHSTS,
-		maxRequestBody:   options.MaxRequestBodyBytes,
-		requestTimeout:   options.RequestTimeout,
-		readinessTimeout: options.ReadinessTimeout,
-		logger:           options.Logger,
-		adapterRegistry:  options.AdapterRegistry,
-		attStore:         options.VerifierStore,
-		verifierNet:      options.VerifierNetwork,
-		kpiFeedEngine:    indicators.NewLiveFeedEngine(),
-		kpiEvaluator:     indicators.NewProjectEvaluator(),
+		store:              store,
+		mux:                http.NewServeMux(),
+		allowedOrigins:     make(map[string]struct{}, len(options.AllowedOrigins)),
+		enableHSTS:         options.EnableHSTS,
+		maxRequestBody:     options.MaxRequestBodyBytes,
+		requestTimeout:     options.RequestTimeout,
+		readinessTimeout:   options.ReadinessTimeout,
+		logger:             options.Logger,
+		adapterRegistry:    options.AdapterRegistry,
+		adapterAdminSecret: options.AdapterAdminSecret,
+		attStore:           options.VerifierStore,
+		verifierNet:        options.VerifierNetwork,
+		kpiFeedEngine:      indicators.NewLiveFeedEngine(),
+		kpiEvaluator:       indicators.NewProjectEvaluator(),
 	}
 	for _, origin := range options.AllowedOrigins {
 		origin = strings.TrimSpace(origin)

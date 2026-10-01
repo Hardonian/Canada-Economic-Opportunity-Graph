@@ -144,6 +144,7 @@ func clearConfigEnvironment(t *testing.T) {
 		"IDLE_TIMEOUT",
 		"SHUTDOWN_TIMEOUT",
 		"INITIAL_INGEST_TIMEOUT",
+		"ADAPTER_ADMIN_SECRET",
 	} {
 		t.Setenv(key, "")
 	}

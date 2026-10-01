@@ -1,4 +1,4 @@
-.PHONY: all bootstrap build test bench vet lint cegs-validate release-check seed demo api worker web-lint web-test web-build web-dev verify clean
+.PHONY: all bootstrap build test bench vet lint cegs-validate release-check freshness-check seed demo api worker web-lint web-test web-build web-dev verify clean
 
 all: build test
 
@@ -37,6 +37,9 @@ cegs-validate: build
 release-check:
 	go run ./cmd/releasecheck
 
+freshness-check:
+	go run ./cmd/freshnesscheck -max-age=720h
+
 seed:
 	go run ./scripts/generate_datasets.go
 	cd apps/web && pnpm snapshot:generate
@@ -62,7 +65,7 @@ web-build:
 web-dev:
 	cd apps/web && pnpm dev
 
-verify: build lint test bench release-check cegs-validate demo web-lint web-test web-build
+verify: build lint test bench release-check freshness-check cegs-validate demo web-lint web-test web-build
 	@echo "=== ALL VERIFICATION GATES PASSED ==="
 
 clean:

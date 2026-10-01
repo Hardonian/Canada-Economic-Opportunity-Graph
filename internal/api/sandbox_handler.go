@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -71,8 +72,7 @@ func (s *Server) handleApproveAdapter(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, http.StatusServiceUnavailable, "sandbox_unavailable", "Adapter sandbox is not initialised.")
 		return
 	}
-	if r.Header.Get("X-Admin-Secret") == "" {
-		writeError(w, r, http.StatusUnauthorized, "unauthorized", "Admin secret required.")
+	if !s.authorizeAdapterAdmin(w, r) {
 		return
 	}
 
@@ -102,8 +102,7 @@ func (s *Server) handleDeleteAdapter(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, http.StatusServiceUnavailable, "sandbox_unavailable", "Adapter sandbox is not initialised.")
 		return
 	}
-	if r.Header.Get("X-Admin-Secret") == "" {
-		writeError(w, r, http.StatusUnauthorized, "unauthorized", "Admin secret required.")
+	if !s.authorizeAdapterAdmin(w, r) {
 		return
 	}
 
@@ -123,6 +122,19 @@ func (s *Server) handleDeleteAdapter(w http.ResponseWriter, r *http.Request) {
 		"name":    name,
 		"message": "Adapter " + name + " has been removed.",
 	})
+}
+
+func (s *Server) authorizeAdapterAdmin(w http.ResponseWriter, r *http.Request) bool {
+	if s.adapterAdminSecret == "" {
+		writeError(w, r, http.StatusServiceUnavailable, "admin_auth_not_configured", "Adapter administration is not configured.")
+		return false
+	}
+	provided := r.Header.Get("X-Admin-Secret")
+	if subtle.ConstantTimeCompare([]byte(provided), []byte(s.adapterAdminSecret)) != 1 {
+		writeError(w, r, http.StatusUnauthorized, "unauthorized", "Valid administrator credentials required.")
+		return false
+	}
+	return true
 }
 
 // tierString converts a domain.SourceTier to its display name.

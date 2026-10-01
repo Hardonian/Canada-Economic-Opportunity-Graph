@@ -93,10 +93,10 @@ func (p *EAParser) ParseNotice(source, province, projectName, regID, title, rawT
 	return rec
 }
 
-// CanonicalEANotices returns a curated set of major provincial & federal EA registry records.
+// CanonicalEANotices returns checked-in demonstration records, not a live
+// provincial or federal registry feed.
 func CanonicalEANotices() []*EARecord {
 	parser := NewEAParser()
-	now := time.Now().UTC()
 	return []*EARecord{
 		parser.ParseNotice(
 			"BC_EAO",
@@ -106,7 +106,7 @@ func CanonicalEANotices() []*EARecord {
 			"Issuance of Environmental Assessment Certificate",
 			"Environmental assessment certificate issued approval granted with 38 legally binding conditions.",
 			"https://projects.eao.gov.bc.ca/p/cedarlng",
-			now.Add(-48*time.Hour),
+			DemonstrationSnapshotTime.Add(-48*time.Hour),
 		),
 		parser.ParseNotice(
 			"ONTARIO_ERO",
@@ -116,7 +116,7 @@ func CanonicalEANotices() []*EARecord {
 			"Terms of Reference Approved for SMR Units 2-4",
 			"Terms of reference approved for environmental baseline evaluation across Durham Region.",
 			"https://ero.ontario.ca/notice/019-9482",
-			now.Add(-96*time.Hour),
+			DemonstrationSnapshotTime.Add(-96*time.Hour),
 		),
 		parser.ParseNotice(
 			"IAAC",
@@ -126,7 +126,7 @@ func CanonicalEANotices() []*EARecord {
 			"Public Comment Period Commenced for Marine Terminal Expansion",
 			"Invitation for public comments and Indigenous consultation period open for 30 calendar days.",
 			"https://iaac-aeic.gc.ca/050/evaluations/proj/80129",
-			now.Add(-120*time.Hour),
+			DemonstrationSnapshotTime.Add(-120*time.Hour),
 		),
 	}
 }

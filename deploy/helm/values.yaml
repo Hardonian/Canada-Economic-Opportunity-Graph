@@ -10,10 +10,12 @@ global:
 
 api:
   enabled: true
-  replicaCount: 3
+  # Persistent WAL storage is single-writer. Use the snapshot profile for
+  # horizontal API scaling until a replicated transactional store is adopted.
+  replicaCount: 1
   image:
     repository: ceo-g-api
-    tag: latest
+    tag: v1.0.0
   port: 8080
   storage:
     mode: persistent # persistent or snapshot
@@ -28,9 +30,9 @@ api:
       cpu: 4000m
       memory: 4Gi
   autoscaling:
-    enabled: true
-    minReplicas: 3
-    maxReplicas: 20
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 75
 
 web:
@@ -38,7 +40,7 @@ web:
   replicaCount: 3
   image:
     repository: ceo-g-web
-    tag: latest
+    tag: v1.0.0
   port: 3000
   resources:
     requests:

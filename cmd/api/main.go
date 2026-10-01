@@ -126,6 +126,7 @@ func main() {
 		ReadinessTimeout:    cfg.ReadinessTimeout,
 		Logger:              log.Default(),
 		AdapterRegistry:     adapterSandboxReg,
+		AdapterAdminSecret:  cfg.AdapterAdminSecret,
 		VerifierStore:       verifierStore,
 		VerifierNetwork:     verifierNet,
 	})

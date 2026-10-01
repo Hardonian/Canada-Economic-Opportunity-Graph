@@ -36,7 +36,8 @@ Any future generative layer must be downstream of this evidence contract, treat 
 
 ## Residual risks
 
-- The shipped server is a read-only snapshot projection. It rejects `DATABASE_URL`; durable mutations and cross-instance ingestion remain unsupported until a transactional store, migrations, backup/restore and row-level authorization are implemented.
+- `DATABASE_URL` is intentionally rejected: this reference implementation does not ship a Postgres backend. The optional local WAL store (`STORAGE_MODE=persistent`) is single-writer storage, not a horizontally scalable database. Use a single API replica with that mode and test backup/restore before relying on it.
+- Adapter-sandbox mutations are disabled unless `ADAPTER_ADMIN_SECRET` is configured. The reference secret gate is suitable for a tightly controlled operator channel; government or multi-user deployment still requires federated identity, audited roles, and row-level authorization.
 - Rate limiting is process-local and must move to a shared sovereign service for horizontally scaled enforcement.
 - CSP permits inline scripts/styles required by the present Next.js build. A nonce-based policy is a future hardening item.
 - Source hashes are not publisher signatures. Independent verification and an externally witnessed transparency log remain roadmap items.

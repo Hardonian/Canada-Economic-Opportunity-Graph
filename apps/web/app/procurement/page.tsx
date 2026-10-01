@@ -20,7 +20,7 @@ export default async function ProcurementPage() {
             Canadian <span className="text-aurora">Procurement & Filings Radar</span>
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
-            Continuous real-time ingestion covering CanadaBuys tenders, Defence Construction Canada (DCC), SEDAR+ continuous corporate disclosures, and provincial/federal Environmental Assessment registries.
+            Reviewed public procurement and disclosure records with explicit provenance and freshness status. This reference deployment labels demonstration snapshots when live upstream feeds are not configured.
           </p>
         </div>
 
@@ -35,4 +35,3 @@ export default async function ProcurementPage() {
     </div>
   );
 }
-

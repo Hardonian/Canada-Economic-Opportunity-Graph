@@ -47,6 +47,6 @@ CanadaOpportunityGraph is architected around three discrete layers:
 
 ## 3. Runtime Data Layer
 
-- **Shipped runtime**: The API deterministically loads pinned, evidence-linked source snapshots into a thread-safe `MemoryStore` at startup. It is a stateless, read-only projection that can be rebuilt and independently verified on every instance.
-- **Future durable store**: `migrations/001_initial_schema.sql` is a design draft, not a wired production backend. `DATABASE_URL` is rejected at startup so operators cannot mistake discarded writes for persistence.
+- **Snapshot runtime**: `STORAGE_MODE=snapshot` deterministically loads pinned, evidence-linked source snapshots into a thread-safe `MemoryStore` at startup. It is a stateless projection that can be rebuilt and independently verified on every instance.
+- **Local durable runtime**: `STORAGE_MODE=persistent` uses the built-in WAL-backed store. It is explicitly single-writer and must run with one API replica; it is not a substitute for a replicated transactional database. `DATABASE_URL` remains rejected because the Postgres migration draft is not a wired backend.
 - **Release boundary**: `cmd/releasecheck` validates hashes, counts, ordering, duplicate IDs, graph references, CEGS conformance, web snapshot parity, and current/latest immutable release equality.

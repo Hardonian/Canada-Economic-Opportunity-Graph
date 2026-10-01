@@ -7,7 +7,9 @@ metadata:
     app.kubernetes.io/name: canada-economic-opportunity-graph
     app.kubernetes.io/component: api
 spec:
-  replicas: 3
+  # The built-in WAL store is single-writer. Scale the stateless snapshot
+  # profile instead; do not horizontally scale this persistent profile.
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: canada-economic-opportunity-graph
@@ -36,8 +38,10 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/hardonian/ceo-g-api:latest
-          imagePullPolicy: IfNotPresent
+          # CI writes the signed immutable digest to the release deployment
+          # overlay. Never deploy a mutable tag such as `latest` here.
+          image: ghcr.io/hardonian/ceo-g-api:v1.0.0
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -127,8 +131,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: web
-          image: ghcr.io/hardonian/ceo-g-web:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/hardonian/ceo-g-web:v1.0.0
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

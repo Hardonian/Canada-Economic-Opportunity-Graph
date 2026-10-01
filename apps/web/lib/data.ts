@@ -452,7 +452,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       exchange: "TSXV",
       filing_type: "MANAGEMENT_DISCUSSION_ANALYSIS",
       document_title: "Crawford Nickel-Cobalt Project - Q3 2026 MD&A Disclosure",
-      filing_date: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+      filing_date: "2026-09-15T12:00:00.000Z",
       source_url: "https://sedarplus.ca/filings/10049281.pdf",
       raw_content_sha256: "9832c91823abce1287e0291bafe23981273981bafe",
       capex_revision_cad: 1800000000,
@@ -480,7 +480,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       exchange: "CSE",
       filing_type: "MATERIAL_CHANGE_REPORT",
       document_title: "Nujio'qonik Green Hydrogen - Project Financing & EPC Notice",
-      filing_date: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+      filing_date: "2026-09-14T12:00:00.000Z",
       source_url: "https://sedarplus.ca/filings/10052981.pdf",
       raw_content_sha256: "8732bc981273891bafe289371982bca81927bc19",
       capex_revision_cad: 4500000000,
@@ -508,7 +508,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       exchange: "TSX",
       filing_type: "ANNUAL_INFORMATION_FORM",
       document_title: "Cedar Floating LNG Facility - Annual Information Form",
-      filing_date: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
+      filing_date: "2026-09-13T12:00:00.000Z",
       source_url: "https://sedarplus.ca/filings/10061204.pdf",
       raw_content_sha256: "7612984bafe8291bc98127391823901bacf91283",
       capex_revision_cad: 3400000000,
@@ -539,7 +539,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       milestone: "ENVIRONMENTAL_ASSESSMENT_CERTIFICATE",
       notice_title: "Issuance of Environmental Assessment Certificate",
       notice_url: "https://projects.eao.gov.bc.ca/p/cedarlng",
-      published_date: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
+      published_date: "2026-09-14T00:00:00.000Z",
       approved: true,
       conditions_count: 38,
       summary: "Provincial Environmental Assessment Certificate officially granted with 38 legally binding conditions.",
@@ -554,7 +554,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       milestone: "TERMS_OF_REFERENCE_APPROVED",
       notice_title: "Terms of Reference Approved for SMR Units 2-4",
       notice_url: "https://ero.ontario.ca/notice/019-9482",
-      published_date: new Date(Date.now() - 96 * 3600 * 1000).toISOString(),
+      published_date: "2026-09-12T00:00:00.000Z",
       approved: true,
       conditions_count: 15,
       summary: "Terms of Reference approved setting baseline study requirements across Durham Region.",
@@ -569,8 +569,8 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       milestone: "PUBLIC_COMMENT_PERIOD_OPEN",
       notice_title: "Public Comment Period Commenced for Marine Terminal Expansion",
       notice_url: "https://iaac-aeic.gc.ca/050/evaluations/proj/80129",
-      published_date: new Date(Date.now() - 120 * 3600 * 1000).toISOString(),
-      comment_deadline: new Date(Date.now() + 18 * 24 * 3600 * 1000).toISOString(),
+      published_date: "2026-09-11T00:00:00.000Z",
+      comment_deadline: "2026-09-29T00:00:00.000Z",
       approved: false,
       summary: "Invitation for public comments and Indigenous consultation period open for 30 calendar days.",
       audit_hash: "f718293019283bafe91283019283bafe9128301"
@@ -582,7 +582,7 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       tender_reference: "WS39482910-Doc29102",
       amendment_number: 3,
       type: "CONTRACT_AWARD_NOTICE",
-      issued_date: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+      issued_date: "2026-09-15T00:00:00.000Z",
       winning_bidder: "Aecon-PCL Industrial Joint Venture",
       winning_bidder_bn: "100234892RC0001",
       contract_value_cad: 185000000,
@@ -595,8 +595,8 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       tender_reference: "PWGSC-2026-HQ-0081",
       amendment_number: 2,
       type: "CLOSING_DATE_EXTENSION",
-      issued_date: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
-      revised_closing: new Date(Date.now() + 12 * 24 * 3600 * 1000).toISOString(),
+      issued_date: "2026-09-14T00:00:00.000Z",
+      revised_closing: "2026-09-26T00:00:00.000Z",
       summary: "Solicitation deadline extended by 14 calendar days for marine terminal berth dredging.",
       source_url: "https://canadabuys.canada.ca/tender/PWGSC-2026-HQ-0081",
       audit_hash: "b23948102938bafe91283019283bafe9128301"
@@ -606,13 +606,16 @@ export const CANONICAL_FILINGS_SNAPSHOT: FilingsResponse = {
       tender_reference: "DCC-ESQ-2026-44",
       amendment_number: 4,
       type: "BIDDER_QA_RESPONSE",
-      issued_date: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
+      issued_date: "2026-09-13T00:00:00.000Z",
       summary: "Technical clarification Q&A responses issued to registered proponents.",
       source_url: "https://canadabuys.canada.ca/tender/DCC-ESQ-2026-44",
       audit_hash: "c34958102938bafe91283019283bafe9128301"
     }
   ],
-  total_count: 9
+  total_count: 9,
+  data_mode: "DEMONSTRATION_SNAPSHOT",
+  generated_at: "2026-09-16T00:00:00.000Z",
+  notice: "Demonstration records; not a live registry or continuous-disclosure feed."
 };
 
 export async function getRecentFilings(): Promise<FilingsResponse> {
@@ -629,4 +632,3 @@ export async function getRecentFilings(): Promise<FilingsResponse> {
   }
   return CANONICAL_FILINGS_SNAPSHOT;
 }
-

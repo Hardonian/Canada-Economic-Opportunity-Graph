@@ -1,0 +1,23 @@
+name: data-freshness
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-public-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Verify immutable release integrity
+        run: go run ./cmd/releasecheck
+      - name: Enforce public-data freshness SLO
+        run: go run ./cmd/freshnesscheck -max-age=720h

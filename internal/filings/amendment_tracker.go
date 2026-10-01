@@ -82,31 +82,31 @@ func (t *AmendmentTracker) TrackAmendment(tenderRef string, num int, rawText, ur
 	return amend
 }
 
-// CanonicalTenderAmendments returns active procurement amendments and contract awards from CanadaBuys & DCC.
+// CanonicalTenderAmendments returns checked-in demonstration records, not a
+// live CanadaBuys or DCC feed.
 func CanonicalTenderAmendments() []*TenderAmendment {
 	tracker := NewAmendmentTracker()
-	now := time.Now().UTC()
 	return []*TenderAmendment{
 		tracker.TrackAmendment(
 			"WS39482910-Doc29102",
 			3,
 			"Defence Construction Canada: Contract awarded to Aecon-PCL Industrial Joint Venture for $185M CAD.",
 			"https://canadabuys.canada.ca/tender/WS39482910",
-			now.Add(-24*time.Hour),
+			DemonstrationSnapshotTime.Add(-24*time.Hour),
 		),
 		tracker.TrackAmendment(
 			"PWGSC-2026-HQ-0081",
 			2,
 			"Public Services and Procurement Canada: Closing date extended by 14 calendar days for marine terminal berth dredging.",
 			"https://canadabuys.canada.ca/tender/PWGSC-2026-HQ-0081",
-			now.Add(-48*time.Hour),
+			DemonstrationSnapshotTime.Add(-48*time.Hour),
 		),
 		tracker.TrackAmendment(
 			"DCC-ESQ-2026-44",
 			4,
 			"Esquimalt Naval Jetty Recapitalization: Questions and answers technical addendum published.",
 			"https://canadabuys.canada.ca/tender/DCC-ESQ-2026-44",
-			now.Add(-72*time.Hour),
+			DemonstrationSnapshotTime.Add(-72*time.Hour),
 		),
 	}
 }
