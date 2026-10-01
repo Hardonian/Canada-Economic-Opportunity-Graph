@@ -68,14 +68,15 @@ func TestLoadValidatedRejectsUnsafeOrMalformedSettings(t *testing.T) {
 		key   string
 		value string
 	}{
-		"invalid port":             {"PORT", "70000"},
-		"invalid duration":         {"REQUEST_TIMEOUT", "forever"},
-		"weak header ceiling":      {"MAX_HEADER_BYTES", "1024"},
-		"invalid log level":        {"LOG_LEVEL", "verbose"},
-		"invalid public URL":       {"PUBLIC_URL", "https://example.ca/private/path"},
-		"invalid trusted proxy":    {"TRUSTED_PROXY_CIDRS", "10.0.0.1"},
-		"mixed wildcard origins":   {"CORS_ORIGINS", "*,https://planner.gc.ca"},
-		"credentialed CORS origin": {"CORS_ORIGINS", "https://user:password@planner.gc.ca"},
+		"invalid port":               {"PORT", "70000"},
+		"invalid duration":           {"REQUEST_TIMEOUT", "forever"},
+		"weak header ceiling":        {"MAX_HEADER_BYTES", "1024"},
+		"invalid log level":          {"LOG_LEVEL", "verbose"},
+		"invalid public URL":         {"PUBLIC_URL", "https://example.ca/private/path"},
+		"invalid trusted proxy":      {"TRUSTED_PROXY_CIDRS", "10.0.0.1"},
+		"mixed wildcard origins":     {"CORS_ORIGINS", "*,https://planner.gc.ca"},
+		"credentialed CORS origin":   {"CORS_ORIGINS", "https://user:password@planner.gc.ca"},
+		"short adapter admin secret": {"ADAPTER_ADMIN_SECRET", "too-short"},
 	}
 
 	for name, test := range tests {

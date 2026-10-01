@@ -15,6 +15,7 @@ import (
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/eventsse"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/matching"
 	"github.com/google/uuid"
 )
@@ -615,5 +616,37 @@ func TestDealPrecedents_CanonicalProfiles(t *testing.T) {
 	}
 	if !strings.Contains(mRec.Body.String(), "cog_ingestion_dlq_size") {
 		t.Fatal("expected cog_ingestion_dlq_size in /metrics response")
+	}
+}
+
+func TestEventStream_SSE(t *testing.T) {
+	store := database.NewMemoryStore()
+	server := mustServer(t, store, testOptions())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/stream/events?project_id=crawford-nickel", nil).WithContext(ctx)
+	rec := httptest.NewRecorder()
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		server.ServeHTTP(rec, req)
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	eventsse.BroadcastSynthetic("crawford-nickel", "Permit Condition Satisfied", "regulatory_filing")
+
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+	<-done
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "event: connected") {
+		t.Fatalf("expected connected event in stream: %s", body)
+	}
+	if !strings.Contains(body, "Permit Condition Satisfied") {
+		t.Fatalf("expected broadcasted event title in stream: %s", body)
 	}
 }

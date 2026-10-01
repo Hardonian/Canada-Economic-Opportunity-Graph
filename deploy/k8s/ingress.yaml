@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cog-ingress
+  namespace: cog-system
+  labels:
+    app.kubernetes.io/name: canada-economic-opportunity-graph
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - opportunity.canada.ca
+        - api.opportunity.canada.ca
+      secretName: cog-tls-cert
+  rules:
+    - host: opportunity.canada.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cog-web
+                port:
+                  number: 3000
+    - host: api.opportunity.canada.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cog-api
+                port:
+                  number: 8080

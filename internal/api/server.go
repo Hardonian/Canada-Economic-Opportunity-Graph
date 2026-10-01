@@ -20,6 +20,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/eventsse"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/forecast"
 	graphqlhandler "github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/graphql"
@@ -523,6 +524,9 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/kpis/project/{id}", s.handleKPIProject)
 	s.mux.HandleFunc("GET /api/v1/kpis/summary", s.handleKPISummary)
 	s.mux.HandleFunc("GET /api/v1/kpis/snapshot", s.handleKPISnapshot)
+
+	// Real-Time Event Streaming (Server-Sent Events)
+	s.mux.HandleFunc("GET /api/v1/stream/events", eventsse.DefaultHub.StreamHandler)
 
 	// Palantir-Grade Sovereign Capabilities (Pillars 1 through 10 Complete)
 	s.registerPalantirGradeRoutes()

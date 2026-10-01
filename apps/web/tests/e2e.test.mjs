@@ -151,6 +151,18 @@ test('E2E Test 5: WCAG 2.2 AAA Accessibility, FIP Branding & Bilingual Complianc
   assert.ok(footerContent.includes('WCAG 2.2 AAA'), 'Footer must declare WCAG AAA bilingual compliance');
 });
 
+test('E2E Test 8: Filings fallback is explicitly labelled and time-stable', async () => {
+  const dataPath = path.join(__dirname, '../lib/data.ts');
+  const explorerPath = path.join(__dirname, '../components/ProcurementExplorer.tsx');
+  const dataContent = fs.readFileSync(dataPath, 'utf8');
+  const explorerContent = fs.readFileSync(explorerPath, 'utf8');
+
+  assert.ok(dataContent.includes('data_mode: "DEMONSTRATION_SNAPSHOT"'));
+  assert.ok(dataContent.includes('Demonstration records; not a live registry'));
+  assert.ok(!dataContent.includes('new Date(Date.now()'), 'fallback timestamps must not move with the clock');
+  assert.ok(explorerContent.includes('Demonstration snapshot:'), 'UI must disclose non-live data');
+});
+
 test('E2E Test 6: 10-Pillars Palantir Sovereign Capabilities Architecture Contract', async (t) => {
   // Verify architectural contract of all 10 Sovereign Pillars in palantir_routes.go
   const routesPath = path.join(rootDir, 'internal/api/palantir_routes.go');
@@ -229,4 +241,3 @@ test('E2E Test 7: Institutional Deal Precedents and Maple 8 Allocator Matching C
   assert.ok(result.score >= 85, `Institutional match score should exceed 85%, got ${result.score}%`);
   assert.deepEqual(result.matched, ['sector', 'province', 'stage', 'scale', 'recent']);
 });
-
