@@ -370,7 +370,7 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
-		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/") ||
+		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridor/") || strings.HasPrefix(r.URL.Path, "/api/v1/palantir/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/") ||
 			strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/"))
 	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
@@ -583,6 +583,9 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "# HELP cog_verifier_attestations Total verifier attestations recorded\n")
 	fmt.Fprintf(w, "# TYPE cog_verifier_attestations counter\n")
 	fmt.Fprintf(w, "cog_verifier_attestations %d\n", attCount)
+	fmt.Fprintf(w, "# HELP cog_ingestion_dlq_size Ingestion dead letter queue item count\n")
+	fmt.Fprintf(w, "# TYPE cog_ingestion_dlq_size gauge\n")
+	fmt.Fprintf(w, "cog_ingestion_dlq_size %d\n", ingestion.DefaultDLQ.Count())
 	fmt.Fprint(w, telemetry.DefaultCollector.RenderPrometheus())
 }
 
@@ -1894,11 +1897,9 @@ func (s *Server) handleReconciliation(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) collectInvestorProfiles() []*domain.InvestorProfile {
-	// Investor profiles are derived from entity metadata; the store does not
-	// yet expose a separate profile index, so we surface an empty list
-	// rather than hallucinating matches.
-	_, _ = s.store.ListEntities(context.Background())
-	return nil
+	// Surface authoritative Canadian institutional investor profiles across
+	// Maple 8 pension funds, Crown corporations, and sovereign allocators.
+	return matching.CanonicalInvestorProfiles()
 }
 
 func (s *Server) collectAISovereigntyProfiles() []*sovereignty.AIProfile {
