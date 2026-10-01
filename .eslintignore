@@ -1,0 +1,3 @@
+apps/web/tests/
+apps/web/.next/
+**/node_modules/

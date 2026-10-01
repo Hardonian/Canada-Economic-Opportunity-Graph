@@ -319,14 +319,14 @@ func (e *TransitionEngine) EvaluateProject(project *domain.Project) *TransitionA
 	}
 
 	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("%s|%s|%s|%.2f|%.0f|%d",
+	hasher.Write(fmt.Appendf(nil, "%s|%s|%s|%.2f|%.0f|%d",
 		project.ID,
 		category,
 		rating,
 		overallScore,
 		lifetimeAbatement,
 		capex,
-	)))
+	))
 	auditHash := hex.EncodeToString(hasher.Sum(nil))
 
 	return &TransitionAssessment{
@@ -397,13 +397,13 @@ func (e *TransitionEngine) EvaluatePortfolio(projects []*domain.Project) *Portfo
 	}
 
 	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("portfolio|%d|%d|%d|%.2f|%.2f",
+	hasher.Write(fmt.Appendf(nil, "portfolio|%d|%d|%d|%.2f|%.2f",
 		summary.TotalProjects,
 		summary.TotalGreenCapexCAD,
 		summary.TotalTransitionCapexCAD,
 		summary.AggregateLifetimeAbatementTonnes,
 		summary.WeightedAverageCredibilityIndex,
-	)))
+	))
 	summary.AuditHash = hex.EncodeToString(hasher.Sum(nil))
 
 	return summary

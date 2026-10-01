@@ -416,7 +416,7 @@ func SimulateConcessions(params SimulationParams) *NationalConcessionSimulation 
 	}
 
 	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("nas_concession|%d|%d|%d|%d|%d|%.2f|%.2f",
+	hasher.Write(fmt.Appendf(nil, "nas_concession|%d|%d|%d|%d|%d|%.2f|%.2f",
 		params.ConcessionHorizonYears,
 		totalCapex,
 		totalUpfrontProceeds,
@@ -424,7 +424,7 @@ func SimulateConcessions(params SimulationParams) *NationalConcessionSimulation 
 		totalPensionEquity,
 		portfolioIRR,
 		crowdingIn,
-	)))
+	))
 	auditHash := hex.EncodeToString(hasher.Sum(nil))
 
 	return &NationalConcessionSimulation{

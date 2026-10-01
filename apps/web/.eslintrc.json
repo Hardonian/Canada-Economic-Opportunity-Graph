@@ -1,3 +1,9 @@
 {
-  "extends": ["next/core-web-vitals"]
+  "extends": ["next/core-web-vitals"],
+  "ignorePatterns": [
+    "tests/**",
+    "*.test.mjs",
+    "node_modules/**",
+    ".next/**"
+  ]
 }

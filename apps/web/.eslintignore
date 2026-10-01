@@ -1,0 +1,4 @@
+tests/
+*.test.mjs
+node_modules/
+.next/
