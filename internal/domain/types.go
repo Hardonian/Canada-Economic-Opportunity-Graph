@@ -16,14 +16,14 @@ const (
 type ConfidenceLevel string
 
 const (
-	ConfidenceVerified   ConfidenceLevel = "VERIFIED"   // Corroborated by Tier 1 authoritative publisher
-	ConfidenceSupported  ConfidenceLevel = "SUPPORTED"  // Corroborated by Tier 2 or multiple Tier 3 sources
-	ConfidenceReported   ConfidenceLevel = "REPORTED"   // Stated by a single source without independent verification
-	ConfidenceInferred   ConfidenceLevel = "INFERRED"   // Derived algorithmically via dependency ontologies
-	ConfidenceUnknown    ConfidenceLevel = "UNKNOWN"    // Data point is unobserved or not disclosed
-	ConfidenceConflict   ConfidenceLevel = "CONFLICTED" // Multiple active sources assert irreconcilable facts
-	ConfidenceStale      ConfidenceLevel = "STALE"      // Information has exceeded its review horizon
-	ConfidenceRetracted  ConfidenceLevel = "RETRACTED"  // Source publication or claim formally withdrawn
+	ConfidenceVerified  ConfidenceLevel = "VERIFIED"   // Corroborated by Tier 1 authoritative publisher
+	ConfidenceSupported ConfidenceLevel = "SUPPORTED"  // Corroborated by Tier 2 or multiple Tier 3 sources
+	ConfidenceReported  ConfidenceLevel = "REPORTED"   // Stated by a single source without independent verification
+	ConfidenceInferred  ConfidenceLevel = "INFERRED"   // Derived algorithmically via dependency ontologies
+	ConfidenceUnknown   ConfidenceLevel = "UNKNOWN"    // Data point is unobserved or not disclosed
+	ConfidenceConflict  ConfidenceLevel = "CONFLICTED" // Multiple active sources assert irreconcilable facts
+	ConfidenceStale     ConfidenceLevel = "STALE"      // Information has exceeded its review horizon
+	ConfidenceRetracted ConfidenceLevel = "RETRACTED"  // Source publication or claim formally withdrawn
 	// ConfidenceConflicted is retained as a compatibility alias for older
 	// callers and models.
 	ConfidenceConflicted = ConfidenceConflict
@@ -33,19 +33,19 @@ const (
 type Sector string
 
 const (
-	SectorCriticalMinerals     Sector = "Critical Minerals"
-	SectorNuclearEnergy        Sector = "Nuclear & Clean Power"
-	SectorCleanEnergy          Sector = "Clean Energy & Grid"
-	SectorAICompute            Sector = "AI Compute & Data Centres"
-	SectorDefenceArctic        Sector = "Defence & Arctic"
-	SectorTransportation       Sector = "Transportation & Ports"
-	SectorIndustrialMfg        Sector = "Industrial & Manufacturing"
-	SectorHousingEnabling      Sector = "Housing-Enabling Infrastructure"
-	SectorMiningMetals         Sector = "Mining & Metals"
-	SectorEnergyFuels          Sector = "Energy & Fuels"
-	SectorForestryBioeconomy   Sector = "Forestry & Bioeconomy"
+	SectorCriticalMinerals   Sector = "Critical Minerals"
+	SectorNuclearEnergy      Sector = "Nuclear & Clean Power"
+	SectorCleanEnergy        Sector = "Clean Energy & Grid"
+	SectorAICompute          Sector = "AI Compute & Data Centres"
+	SectorDefenceArctic      Sector = "Defence & Arctic"
+	SectorTransportation     Sector = "Transportation & Ports"
+	SectorIndustrialMfg      Sector = "Industrial & Manufacturing"
+	SectorHousingEnabling    Sector = "Housing-Enabling Infrastructure"
+	SectorMiningMetals       Sector = "Mining & Metals"
+	SectorEnergyFuels        Sector = "Energy & Fuels"
+	SectorForestryBioeconomy Sector = "Forestry & Bioeconomy"
 	// Compatibility aliases for earlier domain versions.
-	SectorHousingInfra = SectorHousingEnabling
+	SectorHousingInfra  = SectorHousingEnabling
 	SectorManufacturing = SectorIndustrialMfg
 )
 
@@ -53,31 +53,31 @@ const (
 type LifecycleStage string
 
 const (
-	StageUnknown           LifecycleStage = "UNKNOWN"
-	StageDiscovered        LifecycleStage = "DISCOVERED"
-	StageConcept           LifecycleStage = "CONCEPT"
-	StagePreDevelopment    LifecycleStage = "PRE_DEVELOPMENT"
-	StageAnnounced         LifecycleStage = "ANNOUNCED"
-	StageReferred          LifecycleStage = "REFERRED"
-	StageEarlyDevelopment  LifecycleStage = "EARLY_DEVELOPMENT"
-	StageFeasibility       LifecycleStage = "FEASIBILITY"
-	StagePreFEED           LifecycleStage = "PRE_FEED"
-	StageFEED              LifecycleStage = "FEED"
+	StageUnknown             LifecycleStage = "UNKNOWN"
+	StageDiscovered          LifecycleStage = "DISCOVERED"
+	StageConcept             LifecycleStage = "CONCEPT"
+	StagePreDevelopment      LifecycleStage = "PRE_DEVELOPMENT"
+	StageAnnounced           LifecycleStage = "ANNOUNCED"
+	StageReferred            LifecycleStage = "REFERRED"
+	StageEarlyDevelopment    LifecycleStage = "EARLY_DEVELOPMENT"
+	StageFeasibility         LifecycleStage = "FEASIBILITY"
+	StagePreFEED             LifecycleStage = "PRE_FEED"
+	StageFEED                LifecycleStage = "FEED"
 	StageDetailedEngineering LifecycleStage = "DETAILED_ENGINEERING"
-	StageFinancing         LifecycleStage = "FINANCING"
+	StageFinancing           LifecycleStage = "FINANCING"
 	StageEnvironmentalReview LifecycleStage = "ENVIRONMENTAL_REVIEW"
-	StagePermitting        LifecycleStage = "PERMITTING"
-	StageProcurement       LifecycleStage = "PROCUREMENT"
-	StageFIDLikely         LifecycleStage = "FID_LIKELY"
-	StageFID               LifecycleStage = "FID"
-	StageConstructionReady LifecycleStage = "CONSTRUCTION_READY"
-	StageConstruction      LifecycleStage = "CONSTRUCTION"
-	StageCommissioning     LifecycleStage = "COMMISSIONING"
-	StageOperating         LifecycleStage = "OPERATING"
-	StageExpansion         LifecycleStage = "EXPANSION"
-	StageDelayed           LifecycleStage = "DELAYED"
-	StagePaused            LifecycleStage = "PAUSED"
-	StageCancelled         LifecycleStage = "CANCELLED"
+	StagePermitting          LifecycleStage = "PERMITTING"
+	StageProcurement         LifecycleStage = "PROCUREMENT"
+	StageFIDLikely           LifecycleStage = "FID_LIKELY"
+	StageFID                 LifecycleStage = "FID"
+	StageConstructionReady   LifecycleStage = "CONSTRUCTION_READY"
+	StageConstruction        LifecycleStage = "CONSTRUCTION"
+	StageCommissioning       LifecycleStage = "COMMISSIONING"
+	StageOperating           LifecycleStage = "OPERATING"
+	StageExpansion           LifecycleStage = "EXPANSION"
+	StageDelayed             LifecycleStage = "DELAYED"
+	StagePaused              LifecycleStage = "PAUSED"
+	StageCancelled           LifecycleStage = "CANCELLED"
 )
 
 // ValidLifecycleStages returns all valid lifecycle stages for validation.
@@ -93,8 +93,8 @@ var ValidLifecycleStages = []LifecycleStage{
 type CapitalCategory string
 
 const (
-	CapitalCategoryCIB           CapitalCategory = "CIB"           // Canada Infrastructure Bank
-	CapitalCategoryCGF           CapitalCategory = "CGF"           // Canada Growth Fund
+	CapitalCategoryCIB           CapitalCategory = "CIB" // Canada Infrastructure Bank
+	CapitalCategoryCGF           CapitalCategory = "CGF" // Canada Growth Fund
 	CapitalCategoryEquity        CapitalCategory = "EQUITY"
 	CapitalCategoryDebt          CapitalCategory = "DEBT"
 	CapitalCategoryGrant         CapitalCategory = "GRANT"
@@ -135,15 +135,15 @@ const (
 type SignalType string
 
 const (
-	SignalConstructionSignal       SignalType = "CONSTRUCTION_SIGNAL"
-	SignalRegulatoryProgress       SignalType = "REGULATORY_PROGRESS"
-	SignalIndigenousPartnership    SignalType = "INDIGENOUS_PARTNERSHIP"
-	SignalFinancingAcceleration    SignalType = "FINANCING_ACCELERATION"
-	SignalProcurementAcceleration  SignalType = "PROCUREMENT_ACCELERATION"
-	SignalTimelineSlip             SignalType = "TIMELINE_SLIP"
-	SignalProjectDelay             SignalType = "PROJECT_DELAY"
-	SignalPoliticalSupportLoss     SignalType = "POLITICAL_SUPPORT_LOSS"
-	SignalCapexIncrease            SignalType = "CAPEX_INCREASE"
+	SignalConstructionSignal      SignalType = "CONSTRUCTION_SIGNAL"
+	SignalRegulatoryProgress      SignalType = "REGULATORY_PROGRESS"
+	SignalIndigenousPartnership   SignalType = "INDIGENOUS_PARTNERSHIP"
+	SignalFinancingAcceleration   SignalType = "FINANCING_ACCELERATION"
+	SignalProcurementAcceleration SignalType = "PROCUREMENT_ACCELERATION"
+	SignalTimelineSlip            SignalType = "TIMELINE_SLIP"
+	SignalProjectDelay            SignalType = "PROJECT_DELAY"
+	SignalPoliticalSupportLoss    SignalType = "POLITICAL_SUPPORT_LOSS"
+	SignalCapexIncrease           SignalType = "CAPEX_INCREASE"
 )
 
 // IntelligenceStatus represents the overall data quality status.

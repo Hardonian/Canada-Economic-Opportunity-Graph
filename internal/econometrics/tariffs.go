@@ -6,7 +6,7 @@ import (
 
 // TariffShockRequest defines parameters for a cross-border trade tariff simulation.
 type TariffShockRequest struct {
-	TariffRatePct   float64  `json:"tariff_rate_pct"` // e.g. 10.0 or 25.0
+	TariffRatePct   float64  `json:"tariff_rate_pct"`  // e.g. 10.0 or 25.0
 	AffectedSectors []string `json:"affected_sectors"` // "STEEL", "ALUMINUM", "ENERGY", "CRITICAL_MINERALS", "AUTOMOTIVE"
 }
 

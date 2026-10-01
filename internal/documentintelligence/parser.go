@@ -27,9 +27,9 @@ var (
 )
 
 type ExtractedCard struct {
-	Candidate          *domain.CandidateProject     `json:"candidate"`
-	CapitalRequirement *domain.CapitalRequirement  `json:"capital_requirement,omitempty"`
-	CapitalNeed        *domain.CapitalNeed          `json:"capital_need,omitempty"`
+	Candidate          *domain.CandidateProject   `json:"candidate"`
+	CapitalRequirement *domain.CapitalRequirement `json:"capital_requirement,omitempty"`
+	CapitalNeed        *domain.CapitalNeed        `json:"capital_need,omitempty"`
 }
 
 func ExtractCards(text, sourceID string, visibility domain.VisibilityClass, observedAt time.Time) ([]ExtractedCard, error) {
@@ -202,18 +202,18 @@ func ClassifyCounterparties(raw string) []domain.CounterpartyType {
 	lower := strings.ToLower(raw)
 	mapping := map[string]domain.CounterpartyType{
 		"infrastructure fund": domain.CounterpartyInfrastructureFund,
-		"pension": domain.CounterpartyPensionFund,
-		"private equity": domain.CounterpartyPrivateEquity,
-		"bank": domain.CounterpartyBank,
-		"private credit": domain.CounterpartyPrivateCredit,
-		"export credit": domain.CounterpartyECA,
-		"sovereign": domain.CounterpartySovereignFund,
-		"strategic partner": domain.CounterpartyStrategicCorporate,
-		"epc": domain.CounterpartyEPC,
-		"offtaker": domain.CounterpartyOfftaker,
-		"anchor tenant": domain.CounterpartyAnchorTenant,
-		"indigenous partner": domain.CounterpartyIndigenousPartner,
-		"joint venture": domain.CounterpartyJVPartner,
+		"pension":             domain.CounterpartyPensionFund,
+		"private equity":      domain.CounterpartyPrivateEquity,
+		"bank":                domain.CounterpartyBank,
+		"private credit":      domain.CounterpartyPrivateCredit,
+		"export credit":       domain.CounterpartyECA,
+		"sovereign":           domain.CounterpartySovereignFund,
+		"strategic partner":   domain.CounterpartyStrategicCorporate,
+		"epc":                 domain.CounterpartyEPC,
+		"offtaker":            domain.CounterpartyOfftaker,
+		"anchor tenant":       domain.CounterpartyAnchorTenant,
+		"indigenous partner":  domain.CounterpartyIndigenousPartner,
+		"joint venture":       domain.CounterpartyJVPartner,
 	}
 	seen := map[domain.CounterpartyType]bool{}
 	result := []domain.CounterpartyType{}
@@ -357,7 +357,7 @@ type CapitalWaterfallDossier struct {
 	SeniorDebtCAD        int64   `json:"senior_debt_cad"`
 	SponsorEquityCAD     int64   `json:"sponsor_equity_cad"`
 	ConcessionaryDebtCAD int64   `json:"concessionary_debt_cad"` // CIB
-	TaxCreditEquityCAD   int64   `json:"tax_credit_equity_cad"`   // ITCs
+	TaxCreditEquityCAD   int64   `json:"tax_credit_equity_cad"`  // ITCs
 	IndigenousEquityCAD  int64   `json:"indigenous_equity_cad"`
 	TotalCapexCAD        int64   `json:"total_capex_cad"`
 	BlendedWACCPct       float64 `json:"blended_wacc_pct"`
@@ -420,4 +420,3 @@ func ExtractCapitalWaterfall(text string, reportedCapexCAD int64) *CapitalWaterf
 
 	return waterfall
 }
-

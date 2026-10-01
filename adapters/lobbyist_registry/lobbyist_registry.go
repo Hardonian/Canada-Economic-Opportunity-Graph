@@ -69,8 +69,8 @@ func NewLobbyistRegistryAdapter(fixturePath string) *LobbyistRegistryAdapter {
 	}
 }
 
-func (a *LobbyistRegistryAdapter) Name() string { return adapterName }
-func (a *LobbyistRegistryAdapter) Tier() domain.SourceTier { return domain.SourceTier2 }
+func (a *LobbyistRegistryAdapter) Name() string                   { return adapterName }
+func (a *LobbyistRegistryAdapter) Tier() domain.SourceTier        { return domain.SourceTier2 }
 func (a *LobbyistRegistryAdapter) Health() *adapters.SourceHealth { return &a.health }
 
 func (a *LobbyistRegistryAdapter) Fetch(ctx context.Context) ([]byte, error) {
@@ -126,27 +126,27 @@ func (a *LobbyistRegistryAdapter) fetchLive(ctx context.Context) ([]byte, error)
 }
 
 type rawRegistration struct {
-	RegistrationID              string   `json:"registration_id"`
-	RegistrantName              string   `json:"registrant_name"`
-	RegistrantType              string   `json:"registrant_type"`
-	ClientOrganization          *string  `json:"client_organization"`
-	SubjectMatters              []string `json:"subject_matters"`
-	SubjectMattersFr            []string `json:"subject_matters_fr"`
-	DesignatedPublicOfficeHolder bool    `json:"designated_public_office_holder"`
-	Active                      bool     `json:"active"`
-	RegistrationDate            string   `json:"registration_date"`
-	LastAmended                 string   `json:"last_amended"`
-	SectorFocus                 string   `json:"sector_focus"`
-	SourceURL                   string   `json:"source_url"`
+	RegistrationID               string   `json:"registration_id"`
+	RegistrantName               string   `json:"registrant_name"`
+	RegistrantType               string   `json:"registrant_type"`
+	ClientOrganization           *string  `json:"client_organization"`
+	SubjectMatters               []string `json:"subject_matters"`
+	SubjectMattersFr             []string `json:"subject_matters_fr"`
+	DesignatedPublicOfficeHolder bool     `json:"designated_public_office_holder"`
+	Active                       bool     `json:"active"`
+	RegistrationDate             string   `json:"registration_date"`
+	LastAmended                  string   `json:"last_amended"`
+	SectorFocus                  string   `json:"sector_focus"`
+	SourceURL                    string   `json:"source_url"`
 }
 
 type rawLobbyistFile struct {
-	Source        string             `json:"source"`
-	SourceURL     string             `json:"source_url"`
-	RetrievedAt   string             `json:"retrieved_at"`
-	EffectiveAt   string             `json:"effective_at"`
+	Source         string            `json:"source"`
+	SourceURL      string            `json:"source_url"`
+	RetrievedAt    string            `json:"retrieved_at"`
+	EffectiveAt    string            `json:"effective_at"`
 	DatasetVintage string            `json:"dataset_vintage"`
-	Registrations []rawRegistration  `json:"registrations"`
+	Registrations  []rawRegistration `json:"registrations"`
 }
 
 func (a *LobbyistRegistryAdapter) Parse(data []byte) (*adapters.IngestionResult, error) {

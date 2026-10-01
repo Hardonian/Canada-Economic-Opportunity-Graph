@@ -244,11 +244,11 @@ func (s *Server) handleGraphCommunities(w http.ResponseWriter, r *http.Request) 
 	clusterer := graphanalytics.NewLouvainClusterer()
 	nodes := []string{"crawford-nickel", "timmins-substation", "ontario-hydro-one", "noront-eagles-nest", "james-bay-road"}
 	edges := map[string][]string{
-		"crawford-nickel":     {"timmins-substation"},
-		"timmins-substation":  {"crawford-nickel", "ontario-hydro-one"},
-		"ontario-hydro-one":   {"timmins-substation"},
-		"noront-eagles-nest":  {"james-bay-road"},
-		"james-bay-road":      {"noront-eagles-nest"},
+		"crawford-nickel":    {"timmins-substation"},
+		"timmins-substation": {"crawford-nickel", "ontario-hydro-one"},
+		"ontario-hydro-one":  {"timmins-substation"},
+		"noront-eagles-nest": {"james-bay-road"},
+		"james-bay-road":     {"noront-eagles-nest"},
 	}
 
 	communities := clusterer.DetectCommunities(nodes, edges)
@@ -315,12 +315,12 @@ func (s *Server) handleAICopilotRun(w http.ResponseWriter, r *http.Request) {
 	project, err := s.store.GetProject(r.Context(), "crawford-nickel")
 	if err != nil || project == nil {
 		project = &domain.Project{
-			ID:          "crawford-nickel",
-			Name:        "Crawford Nickel Sulphide",
-			Sector:      domain.SectorCriticalMinerals,
-			Subsector:   "Nickel-Cobalt",
-			CapexCAD:    3500000000,
-			Province:    "ON",
+			ID:        "crawford-nickel",
+			Name:      "Crawford Nickel Sulphide",
+			Sector:    domain.SectorCriticalMinerals,
+			Subsector: "Nickel-Cobalt",
+			CapexCAD:  3500000000,
+			Province:  "ON",
 		}
 	}
 

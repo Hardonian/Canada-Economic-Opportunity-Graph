@@ -23,22 +23,22 @@ const (
 
 // FilingRecord represents a parsed continuous disclosure document from SEDAR+ or EDGAR.
 type FilingRecord struct {
-	ID                   string                 `json:"id"`
-	IssuerName           string                 `json:"issuer_name"`
-	Ticker               string                 `json:"ticker"`
-	Exchange             string                 `json:"exchange"` // TSX, TSXV, CSE, NYSE
-	FilingType           FilingType             `json:"filing_type"`
-	DocumentTitle        string                 `json:"document_title"`
-	FilingDate           time.Time              `json:"filing_date"`
-	SourceURL            string                 `json:"source_url"`
-	RawContentSHA256      string                 `json:"raw_content_sha256"`
-	CapexRevisionCAD     int64                  `json:"capex_revision_cad,omitempty"`
-	FinancingAnnouncedCAD int64                  `json:"financing_announced_cad,omitempty"`
-	StageChangeDetected  bool                   `json:"stage_change_detected"`
-	DetectedStage        domain.LifecycleStage  `json:"detected_stage,omitempty"`
-	ContractAwards       []ContractAwardNotice  `json:"contract_awards,omitempty"`
-	MaterialEvents       []string               `json:"material_events"`
-	AuditHash            string                 `json:"audit_hash"`
+	ID                    string                `json:"id"`
+	IssuerName            string                `json:"issuer_name"`
+	Ticker                string                `json:"ticker"`
+	Exchange              string                `json:"exchange"` // TSX, TSXV, CSE, NYSE
+	FilingType            FilingType            `json:"filing_type"`
+	DocumentTitle         string                `json:"document_title"`
+	FilingDate            time.Time             `json:"filing_date"`
+	SourceURL             string                `json:"source_url"`
+	RawContentSHA256      string                `json:"raw_content_sha256"`
+	CapexRevisionCAD      int64                 `json:"capex_revision_cad,omitempty"`
+	FinancingAnnouncedCAD int64                 `json:"financing_announced_cad,omitempty"`
+	StageChangeDetected   bool                  `json:"stage_change_detected"`
+	DetectedStage         domain.LifecycleStage `json:"detected_stage,omitempty"`
+	ContractAwards        []ContractAwardNotice `json:"contract_awards,omitempty"`
+	MaterialEvents        []string              `json:"material_events"`
+	AuditHash             string                `json:"audit_hash"`
 }
 
 // ContractAwardNotice documents an EPC or major engineering subcontract mentioned in public filings.
@@ -72,7 +72,7 @@ func (s *Streamer) ParseFiling(issuer, ticker, exchange string, fType FilingType
 		DocumentTitle:    title,
 		FilingDate:       date,
 		SourceURL:        sourceURL,
-		RawContentSHA256:  contentHash,
+		RawContentSHA256: contentHash,
 		MaterialEvents:   make([]string, 0),
 		ContractAwards:   make([]ContractAwardNotice, 0),
 	}

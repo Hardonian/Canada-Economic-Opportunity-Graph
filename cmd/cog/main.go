@@ -14,10 +14,10 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/nrcan_major_projects"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/official"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/corridor"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/documentintelligence"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
-	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/corridor"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/earthobs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/econometrics"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
@@ -1176,6 +1176,3 @@ func handleKPI(args []string) {
 		fmt.Println("Usage: cog kpi <list|show|feeds|snapshot>")
 	}
 }
-
-
-

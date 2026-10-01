@@ -71,12 +71,12 @@ func TestPropagateOpportunities_UnknownSector(t *testing.T) {
 
 func TestPropagateOpportunities_GeneratesForMatchingSector(t *testing.T) {
 	project := &domain.Project{
-		ID:            "p1",
-		Sector:        domain.SectorCriticalMinerals,
-		Name:          "Test Project",
-		CurrentStage:  domain.StageFEED,
-		CapexCAD:      1_000_000_000,
-		UpdatedAt:     time.Now(),
+		ID:           "p1",
+		Sector:       domain.SectorCriticalMinerals,
+		Name:         "Test Project",
+		CurrentStage: domain.StageFEED,
+		CapexCAD:     1_000_000_000,
+		UpdatedAt:    time.Now(),
 	}
 	got := PropagateOpportunities(project)
 	if got == nil {

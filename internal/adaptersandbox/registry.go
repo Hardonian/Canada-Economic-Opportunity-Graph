@@ -20,22 +20,22 @@ const RegistryVersion = "adapter-sandbox-v1.0"
 
 // AdapterEntry describes a community adapter registered in the sandbox.
 type AdapterEntry struct {
-	Name         string             `json:"name"`
-	Version      string             `json:"version"`
-	SourceURL    string             `json:"source_url"`
-	Tier         domain.SourceTier  `json:"tier"`
-	Contact      string             `json:"contact"`
-	Description  string             `json:"description"`
-	Capabilities []string           `json:"capabilities"`
-	RegisteredAt time.Time          `json:"registered_at"`
-	Approved     bool               `json:"approved"`
+	Name         string            `json:"name"`
+	Version      string            `json:"version"`
+	SourceURL    string            `json:"source_url"`
+	Tier         domain.SourceTier `json:"tier"`
+	Contact      string            `json:"contact"`
+	Description  string            `json:"description"`
+	Capabilities []string          `json:"capabilities"`
+	RegisteredAt time.Time         `json:"registered_at"`
+	Approved     bool              `json:"approved"`
 }
 
 // Registry holds community adapters with thread-safe registration.
 type Registry struct {
-	mu       sync.RWMutex
-	entries  map[string]*AdapterEntry
-	order    []string
+	mu      sync.RWMutex
+	entries map[string]*AdapterEntry
+	order   []string
 }
 
 // NewRegistry constructs an empty adapter sandbox registry.

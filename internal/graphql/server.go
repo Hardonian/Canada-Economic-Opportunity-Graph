@@ -19,8 +19,8 @@ type gqlRequest struct {
 
 // gqlResponse is the GraphQL JSON response envelope.
 type gqlResponse struct {
-	Data   interface{}  `json:"data,omitempty"`
-	Errors []gqlError   `json:"errors,omitempty"`
+	Data   interface{} `json:"data,omitempty"`
+	Errors []gqlError  `json:"errors,omitempty"`
 }
 
 // gqlError follows the GraphQL spec error shape.
@@ -259,10 +259,10 @@ func parseQuery(q string) (fields []string, args map[string]map[string]interface
 		// Parse arguments if present.
 		var fieldArgs map[string]interface{}
 		if pos < len(q) && q[pos] == '(' {
-end, a, parseErr := parseArgs(q, pos)
-		if parseErr != nil {
-			return nil, nil, nil, parseErr
-		}
+			end, a, parseErr := parseArgs(q, pos)
+			if parseErr != nil {
+				return nil, nil, nil, parseErr
+			}
 			fieldArgs = a
 			pos = end
 		}

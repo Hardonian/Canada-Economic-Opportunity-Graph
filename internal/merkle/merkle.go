@@ -23,9 +23,9 @@ const MethodologyVersion = "merkle-v1.0"
 // the canonical (evidence ID, content hash) pairs in stable ID order, so the
 // root is reproducible for an identical dataset.
 type Leaf struct {
-	EvidenceID   string `json:"evidence_id"`
-	ContentHash  string `json:"content_hash"`
-	LeafHash     string `json:"leaf_hash"`
+	EvidenceID  string `json:"evidence_id"`
+	ContentHash string `json:"content_hash"`
+	LeafHash    string `json:"leaf_hash"`
 }
 
 // Root is the published Merkle root and supporting metadata.

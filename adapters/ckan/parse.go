@@ -26,31 +26,31 @@ type rawSearchEnvelope struct {
 }
 
 type rawDataset struct {
-	ID                    string                    `json:"id"`
-	Name                  string                    `json:"name"`
-	Type                  string                    `json:"type"`
-	State                 string                    `json:"state"`
-	Title                 string                    `json:"title"`
-	TitleTranslated       LocalizedText             `json:"title_translated"`
-	Notes                 string                    `json:"notes"`
-	NotesTranslated       LocalizedText             `json:"notes_translated"`
-	Organization          rawOrganization           `json:"organization"`
-	OrgTitleAtPublication LocalizedText             `json:"org_title_at_publication"`
-	OwnerOrg              string                    `json:"owner_org"`
-	Jurisdiction          string                    `json:"jurisdiction"`
-	LicenseID             string                    `json:"license_id"`
-	LicenseTitle          string                    `json:"license_title"`
-	LicenseURL            string                    `json:"license_url"`
-	Frequency             string                    `json:"frequency"`
-	URL                   string                    `json:"url"`
-	Private               bool                      `json:"private"`
-	IsOpen                bool                      `json:"isopen"`
-	Keywords              json.RawMessage           `json:"keywords"`
-	Subject               stringList                `json:"subject"`
-	MetadataCreated       string                    `json:"metadata_created"`
-	MetadataModified      string                    `json:"metadata_modified"`
-	Tags                  []rawTag                  `json:"tags"`
-	Resources             []rawResource             `json:"resources"`
+	ID                    string          `json:"id"`
+	Name                  string          `json:"name"`
+	Type                  string          `json:"type"`
+	State                 string          `json:"state"`
+	Title                 string          `json:"title"`
+	TitleTranslated       LocalizedText   `json:"title_translated"`
+	Notes                 string          `json:"notes"`
+	NotesTranslated       LocalizedText   `json:"notes_translated"`
+	Organization          rawOrganization `json:"organization"`
+	OrgTitleAtPublication LocalizedText   `json:"org_title_at_publication"`
+	OwnerOrg              string          `json:"owner_org"`
+	Jurisdiction          string          `json:"jurisdiction"`
+	LicenseID             string          `json:"license_id"`
+	LicenseTitle          string          `json:"license_title"`
+	LicenseURL            string          `json:"license_url"`
+	Frequency             string          `json:"frequency"`
+	URL                   string          `json:"url"`
+	Private               bool            `json:"private"`
+	IsOpen                bool            `json:"isopen"`
+	Keywords              json.RawMessage `json:"keywords"`
+	Subject               stringList      `json:"subject"`
+	MetadataCreated       string          `json:"metadata_created"`
+	MetadataModified      string          `json:"metadata_modified"`
+	Tags                  []rawTag        `json:"tags"`
+	Resources             []rawResource   `json:"resources"`
 }
 
 type rawOrganization struct {
@@ -505,22 +505,22 @@ func normalizeChangeKind(activityType string) ChangeKind {
 }
 
 var relevanceTerms = map[string][]string{
-	"ai_compute":            {"artificial intelligence", "intelligence artificielle", "data centre", "data center", "centre de données", "compute", "calcul informatique"},
-	"capital":               {"capital expenditure", "capital investment", "capex", "financing", "funding", "grant", "loan", "investissement", "financement", "subvention", "prêt"},
-	"construction":          {"construction", "building permit", "development application", "permis de construction", "demande d'aménagement"},
-	"corporate":             {"corporation", "company", "business", "issuer", "société", "entreprise", "émetteur"},
-	"critical_minerals":     {"critical mineral", "mining", "mine", "mineral processing", "minéraux critiques", "exploitation minière", "traitement des minéraux"},
-	"defence_arctic":        {"defence", "defense", "military", "arctic", "norad", "défense", "militaire", "arctique"},
-	"energy":                {"energy", "electricity", "power grid", "generation", "transmission", "pipeline", "énergie", "électricité", "réseau électrique", "production", "transport d'électricité"},
+	"ai_compute":             {"artificial intelligence", "intelligence artificielle", "data centre", "data center", "centre de données", "compute", "calcul informatique"},
+	"capital":                {"capital expenditure", "capital investment", "capex", "financing", "funding", "grant", "loan", "investissement", "financement", "subvention", "prêt"},
+	"construction":           {"construction", "building permit", "development application", "permis de construction", "demande d'aménagement"},
+	"corporate":              {"corporation", "company", "business", "issuer", "société", "entreprise", "émetteur"},
+	"critical_minerals":      {"critical mineral", "mining", "mine", "mineral processing", "minéraux critiques", "exploitation minière", "traitement des minéraux"},
+	"defence_arctic":         {"defence", "defense", "military", "arctic", "norad", "défense", "militaire", "arctique"},
+	"energy":                 {"energy", "electricity", "power grid", "generation", "transmission", "pipeline", "énergie", "électricité", "réseau électrique", "production", "transport d'électricité"},
 	"environment_regulatory": {"environmental assessment", "regulator", "permit", "approval", "impact assessment", "évaluation environnementale", "organisme de réglementation", "permis", "approbation"},
-	"housing":               {"housing", "residential development", "affordable housing", "logement", "développement résidentiel", "logement abordable"},
-	"indigenous_economy":    {"indigenous", "first nation", "inuit", "métis", "autochtone", "première nation"},
-	"infrastructure":        {"infrastructure", "public works", "utility", "utilities", "travaux publics", "service public"},
-	"procurement":           {"procurement", "tender", "contract award", "standing offer", "request for proposal", "approvisionnement", "appel d'offres", "attribution de contrat", "offre à commandes"},
-	"telecom":               {"telecommunications", "broadband", "fibre", "fiber", "connectivity", "télécommunications", "large bande", "connectivité"},
-	"trade":                 {"trade", "export", "import", "supply chain", "commerce", "exportation", "importation", "chaîne d'approvisionnement"},
-	"transport":             {"transportation", "transit", "rail", "port", "airport", "highway", "freight", "transport", "ferroviaire", "aéroport", "autoroute", "marchandises"},
-	"workforce":             {"employment", "labour", "workforce", "job", "emploi", "main-d'œuvre", "travailleur"},
+	"housing":                {"housing", "residential development", "affordable housing", "logement", "développement résidentiel", "logement abordable"},
+	"indigenous_economy":     {"indigenous", "first nation", "inuit", "métis", "autochtone", "première nation"},
+	"infrastructure":         {"infrastructure", "public works", "utility", "utilities", "travaux publics", "service public"},
+	"procurement":            {"procurement", "tender", "contract award", "standing offer", "request for proposal", "approvisionnement", "appel d'offres", "attribution de contrat", "offre à commandes"},
+	"telecom":                {"telecommunications", "broadband", "fibre", "fiber", "connectivity", "télécommunications", "large bande", "connectivité"},
+	"trade":                  {"trade", "export", "import", "supply chain", "commerce", "exportation", "importation", "chaîne d'approvisionnement"},
+	"transport":              {"transportation", "transit", "rail", "port", "airport", "highway", "freight", "transport", "ferroviaire", "aéroport", "autoroute", "marchandises"},
+	"workforce":              {"employment", "labour", "workforce", "job", "emploi", "main-d'œuvre", "travailleur"},
 }
 
 func scoreRelevance(dataset Dataset) Relevance {

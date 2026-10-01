@@ -59,8 +59,8 @@ func TestGenerateOpportunities_Requirements(t *testing.T) {
 		{ID: "r2", Type: domain.RequireRoad, Description: "Road needed", Confidence: domain.RequirementStated, Visibility: domain.VisibilityPublic, Publishable: true, EvidenceIDs: []string{"e2"}},
 	}
 	got := GenerateOpportunities(Context{
-		Project:       project,
-		Requirements:  reqs,
+		Project:      project,
+		Requirements: reqs,
 	}, now)
 	procurementCount := 0
 	for _, opp := range got {

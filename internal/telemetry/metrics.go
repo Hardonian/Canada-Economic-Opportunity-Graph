@@ -11,14 +11,14 @@ import (
 
 // MetricsCollector tracks operational SLIs and exports Prometheus telemetry.
 type MetricsCollector struct {
-	httpRequestsTotal       sync.Map // key: "METHOD /path status" -> *atomic.Uint64
-	httpRequestDurations    sync.Map // key: "/path" -> *durationStats
-	storageWALWrites        atomic.Uint64
-	storageCheckpoints      atomic.Uint64
-	verifierAttestations    atomic.Uint64
-	verifierQuorumsReached  atomic.Uint64
-	lakehouseQueries        atomic.Uint64
-	activeAuditorPeers      atomic.Int64
+	httpRequestsTotal      sync.Map // key: "METHOD /path status" -> *atomic.Uint64
+	httpRequestDurations   sync.Map // key: "/path" -> *durationStats
+	storageWALWrites       atomic.Uint64
+	storageCheckpoints     atomic.Uint64
+	verifierAttestations   atomic.Uint64
+	verifierQuorumsReached atomic.Uint64
+	lakehouseQueries       atomic.Uint64
+	activeAuditorPeers     atomic.Int64
 }
 
 type durationStats struct {

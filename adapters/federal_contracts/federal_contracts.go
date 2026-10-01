@@ -131,18 +131,18 @@ func (a *FederalContractsAdapter) fetchLive(ctx context.Context) ([]byte, error)
 }
 
 type rawFederalContract struct {
-	ContractID          string  `json:"contract_id"`
-	VendorName          string  `json:"vendor_name"`
-	VendorLocation      string  `json:"vendor_location"`
-	BuyerDepartment     string  `json:"buyer_department"`
-	BuyerDepartmentFr   string  `json:"buyer_department_fr"`
-	Description         string  `json:"description"`
-	DescriptionFr       string  `json:"description_fr"`
-	ContractValueCad    int64   `json:"contract_value_cad"`
-	AwardDate           string  `json:"award_date"`
-	Sector              string  `json:"sector"`
-	ProcurementCategory string  `json:"procurement_category"`
-	SourceURL           string  `json:"source_url"`
+	ContractID          string `json:"contract_id"`
+	VendorName          string `json:"vendor_name"`
+	VendorLocation      string `json:"vendor_location"`
+	BuyerDepartment     string `json:"buyer_department"`
+	BuyerDepartmentFr   string `json:"buyer_department_fr"`
+	Description         string `json:"description"`
+	DescriptionFr       string `json:"description_fr"`
+	ContractValueCad    int64  `json:"contract_value_cad"`
+	AwardDate           string `json:"award_date"`
+	Sector              string `json:"sector"`
+	ProcurementCategory string `json:"procurement_category"`
+	SourceURL           string `json:"source_url"`
 }
 
 type rawFederalContractsFile struct {

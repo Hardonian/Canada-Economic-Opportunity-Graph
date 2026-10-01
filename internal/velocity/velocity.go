@@ -29,8 +29,8 @@ const (
 type VelocityScore struct {
 	ProjectID          string              `json:"project_id"`
 	Type               VelocityType        `json:"type"`
-	Score              float64             `json:"score"`   // 0-100
-	Trend              string              `json:"trend"`   // ACCELERATING, STEADY, DECELERATING, STALLED
+	Score              float64             `json:"score"` // 0-100
+	Trend              string              `json:"trend"` // ACCELERATING, STEADY, DECELERATING, STALLED
 	MethodologyVersion string              `json:"methodology_version"`
 	Factors            map[string]float64  `json:"factors"`
 	FactorEvidence     map[string][]string `json:"factor_evidence"`
@@ -208,7 +208,7 @@ func financingMilestoneFactor(milestones []*domain.Milestone) (float64, []string
 	financingTypes := map[domain.MilestoneType]float64{
 		domain.MilestoneFinancingCommitted: 40,
 		domain.MilestoneFinancialClose:     60,
-		domain.MilestoneFID:               80,
+		domain.MilestoneFID:                80,
 		domain.MilestoneOfftakeSigned:      30,
 	}
 	var score float64
@@ -312,21 +312,21 @@ func executionMilestoneFactor(milestones []*domain.Milestone) (float64, []string
 
 func stageAdvancementFactor(stage domain.LifecycleStage) float64 {
 	stageScore := map[domain.LifecycleStage]float64{
-		domain.StageConcept:            5,
-		domain.StagePreDevelopment:     10,
-		domain.StageAnnounced:          15,
-		domain.StageFeasibility:        25,
-		domain.StagePreFEED:            30,
-		domain.StageFEED:               40,
+		domain.StageConcept:             5,
+		domain.StagePreDevelopment:      10,
+		domain.StageAnnounced:           15,
+		domain.StageFeasibility:         25,
+		domain.StagePreFEED:             30,
+		domain.StageFEED:                40,
 		domain.StageDetailedEngineering: 50,
-		domain.StagePermitting:         55,
-		domain.StageFinancing:          60,
-		domain.StageFIDLikely:          70,
-		domain.StageFID:                75,
-		domain.StageConstructionReady:  80,
-		domain.StageConstruction:       85,
-		domain.StageCommissioning:      90,
-		domain.StageOperating:          100,
+		domain.StagePermitting:          55,
+		domain.StageFinancing:           60,
+		domain.StageFIDLikely:           70,
+		domain.StageFID:                 75,
+		domain.StageConstructionReady:   80,
+		domain.StageConstruction:        85,
+		domain.StageCommissioning:       90,
+		domain.StageOperating:           100,
 	}
 	if s, ok := stageScore[stage]; ok {
 		return s

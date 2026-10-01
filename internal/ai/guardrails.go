@@ -31,8 +31,8 @@ func NewAIPGuardrails() *AIPGuardrails {
 	}
 
 	g.allowedRoleTools[RoleGridPhysicist] = map[string]bool{
-		"solve_power_flow":        true,
-		"simulate_contingency":    true,
+		"solve_power_flow":          true,
+		"simulate_contingency":      true,
 		"query_substation_headroom": true,
 	}
 

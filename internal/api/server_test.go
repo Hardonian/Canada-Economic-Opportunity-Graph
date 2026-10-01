@@ -551,5 +551,3 @@ func TestSovereigntyPillarsEndpoints(t *testing.T) {
 		}
 	}
 }
-
-

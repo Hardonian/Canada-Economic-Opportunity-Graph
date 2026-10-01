@@ -67,8 +67,8 @@ func TestSecurityRedactionAndBanner(t *testing.T) {
 
 	redactor := NewRedactor()
 	data := map[string]interface{}{
-		"project_name": "SMR Fuel Fabrication",
-		"capex_cad":    500000000.0,
+		"project_name":          "SMR Fuel Fabrication",
+		"capex_cad":             500000000.0,
 		"enrichment_purity_pct": 19.75, // Secret
 	}
 	fieldLevels := map[string]ClassificationLevel{

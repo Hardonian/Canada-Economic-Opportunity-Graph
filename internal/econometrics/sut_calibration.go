@@ -14,13 +14,13 @@ const SUTTableReference = "Statistics Canada Table 36-10-0438-01 (Supply and Use
 
 // SectorCalibrationReport evaluates empirical alignment between national planning models and official SUT benchmarks.
 type SectorCalibrationReport struct {
-	Sector             domain.Sector `json:"sector"`
-	DirectGDP          float64       `json:"direct_gdp"`
-	TotalGDP           float64       `json:"total_gdp"`
-	JobsPerMillionCAD  float64       `json:"jobs_per_million_cad"`
-	TotalTaxRate       float64       `json:"total_tax_rate"`
-	EmpiricallyValid   bool          `json:"empirically_valid"`
-	ValidationNotes    []string      `json:"validation_notes"`
+	Sector            domain.Sector `json:"sector"`
+	DirectGDP         float64       `json:"direct_gdp"`
+	TotalGDP          float64       `json:"total_gdp"`
+	JobsPerMillionCAD float64       `json:"jobs_per_million_cad"`
+	TotalTaxRate      float64       `json:"total_tax_rate"`
+	EmpiricallyValid  bool          `json:"empirically_valid"`
+	ValidationNotes   []string      `json:"validation_notes"`
 }
 
 // SUTCalibrationCertificate certifies that the econometrics engine satisfies federal macroeconomic modeling standards.

@@ -58,12 +58,12 @@ func TestRegister_ValidEntry(t *testing.T) {
 func TestRegister_DuplicateName(t *testing.T) {
 	r := NewRegistry()
 	entry := &AdapterEntry{
-		Name:        "dup",
-		Version:     "1.0",
-		SourceURL:   "https://example.com",
-		Tier:        domain.SourceTier1,
-		Contact:     "dev@example.com",
-		Description: "Test",
+		Name:         "dup",
+		Version:      "1.0",
+		SourceURL:    "https://example.com",
+		Tier:         domain.SourceTier1,
+		Contact:      "dev@example.com",
+		Description:  "Test",
 		RegisteredAt: time.Now().UTC(),
 	}
 	if err := r.Register(entry); err != nil {
@@ -71,12 +71,12 @@ func TestRegister_DuplicateName(t *testing.T) {
 	}
 	// Replace with a new entry.
 	entry2 := &AdapterEntry{
-		Name:        "dup",
-		Version:     "2.0",
-		SourceURL:   "https://example.com/v2",
-		Tier:        domain.SourceTier2,
-		Contact:     "dev@example.com",
-		Description: "Updated",
+		Name:         "dup",
+		Version:      "2.0",
+		SourceURL:    "https://example.com/v2",
+		Tier:         domain.SourceTier2,
+		Contact:      "dev@example.com",
+		Description:  "Updated",
 		RegisteredAt: time.Now().UTC(),
 	}
 	if err := r.Register(entry2); err != nil {
@@ -98,12 +98,12 @@ func TestRegister_DuplicateName(t *testing.T) {
 func TestRegister_InvalidName(t *testing.T) {
 	r := NewRegistry()
 	entry := &AdapterEntry{
-		Name:        "",
-		Version:     "1.0",
-		SourceURL:   "https://example.com",
-		Tier:        domain.SourceTier1,
-		Contact:     "dev@example.com",
-		Description: "Test",
+		Name:         "",
+		Version:      "1.0",
+		SourceURL:    "https://example.com",
+		Tier:         domain.SourceTier1,
+		Contact:      "dev@example.com",
+		Description:  "Test",
 		RegisteredAt: time.Now().UTC(),
 	}
 	if err := r.Register(entry); err == nil {
@@ -114,12 +114,12 @@ func TestRegister_InvalidName(t *testing.T) {
 func TestRegister_InvalidURL(t *testing.T) {
 	r := NewRegistry()
 	entry := &AdapterEntry{
-		Name:        "bad",
-		Version:     "1.0",
-		SourceURL:   "not-a-url",
-		Tier:        domain.SourceTier1,
-		Contact:     "dev@example.com",
-		Description: "Test",
+		Name:         "bad",
+		Version:      "1.0",
+		SourceURL:    "not-a-url",
+		Tier:         domain.SourceTier1,
+		Contact:      "dev@example.com",
+		Description:  "Test",
 		RegisteredAt: time.Now().UTC(),
 	}
 	if err := r.Register(entry); err == nil {
@@ -127,12 +127,12 @@ func TestRegister_InvalidURL(t *testing.T) {
 	}
 	// Also test a URL with no scheme.
 	entry2 := &AdapterEntry{
-		Name:        "bad2",
-		Version:     "1.0",
-		SourceURL:   "example.com/path",
-		Tier:        domain.SourceTier1,
-		Contact:     "dev@example.com",
-		Description: "Test",
+		Name:         "bad2",
+		Version:      "1.0",
+		SourceURL:    "example.com/path",
+		Tier:         domain.SourceTier1,
+		Contact:      "dev@example.com",
+		Description:  "Test",
 		RegisteredAt: time.Now().UTC(),
 	}
 	if err := r.Register(entry2); err == nil {
@@ -151,24 +151,24 @@ func TestApprovedFiltering(t *testing.T) {
 	r := NewRegistry()
 	now := time.Now().UTC()
 	r.Register(&AdapterEntry{
-		Name:        "approved_adapter",
-		Version:     "1.0",
-		SourceURL:   "https://example.com/approved",
-		Tier:        domain.SourceTier1,
-		Contact:     "dev@example.com",
-		Description: "Approved",
+		Name:         "approved_adapter",
+		Version:      "1.0",
+		SourceURL:    "https://example.com/approved",
+		Tier:         domain.SourceTier1,
+		Contact:      "dev@example.com",
+		Description:  "Approved",
 		RegisteredAt: now,
-		Approved:    true,
+		Approved:     true,
 	})
 	r.Register(&AdapterEntry{
-		Name:        "pending_adapter",
-		Version:     "1.0",
-		SourceURL:   "https://example.com/pending",
-		Tier:        domain.SourceTier2,
-		Contact:     "dev@example.com",
-		Description: "Pending",
+		Name:         "pending_adapter",
+		Version:      "1.0",
+		SourceURL:    "https://example.com/pending",
+		Tier:         domain.SourceTier2,
+		Contact:      "dev@example.com",
+		Description:  "Pending",
 		RegisteredAt: now,
-		Approved:    false,
+		Approved:     false,
 	})
 
 	approved := r.Approved()
@@ -185,12 +185,12 @@ func TestAllAndNamesOrder(t *testing.T) {
 	now := time.Now().UTC()
 	for _, name := range []string{"z_adapter", "a_adapter", "m_adapter"} {
 		r.Register(&AdapterEntry{
-			Name:        name,
-			Version:     "1.0",
-			SourceURL:   "https://example.com/" + name,
-			Tier:        domain.SourceTier1,
-			Contact:     "dev@example.com",
-			Description: "Test",
+			Name:         name,
+			Version:      "1.0",
+			SourceURL:    "https://example.com/" + name,
+			Tier:         domain.SourceTier1,
+			Contact:      "dev@example.com",
+			Description:  "Test",
 			RegisteredAt: now,
 		})
 	}

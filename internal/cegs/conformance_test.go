@@ -10,11 +10,11 @@ import (
 
 // conformanceCase describes a single conformance test vector.
 type conformanceCase struct {
-	name             string
-	doc              map[string]interface{}
-	expectValid      bool
-	expectLevel      string // empty means "don't check"
-	expectErrSubstr  string // non-empty means at least one error must contain this substring
+	name            string
+	doc             map[string]interface{}
+	expectValid     bool
+	expectLevel     string // empty means "don't check"
+	expectErrSubstr string // non-empty means at least one error must contain this substring
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -257,16 +257,16 @@ func conformanceCases() []conformanceCase {
 		{
 			name: "evidence/provenance-valid",
 			doc: map[string]interface{}{
-				"cegs":                 cegs.SpecVersion,
-				"id":                   "cegs:evidence:ca:iaac-test-001",
-				"type":                 "evidence",
-				"source_url":           "https://example.gc.ca/dataset/001",
-				"publisher":            "IAAC",
-				"source_tier":          1,
-				"content_hash":         "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccd0",
-				"retrieval_timestamp":  now,
-				"confidence":           "verified",
-				"extraction_method":    "deterministic_adapter",
+				"cegs":                cegs.SpecVersion,
+				"id":                  "cegs:evidence:ca:iaac-test-001",
+				"type":                "evidence",
+				"source_url":          "https://example.gc.ca/dataset/001",
+				"publisher":           "IAAC",
+				"source_tier":         1,
+				"content_hash":        "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccdd" + "aabbccd0",
+				"retrieval_timestamp": now,
+				"confidence":          "verified",
+				"extraction_method":   "deterministic_adapter",
 			},
 			expectValid: true,
 			expectLevel: "CEGS Provenance",
@@ -310,13 +310,13 @@ func conformanceCases() []conformanceCase {
 		{
 			name: "source/core-valid",
 			doc: envelope("source", map[string]interface{}{
-				"source_kind":   "DATASET",
-				"canonical_url": "https://open.canada.ca/data/en/dataset/test",
-				"source_family": "federal-opendata",
-				"access_method": "REST_API",
+				"source_kind":    "DATASET",
+				"canonical_url":  "https://open.canada.ca/data/en/dataset/test",
+				"source_family":  "federal-opendata",
+				"access_method":  "REST_API",
 				"authority_tier": 1,
-				"lifecycle":     "ACTIVE",
-				"health":        "HEALTHY",
+				"lifecycle":      "ACTIVE",
+				"health":         "HEALTHY",
 			}),
 			expectValid: true,
 			expectLevel: "CEGS Core",
@@ -324,13 +324,13 @@ func conformanceCases() []conformanceCase {
 		{
 			name: "source/invalid-lifecycle",
 			doc: envelope("source", map[string]interface{}{
-				"source_kind":   "FEED",
-				"canonical_url": "https://example.gc.ca/feed",
-				"source_family": "gazette",
-				"access_method": "SCRAPE",
+				"source_kind":    "FEED",
+				"canonical_url":  "https://example.gc.ca/feed",
+				"source_family":  "gazette",
+				"access_method":  "SCRAPE",
 				"authority_tier": 2,
-				"lifecycle":     "UNKNOWN_INVALID",
-				"health":        "HEALTHY",
+				"lifecycle":      "UNKNOWN_INVALID",
+				"health":         "HEALTHY",
 			}),
 			expectValid:     false,
 			expectErrSubstr: "lifecycle",

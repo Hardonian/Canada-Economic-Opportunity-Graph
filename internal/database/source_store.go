@@ -15,28 +15,28 @@ var (
 )
 
 type SourceRelationshipFilter struct {
-	SourceID        string
-	FromSourceID    string
-	ToSourceID      string
+	SourceID         string
+	FromSourceID     string
+	ToSourceID       string
 	RelationshipType domain.SourceRelationshipType
-	Limit           int
-	Offset          int
+	Limit            int
+	Offset           int
 }
 
 type SourceVersionFilter struct {
-	SourceID     string
+	SourceID      string
 	LastKnownGood *bool
-	Limit        int
-	Offset       int
+	Limit         int
+	Offset        int
 }
 
 type SourceChangeFilter struct {
-	SourceID   string
-	ChangeType domain.SourceChangeType
+	SourceID    string
+	ChangeType  domain.SourceChangeType
 	Materiality domain.Materiality
-	Since      *time.Time
-	Limit      int
-	Offset     int
+	Since       *time.Time
+	Limit       int
+	Offset      int
 }
 
 type SourceHealthFilter struct {
@@ -64,10 +64,10 @@ type CandidateTransitionRequest struct {
 }
 
 type ClaimJobsRequest struct {
-	WorkerID     string
-	Queues       []domain.IngestionQueue
-	Limit        int
-	Now          time.Time
+	WorkerID      string
+	Queues        []domain.IngestionQueue
+	Limit         int
+	Now           time.Time
 	LeaseDuration time.Duration
 }
 
@@ -78,12 +78,12 @@ type CompleteJobRequest struct {
 }
 
 type FailJobRequest struct {
-	JobID       string
-	WorkerID    string
+	JobID        string
+	WorkerID     string
 	FailureStage string
-	Error       string
-	RetryAt     *time.Time
-	At          time.Time
+	Error        string
+	RetryAt      *time.Time
+	At           time.Time
 }
 
 type ReplayJobRequest struct {
@@ -95,9 +95,9 @@ type ReplayJobRequest struct {
 }
 
 type ClaimOutboxRequest struct {
-	WorkerID     string
-	Limit        int
-	Now          time.Time
+	WorkerID      string
+	Limit         int
+	Now           time.Time
 	LeaseDuration time.Duration
 }
 
@@ -108,11 +108,11 @@ type CompleteOutboxRequest struct {
 }
 
 type FailOutboxRequest struct {
-	EventID   string
-	WorkerID  string
-	Error     string
-	RetryAt   time.Time
-	At        time.Time
+	EventID  string
+	WorkerID string
+	Error    string
+	RetryAt  time.Time
+	At       time.Time
 }
 
 // SourceObservationCommit is an atomic control-plane unit. Database-backed

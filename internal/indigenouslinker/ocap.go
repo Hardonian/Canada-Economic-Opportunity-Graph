@@ -16,9 +16,9 @@ const OCAPStandardVersion = "FNIGC-OCAP-v2.0"
 type ConsentStatus string
 
 const (
-	ConsentGranted   ConsentStatus = "CONSENT_GRANTED"
-	ConsentPending   ConsentStatus = "CONSENT_PENDING"
-	ConsentWithdrawn ConsentStatus = "CONSENT_WITHDRAWN"
+	ConsentGranted    ConsentStatus = "CONSENT_GRANTED"
+	ConsentPending    ConsentStatus = "CONSENT_PENDING"
+	ConsentWithdrawn  ConsentStatus = "CONSENT_WITHDRAWN"
 	ConsentRestricted ConsentStatus = "CONSENT_RESTRICTED"
 )
 
@@ -28,8 +28,8 @@ type CommunityConsent struct {
 	BandCouncilNumber   string        `json:"band_council_number"`
 	TreatyTerritory     string        `json:"treaty_territory"`
 	Status              ConsentStatus `json:"status"`
-	PermittedUseCases   []string      `json:"permitted_use_cases"` // "PROCUREMENT_MATCHING", "CAPITAL_STACK", "SUPPLY_CHAIN"
-	RestrictedKnowledge []string      `json:"restricted_knowledge"`// Sacred sites, non-public traditional harvest zones
+	PermittedUseCases   []string      `json:"permitted_use_cases"`  // "PROCUREMENT_MATCHING", "CAPITAL_STACK", "SUPPLY_CHAIN"
+	RestrictedKnowledge []string      `json:"restricted_knowledge"` // Sacred sites, non-public traditional harvest zones
 	AuthorizedSigner    string        `json:"authorized_signer"`
 	EffectiveDate       time.Time     `json:"effective_date"`
 	ExpiryDate          time.Time     `json:"expiry_date"`

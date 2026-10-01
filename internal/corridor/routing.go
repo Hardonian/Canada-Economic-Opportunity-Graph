@@ -21,9 +21,9 @@ const (
 
 // CorridorPoint represents a waypoint along a planned linear route.
 type CorridorPoint struct {
-	Name      string  `json:"name"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Name            string  `json:"name"`
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
 	ElevationMeters float64 `json:"elevation_meters"`
 }
 
@@ -37,29 +37,29 @@ type EnvironmentalSensitivity struct {
 
 // LandTenureDistribution breaks down ownership across the corridor.
 type LandTenureDistribution struct {
-	CrownProvincialPercent float64 `json:"crown_provincial_percent"`
-	CrownFederalPercent    float64 `json:"crown_federal_percent"`
+	CrownProvincialPercent      float64 `json:"crown_provincial_percent"`
+	CrownFederalPercent         float64 `json:"crown_federal_percent"`
 	IndigenousSettlementPercent float64 `json:"indigenous_settlement_percent"`
-	PrivateFreeholdPercent float64 `json:"private_freehold_percent"`
+	PrivateFreeholdPercent      float64 `json:"private_freehold_percent"`
 }
 
 // RouteEvaluation evaluates cost, geotechnical risk, and timing for a linear corridor.
 type RouteEvaluation struct {
-	CorridorID          string                   `json:"corridor_id"`
-	Type                InfrastructureType       `json:"type"`
-	OriginName          string                   `json:"origin_name"`
-	DestinationName     string                   `json:"destination_name"`
-	TotalLengthKM       float64                  `json:"total_length_km"`
-	BaseConstructionCapexCAD int64               `json:"base_construction_capex_cad"`
-	RightOfWayAcquisitionCAD int64               `json:"right_of_way_acquisition_cad"`
-	EnvironmentalMitigationCAD int64             `json:"environmental_mitigation_cad"`
-	TotalEstimatedCapexCAD int64                 `json:"total_estimated_capex_cad"`
-	EstimatedScheduleMonths int                  `json:"estimated_schedule_months"`
-	ImpedanceIndex      float64                  `json:"impedance_index"` // Lower is easier
-	Sensitivity         EnvironmentalSensitivity `json:"sensitivity"`
-	LandTenure          LandTenureDistribution   `json:"land_tenure"`
-	KeyWaypoints        []CorridorPoint          `json:"key_waypoints"`
-	AuditHash           string                   `json:"audit_hash"`
+	CorridorID                 string                   `json:"corridor_id"`
+	Type                       InfrastructureType       `json:"type"`
+	OriginName                 string                   `json:"origin_name"`
+	DestinationName            string                   `json:"destination_name"`
+	TotalLengthKM              float64                  `json:"total_length_km"`
+	BaseConstructionCapexCAD   int64                    `json:"base_construction_capex_cad"`
+	RightOfWayAcquisitionCAD   int64                    `json:"right_of_way_acquisition_cad"`
+	EnvironmentalMitigationCAD int64                    `json:"environmental_mitigation_cad"`
+	TotalEstimatedCapexCAD     int64                    `json:"total_estimated_capex_cad"`
+	EstimatedScheduleMonths    int                      `json:"estimated_schedule_months"`
+	ImpedanceIndex             float64                  `json:"impedance_index"` // Lower is easier
+	Sensitivity                EnvironmentalSensitivity `json:"sensitivity"`
+	LandTenure                 LandTenureDistribution   `json:"land_tenure"`
+	KeyWaypoints               []CorridorPoint          `json:"key_waypoints"`
+	AuditHash                  string                   `json:"audit_hash"`
 }
 
 // RoutingEngine evaluates linear rights-of-way.
@@ -118,17 +118,17 @@ func (r *RoutingEngine) EvaluateCorridor(origin, dest CorridorPoint, infraType I
 	}
 
 	eval := &RouteEvaluation{
-		CorridorID:               fmt.Sprintf("corridor-%s-%s", strings.ToLower(origin.Name), strings.ToLower(dest.Name)),
-		Type:                     infraType,
-		OriginName:               origin.Name,
-		DestinationName:          dest.Name,
-		TotalLengthKM:            math.Round(actualLengthKM*10) / 10,
-		BaseConstructionCapexCAD: baseCapex,
-		RightOfWayAcquisitionCAD: rowAcquisition,
+		CorridorID:                 fmt.Sprintf("corridor-%s-%s", strings.ToLower(origin.Name), strings.ToLower(dest.Name)),
+		Type:                       infraType,
+		OriginName:                 origin.Name,
+		DestinationName:            dest.Name,
+		TotalLengthKM:              math.Round(actualLengthKM*10) / 10,
+		BaseConstructionCapexCAD:   baseCapex,
+		RightOfWayAcquisitionCAD:   rowAcquisition,
 		EnvironmentalMitigationCAD: envMitigation,
-		TotalEstimatedCapexCAD:   totalCapex,
-		EstimatedScheduleMonths:  scheduleMonths,
-		ImpedanceIndex:           math.Round((actualLengthKM*1.15+permafrostRisk*100)*10) / 10,
+		TotalEstimatedCapexCAD:     totalCapex,
+		EstimatedScheduleMonths:    scheduleMonths,
+		ImpedanceIndex:             math.Round((actualLengthKM*1.15+permafrostRisk*100)*10) / 10,
 		Sensitivity: EnvironmentalSensitivity{
 			PermafrostThawHazardScore: permafrostRisk,
 			CaribouRangeIntersectKM:   math.Round(actualLengthKM * 0.35),

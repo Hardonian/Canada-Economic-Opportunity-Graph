@@ -29,8 +29,8 @@ type TradeDemandDetail struct {
 	Trade             TradeCategory `json:"trade"`
 	PeakDemandFTE     int           `json:"peak_demand_fte"`
 	RegionalSupplyFTE int           `json:"regional_supply_fte"`
-	UtilizationPct    float64       `json:"utilization_pct"` // > 90% triggers collision warning
-	CollisionStatus   string        `json:"collision_status"` // NORMAL, ELEVATED, CRITICAL_SHORTAGE
+	UtilizationPct    float64       `json:"utilization_pct"`     // > 90% triggers collision warning
+	CollisionStatus   string        `json:"collision_status"`    // NORMAL, ELEVATED, CRITICAL_SHORTAGE
 	WageInflationRisk string        `json:"wage_inflation_risk"` // LOW, MODERATE, SEVERE
 }
 

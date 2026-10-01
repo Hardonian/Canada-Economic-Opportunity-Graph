@@ -14,28 +14,28 @@ import (
 type MemoType string
 
 const (
-	MemoTypeCabinetMC      MemoType = "MEMORANDUM_TO_CABINET"      // Privy Council Office (PCO) standard
-	MemoTypeTreasuryBoard  MemoType = "TREASURY_BOARD_SUBMISSION"  // TB Sub standard
-	MemoTypeInvestmentComm MemoType = "INVESTMENT_COMMITTEE_MEMO"  // Pension / Infrastructure PE standard
+	MemoTypeCabinetMC      MemoType = "MEMORANDUM_TO_CABINET"     // Privy Council Office (PCO) standard
+	MemoTypeTreasuryBoard  MemoType = "TREASURY_BOARD_SUBMISSION" // TB Sub standard
+	MemoTypeInvestmentComm MemoType = "INVESTMENT_COMMITTEE_MEMO" // Pension / Infrastructure PE standard
 )
 
 // DecisionMemo contains the formal synthesized briefing document.
 type DecisionMemo struct {
-	MemoID             string    `json:"memo_id"`
-	Type               MemoType  `json:"type"`
-	ProjectID          string    `json:"project_id"`
-	ProjectName        string    `json:"project_name"`
-	SecurityCaveat     string    `json:"security_caveat"` // "CONFIDENTIAL // FOR MINISTERIAL CONSIDERATION ONLY"
-	PreparedFor        string    `json:"prepared_for"`
-	DateFormatted      string    `json:"date_formatted"`
-	ExecutiveSummary   string    `json:"executive_summary"`
-	StrategicRationale string    `json:"strategic_rationale"`
-	FinancialExposure  string    `json:"financial_exposure"`
-	IndigenousTreaty   string    `json:"indigenous_treaty"`
-	GeopoliticalRisk   string    `json:"geopolitical_risk"`
-	RecommendedAction  string    `json:"recommended_action"`
-	MarkdownContent    string    `json:"markdown_content"`
-	AuditHash          string    `json:"audit_hash"`
+	MemoID             string   `json:"memo_id"`
+	Type               MemoType `json:"type"`
+	ProjectID          string   `json:"project_id"`
+	ProjectName        string   `json:"project_name"`
+	SecurityCaveat     string   `json:"security_caveat"` // "CONFIDENTIAL // FOR MINISTERIAL CONSIDERATION ONLY"
+	PreparedFor        string   `json:"prepared_for"`
+	DateFormatted      string   `json:"date_formatted"`
+	ExecutiveSummary   string   `json:"executive_summary"`
+	StrategicRationale string   `json:"strategic_rationale"`
+	FinancialExposure  string   `json:"financial_exposure"`
+	IndigenousTreaty   string   `json:"indigenous_treaty"`
+	GeopoliticalRisk   string   `json:"geopolitical_risk"`
+	RecommendedAction  string   `json:"recommended_action"`
+	MarkdownContent    string   `json:"markdown_content"`
+	AuditHash          string   `json:"audit_hash"`
 }
 
 // MemoGenerator compiles structured graph facts into official memorandum documents.

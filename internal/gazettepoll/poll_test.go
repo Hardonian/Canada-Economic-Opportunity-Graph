@@ -195,7 +195,7 @@ func TestPollResult_Fields(t *testing.T) {
 		Changed:          true,
 		PreviousHash:     "abc",
 		CurrentHash:      "def",
-		DocumentsSeen:     100,
+		DocumentsSeen:    100,
 		DocumentsChanged: 5,
 	}
 	if r.Province != "ON" {

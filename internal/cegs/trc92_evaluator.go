@@ -7,9 +7,9 @@ import (
 // TRC92Scorecard evaluates corporate reconciliation compliance under TRC Call to Action #92.
 type TRC92Scorecard struct {
 	ProjectID                  string  `json:"project_id"`
-	Pillar1ConsentAndEquity    float64 `json:"pillar1_consent_and_equity"`    // 0.0 - 100.0 (FPIC, Equity Co-ownership)
-	Pillar2JobsAndProcurement  float64 `json:"pillar2_jobs_and_procurement"`  // 0.0 - 100.0 (Local hiring, contracting)
-	Pillar3EducationAndUNDRIP  float64 `json:"pillar3_education_and_undrip"`  // 0.0 - 100.0 (Staff training on intercultural competency)
+	Pillar1ConsentAndEquity    float64 `json:"pillar1_consent_and_equity"`   // 0.0 - 100.0 (FPIC, Equity Co-ownership)
+	Pillar2JobsAndProcurement  float64 `json:"pillar2_jobs_and_procurement"` // 0.0 - 100.0 (Local hiring, contracting)
+	Pillar3EducationAndUNDRIP  float64 `json:"pillar3_education_and_undrip"` // 0.0 - 100.0 (Staff training on intercultural competency)
 	OverallReconciliationScore float64 `json:"overall_reconciliation_score"` // 0.0 - 100.0
 	TRCRating                  string  `json:"trc_rating"`                   // "EXEMPLARY_PARTNERSHIP", "COMMITTED", "NEEDS_IMPROVEMENT"
 	Summary                    string  `json:"summary"`
@@ -39,7 +39,7 @@ func (e *TRC92Evaluator) Evaluate(
 	// Pillar 3: Education & Intercultural Competency (Weight: 25%)
 	p3 := math.Min(100.0, staffTrainedOnUNDRIPPct)
 
-	overall := math.Round((p1*0.40 + p2*0.35 + p3*0.25)*10) / 10
+	overall := math.Round((p1*0.40+p2*0.35+p3*0.25)*10) / 10
 
 	rating := "NEEDS_IMPROVEMENT"
 	summary := "First Nations co-investment and workforce participation below recommended reconciliation thresholds."

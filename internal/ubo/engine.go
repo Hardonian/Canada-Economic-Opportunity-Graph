@@ -26,8 +26,8 @@ type BeneficialOwner struct {
 	Name             string  `json:"name"`
 	Jurisdiction     string  `json:"jurisdiction"`
 	OwnershipPercent float64 `json:"ownership_percent"`
-	IsSOE            bool    `json:"is_soe"` // State-Owned Enterprise
-	IsFTA            bool    `json:"is_fta"` // Canada Free Trade Agreement Partner (USMCA, CPTPP, CETA)
+	IsSOE            bool    `json:"is_soe"`            // State-Owned Enterprise
+	IsFTA            bool    `json:"is_fta"`            // Canada Free Trade Agreement Partner (USMCA, CPTPP, CETA)
 	ControlMechanism string  `json:"control_mechanism"` // Equity, DebtCovenant, OfftakeOption, BoardSeat
 }
 
@@ -37,11 +37,11 @@ type SovereignScreeningResult struct {
 	ProponentID           string            `json:"proponent_id"`
 	ProponentName         string            `json:"proponent_name"`
 	UltimateOwners        []BeneficialOwner `json:"ultimate_owners"`
-	DomesticControlShare  float64           `json:"domestic_control_share"`  // 0.0 - 1.0 (Canada)
-	FTAPartnerShare       float64           `json:"fta_partner_share"`       // 0.0 - 1.0 (USMCA, CETA, etc.)
-	NonFTAShare           float64           `json:"non_fta_share"`           // 0.0 - 1.0
-	SOEExposurePercent    float64           `json:"soe_exposure_percent"`    // State-Owned Enterprise %
-	ICARisk               ICARiskLevel      `json:"ica_risk"`                // CLEAR, WATCHLIST, MANDATORY_REVIEW, PROHIBITED
+	DomesticControlShare  float64           `json:"domestic_control_share"` // 0.0 - 1.0 (Canada)
+	FTAPartnerShare       float64           `json:"fta_partner_share"`      // 0.0 - 1.0 (USMCA, CETA, etc.)
+	NonFTAShare           float64           `json:"non_fta_share"`          // 0.0 - 1.0
+	SOEExposurePercent    float64           `json:"soe_exposure_percent"`   // State-Owned Enterprise %
+	ICARisk               ICARiskLevel      `json:"ica_risk"`               // CLEAR, WATCHLIST, MANDATORY_REVIEW, PROHIBITED
 	CriticalMineralFlag   bool              `json:"critical_mineral_flag"`
 	DualUseSovereignty    bool              `json:"dual_use_sovereignty"`
 	NationalSecurityNotes []string          `json:"national_security_notes"`

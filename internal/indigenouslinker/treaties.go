@@ -8,24 +8,24 @@ import (
 type TreatyClassification string
 
 const (
-	TreatyNumbered           TreatyClassification = "NUMBERED_TREATY"
-	TreatyHistoricPreConfed  TreatyClassification = "HISTORIC_PRE_CONFEDERATION"
-	TreatyModernLandClaim    TreatyClassification = "MODERN_COMPREHENSIVE_CLAIM"
-	TreatyUnceded            TreatyClassification = "UNCEDED_TERRITORY"
+	TreatyNumbered          TreatyClassification = "NUMBERED_TREATY"
+	TreatyHistoricPreConfed TreatyClassification = "HISTORIC_PRE_CONFEDERATION"
+	TreatyModernLandClaim   TreatyClassification = "MODERN_COMPREHENSIVE_CLAIM"
+	TreatyUnceded           TreatyClassification = "UNCEDED_TERRITORY"
 )
 
 // TreatyTerritory defines sovereign boundary metadata for Indigenous agreements.
 type TreatyTerritory struct {
-	ID             string                `json:"id"`
-	Name           string                `json:"name"`
-	YearSigned     int                   `json:"year_signed"`
-	Classification TreatyClassification  `json:"classification"`
-	Provinces      []string              `json:"provinces"`
-	MinLat         float64               `json:"min_lat"`
-	MaxLat         float64               `json:"max_lat"`
-	MinLng         float64               `json:"min_lng"`
-	MaxLng         float64               `json:"max_lng"`
-	SignatoryNations []string            `json:"signatory_nations"`
+	ID               string               `json:"id"`
+	Name             string               `json:"name"`
+	YearSigned       int                  `json:"year_signed"`
+	Classification   TreatyClassification `json:"classification"`
+	Provinces        []string             `json:"provinces"`
+	MinLat           float64              `json:"min_lat"`
+	MaxLat           float64              `json:"max_lat"`
+	MinLng           float64              `json:"min_lng"`
+	MaxLng           float64              `json:"max_lng"`
+	SignatoryNations []string             `json:"signatory_nations"`
 }
 
 // CanadaTreatiesRegistry contains authoritative spatial boundary references across Canada.

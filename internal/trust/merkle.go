@@ -26,32 +26,32 @@ type MerkleLeaf struct {
 
 // MerkleNode represents a node in the Merkle tree.
 type MerkleNode struct {
-	Hash        string `json:"hash"`
-	LeftHash    string `json:"left_hash,omitempty"`
-	RightHash   string `json:"right_hash,omitempty"`
-	LeafIndex   *int   `json:"leaf_index,omitempty"`
-	IsLeaf      bool   `json:"is_leaf"`
-	ParentHash  string `json:"parent_hash,omitempty"`
+	Hash       string `json:"hash"`
+	LeftHash   string `json:"left_hash,omitempty"`
+	RightHash  string `json:"right_hash,omitempty"`
+	LeafIndex  *int   `json:"leaf_index,omitempty"`
+	IsLeaf     bool   `json:"is_leaf"`
+	ParentHash string `json:"parent_hash,omitempty"`
 }
 
 // MerkleTree represents a complete Merkle tree of evidence hashes.
 type MerkleTree struct {
-	RootHash    string        `json:"root_hash"`
-	LeafCount   int           `json:"leaf_count"`
-	LevelCount  int           `json:"level_count"`
-	GeneratedAt time.Time     `json:"generated_at"`
-	Leaves      []MerkleLeaf  `json:"leaves"`
+	RootHash    string         `json:"root_hash"`
+	LeafCount   int            `json:"leaf_count"`
+	LevelCount  int            `json:"level_count"`
+	GeneratedAt time.Time      `json:"generated_at"`
+	Leaves      []MerkleLeaf   `json:"leaves"`
 	Levels      [][]MerkleNode `json:"levels"`
 }
 
 // MerkleProof represents a cryptographic proof for a specific evidence item.
 type MerkleProof struct {
-	MethodologyVersion string      `json:"methodology_version"`
-	RootHash           string      `json:"root_hash"`
-	Leaf               MerkleLeaf  `json:"leaf"`
+	MethodologyVersion string       `json:"methodology_version"`
+	RootHash           string       `json:"root_hash"`
+	Leaf               MerkleLeaf   `json:"leaf"`
 	Path               []MerkleNode `json:"path"`
-	Verified           bool        `json:"verified"`
-	VerifiedAt         time.Time   `json:"verified_at"`
+	Verified           bool         `json:"verified"`
+	VerifiedAt         time.Time    `json:"verified_at"`
 }
 
 // NewMerkleTree constructs a Merkle tree from evidence hashes.
@@ -59,17 +59,17 @@ func NewMerkleTree(leaves []MerkleLeaf) *MerkleTree {
 	if len(leaves) == 0 {
 		leaves = []MerkleLeaf{}
 	}
-	
+
 	// Sort by evidence ID for deterministic ordering
 	sortedLeaves := make([]MerkleLeaf, len(leaves))
 	copy(sortedLeaves, leaves)
 	sort.Slice(sortedLeaves, func(i, j int) bool {
 		return sortedLeaves[i].EvidenceID < sortedLeaves[j].EvidenceID
 	})
-	
+
 	levels := make([][]MerkleNode, 0)
 	currentLevel := make([]MerkleNode, 0, len(sortedLeaves))
-	
+
 	for i, leaf := range sortedLeaves {
 		hashInput := fmt.Sprintf("%s:%s:%d", leaf.EvidenceID, leaf.ContentHash, leaf.Index)
 		hash := hashString(hashInput)
@@ -80,9 +80,9 @@ func NewMerkleTree(leaves []MerkleLeaf) *MerkleTree {
 			IsLeaf:    true,
 		})
 	}
-	
+
 	levels = append(levels, currentLevel)
-	
+
 	for len(currentLevel) > 1 {
 		nextLevel := make([]MerkleNode, 0, (len(currentLevel)+1)/2)
 		for i := 0; i < len(currentLevel); i += 2 {
@@ -103,12 +103,12 @@ func NewMerkleTree(leaves []MerkleLeaf) *MerkleTree {
 		levels = append(levels, nextLevel)
 		currentLevel = nextLevel
 	}
-	
+
 	rootHash := ""
 	if len(levels) > 0 && len(levels[len(levels)-1]) > 0 {
 		rootHash = levels[len(levels)-1][0].Hash
 	}
-	
+
 	return &MerkleTree{
 		RootHash:    rootHash,
 		LeafCount:   len(sortedLeaves),
@@ -124,7 +124,7 @@ func (m *MerkleTree) GenerateProof(evidenceID string) (*MerkleProof, error) {
 	if m == nil || len(m.Leaves) == 0 {
 		return nil, fmt.Errorf("merkle tree is empty")
 	}
-	
+
 	leafIndex := -1
 	var targetLeaf MerkleLeaf
 	for i, leaf := range m.Leaves {
@@ -134,11 +134,11 @@ func (m *MerkleTree) GenerateProof(evidenceID string) (*MerkleProof, error) {
 			break
 		}
 	}
-	
+
 	if leafIndex == -1 {
 		return nil, fmt.Errorf("evidence %q not found in merkle tree", evidenceID)
 	}
-	
+
 	path := make([]MerkleNode, 0)
 	currentIndex := leafIndex
 	for level := 0; level < len(m.Levels)-1; level++ {
@@ -146,7 +146,7 @@ func (m *MerkleTree) GenerateProof(evidenceID string) (*MerkleProof, error) {
 		if currentIndex >= len(currentLevel) {
 			return nil, fmt.Errorf("invalid merkle tree structure")
 		}
-		
+
 		siblingIndex := currentIndex
 		if currentIndex%2 == 0 {
 			if currentIndex+1 < len(currentLevel) {
@@ -155,17 +155,17 @@ func (m *MerkleTree) GenerateProof(evidenceID string) (*MerkleProof, error) {
 		} else {
 			siblingIndex = currentIndex - 1
 		}
-		
+
 		if siblingIndex >= 0 && siblingIndex < len(currentLevel) {
 			// Only store the sibling's hash in the proof path
 			path = append(path, MerkleNode{
-				Hash:    currentLevel[siblingIndex].Hash,
-				IsLeaf:  false,
+				Hash:   currentLevel[siblingIndex].Hash,
+				IsLeaf: false,
 			})
 		}
 		currentIndex = currentIndex / 2
 	}
-	
+
 	return &MerkleProof{
 		MethodologyVersion: MerkleMethodologyVersion,
 		RootHash:           m.RootHash,
@@ -181,9 +181,9 @@ func VerifyProof(proof *MerkleProof) bool {
 	if proof == nil || proof.RootHash == "" || proof.Leaf.ContentHash == "" {
 		return false
 	}
-	
+
 	currentHash := hashString(fmt.Sprintf("%s:%s:%d", proof.Leaf.EvidenceID, proof.Leaf.ContentHash, proof.Leaf.Index))
-	
+
 	// The path contains siblings in order from leaf to root
 	// We need to know if current node was left or right child at each level
 	index := proof.Leaf.Index
@@ -197,7 +197,7 @@ func VerifyProof(proof *MerkleProof) bool {
 		}
 		index = index / 2
 	}
-	
+
 	return currentHash == proof.RootHash
 }
 
@@ -221,12 +221,12 @@ func PublishMerkleRoot(tree *MerkleTree) string {
 	if tree == nil {
 		return ""
 	}
-	
-	payload := fmt.Sprintf("%s:%d:%s", 
-		tree.RootHash, 
-		tree.LeafCount, 
+
+	payload := fmt.Sprintf("%s:%d:%s",
+		tree.RootHash,
+		tree.LeafCount,
 		tree.GeneratedAt.Format(time.RFC3339Nano))
-	
+
 	return hashString(payload)
 }
 

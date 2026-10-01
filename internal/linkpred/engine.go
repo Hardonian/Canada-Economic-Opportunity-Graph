@@ -25,20 +25,20 @@ const (
 
 // PredictedLink represents a machine-learned or graph-topology-inferred relationship.
 type PredictedLink struct {
-	EntityID         string        `json:"entity_id"`
-	EntityName       string        `json:"entity_name"`
-	EntityType       string        `json:"entity_type"`
-	ProjectID        string        `json:"project_id"`
-	ProjectName      string        `json:"project_name"`
-	PredictedRole    PredictedRole `json:"predicted_role"`
-	ConfidenceScore  float64       `json:"confidence_score"` // 0.0 - 1.0
-	AdamicAdarScore  float64       `json:"adamic_adar_score"`
-	CommonNeighbors  []string      `json:"common_neighbors"`
-	SectorAffinity   float64       `json:"sector_affinity"`
-	GeographicMatch  bool          `json:"geographic_match"`
-	Rationale        string        `json:"rationale"`
-	AuditHash        string        `json:"audit_hash"`
-	PredictedAt      time.Time     `json:"predicted_at"`
+	EntityID        string        `json:"entity_id"`
+	EntityName      string        `json:"entity_name"`
+	EntityType      string        `json:"entity_type"`
+	ProjectID       string        `json:"project_id"`
+	ProjectName     string        `json:"project_name"`
+	PredictedRole   PredictedRole `json:"predicted_role"`
+	ConfidenceScore float64       `json:"confidence_score"` // 0.0 - 1.0
+	AdamicAdarScore float64       `json:"adamic_adar_score"`
+	CommonNeighbors []string      `json:"common_neighbors"`
+	SectorAffinity  float64       `json:"sector_affinity"`
+	GeographicMatch bool          `json:"geographic_match"`
+	Rationale       string        `json:"rationale"`
+	AuditHash       string        `json:"audit_hash"`
+	PredictedAt     time.Time     `json:"predicted_at"`
 }
 
 // LinkPredictor runs topological graph algorithms to forecast unannounced relationships.
@@ -168,7 +168,7 @@ func (lp *LinkPredictor) PredictProjectPartners(
 		}
 
 		// Confidence calculation
-		confidence := (math.Min(aaScore, 3.0) / 3.0) * 0.30 + (sectorAffinity * 0.45)
+		confidence := (math.Min(aaScore, 3.0)/3.0)*0.30 + (sectorAffinity * 0.45)
 		if geoMatch {
 			confidence += 0.25
 		}

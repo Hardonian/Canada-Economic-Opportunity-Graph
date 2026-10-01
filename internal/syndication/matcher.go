@@ -22,17 +22,17 @@ const (
 
 // InstitutionalInvestor represents an institutional capital allocator with strict mandates.
 type InstitutionalInvestor struct {
-	ID               string        `json:"id"`
-	Name             string        `json:"name"`
-	Class            InvestorClass `json:"class"`
-	Jurisdiction     string        `json:"jurisdiction"` // CA, SG, NO, AE, etc.
-	AUMBillionsCAD   float64       `json:"aum_billions_cad"`
-	MinTicketCAD     int64         `json:"min_ticket_cad"`
-	MaxTicketCAD     int64         `json:"max_ticket_cad"`
-	TargetReturnHurdle float64     `json:"target_return_hurdle"` // e.g. 7.5%
-	TargetSectors    []domain.Sector `json:"target_sectors"`
-	PrefersGreenfield bool         `json:"prefers_greenfield"`
-	RequiresDomestic bool          `json:"requires_domestic"`
+	ID                 string          `json:"id"`
+	Name               string          `json:"name"`
+	Class              InvestorClass   `json:"class"`
+	Jurisdiction       string          `json:"jurisdiction"` // CA, SG, NO, AE, etc.
+	AUMBillionsCAD     float64         `json:"aum_billions_cad"`
+	MinTicketCAD       int64           `json:"min_ticket_cad"`
+	MaxTicketCAD       int64           `json:"max_ticket_cad"`
+	TargetReturnHurdle float64         `json:"target_return_hurdle"` // e.g. 7.5%
+	TargetSectors      []domain.Sector `json:"target_sectors"`
+	PrefersGreenfield  bool            `json:"prefers_greenfield"`
+	RequiresDomestic   bool            `json:"requires_domestic"`
 }
 
 // DefaultInstitutionalInvestors returns the canonical directory of Canadian and global allocators.
@@ -121,25 +121,25 @@ func DefaultInstitutionalInvestors() []InstitutionalInvestor {
 
 // InvestorMatch evaluates the fit between an investor and a capital opportunity.
 type InvestorMatch struct {
-	Investor      InstitutionalInvestor `json:"investor"`
-	MatchScore    float64               `json:"match_score"` // 0 - 100
-	RecommendedTranche string           `json:"recommended_tranche"` // "Lead Equity", "Concessionary Subordinated Debt", "Co-Investment Equity"
-	ProposedTicketCAD  int64            `json:"proposed_ticket_cad"`
-	Rationale          string           `json:"rationale"`
+	Investor           InstitutionalInvestor `json:"investor"`
+	MatchScore         float64               `json:"match_score"`         // 0 - 100
+	RecommendedTranche string                `json:"recommended_tranche"` // "Lead Equity", "Concessionary Subordinated Debt", "Co-Investment Equity"
+	ProposedTicketCAD  int64                 `json:"proposed_ticket_cad"`
+	Rationale          string                `json:"rationale"`
 }
 
 // SyndicationConsortium models an optimal multi-party capital stack solution for a project.
 type SyndicationConsortium struct {
-	ProjectID          string          `json:"project_id"`
-	ProjectName        string          `json:"project_name"`
-	TotalCapexCAD      int64           `json:"total_capex_cad"`
-	Matches            []InvestorMatch `json:"matches"`
-	EquityTrancheCAD   int64           `json:"equity_tranche_cad"`
-	DebtTrancheCAD     int64           `json:"debt_tranche_cad"`
-	CrownConcessionCAD int64           `json:"crown_concession_cad"`
-	IndigenousEquityCAD int64          `json:"indigenous_equity_cad"`
-	PrivateCrowdingInRatio float64     `json:"private_crowding_in_ratio"`
-	AuditHash          string          `json:"audit_hash"`
+	ProjectID              string          `json:"project_id"`
+	ProjectName            string          `json:"project_name"`
+	TotalCapexCAD          int64           `json:"total_capex_cad"`
+	Matches                []InvestorMatch `json:"matches"`
+	EquityTrancheCAD       int64           `json:"equity_tranche_cad"`
+	DebtTrancheCAD         int64           `json:"debt_tranche_cad"`
+	CrownConcessionCAD     int64           `json:"crown_concession_cad"`
+	IndigenousEquityCAD    int64           `json:"indigenous_equity_cad"`
+	PrivateCrowdingInRatio float64         `json:"private_crowding_in_ratio"`
+	AuditHash              string          `json:"audit_hash"`
 }
 
 // Matcher runs institutional capital matching algorithms.

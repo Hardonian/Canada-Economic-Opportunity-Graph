@@ -110,9 +110,9 @@ type MRIOImpact struct {
 // SensitivityShockRequest specifies macroeconomic and commodity shocks.
 type SensitivityShockRequest struct {
 	InterestRateDeltaBps float64 `json:"interest_rate_delta_bps"` // e.g. +150 bps
-	FXDepreciationCAD    float64 `json:"fx_depreciation_cad"`    // e.g. -0.05 (CAD weakens vs USD)
-	CommodityPriceDelta  float64 `json:"commodity_price_delta"`  // e.g. -0.20 (20% drop in commodity price)
-	ImportedCapexShare   float64 `json:"imported_capex_share"`   // Share of CAPEX reliant on foreign equipment
+	FXDepreciationCAD    float64 `json:"fx_depreciation_cad"`     // e.g. -0.05 (CAD weakens vs USD)
+	CommodityPriceDelta  float64 `json:"commodity_price_delta"`   // e.g. -0.20 (20% drop in commodity price)
+	ImportedCapexShare   float64 `json:"imported_capex_share"`    // Share of CAPEX reliant on foreign equipment
 }
 
 // SensitivityShockResult details the stress-tested impact on CAPEX and debt service.

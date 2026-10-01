@@ -17,11 +17,11 @@ func TestEarthObsGroundTruthCorroboration(t *testing.T) {
 		}
 		obs := []GroundTruthObservation{
 			{
-				Constellation:          ConstellationRCM,
-				PassDate:               time.Now().Add(-48 * time.Hour),
+				Constellation:           ConstellationRCM,
+				PassDate:                time.Now().Add(-48 * time.Hour),
 				StructuralRadarCrossSec: -8.5, // High backscatter
-				EarthworksDetected:     true,
-				StructuralPourDetected: true,
+				EarthworksDetected:      true,
+				StructuralPourDetected:  true,
 			},
 		}
 		dossier := evaluator.CorroborateProject(project, obs)

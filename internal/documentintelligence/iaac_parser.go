@@ -15,9 +15,9 @@ import (
 type DutyToConsultLevel string
 
 const (
-	ConsultNoticeOnly            DutyToConsultLevel = "NOTICE_ONLY"
-	ConsultSeriousConsultation   DutyToConsultLevel = "SERIOUS_CONSULTATION"
-	ConsultDeepAccommodation     DutyToConsultLevel = "DEEP_ACCOMMODATION_AND_CONSENT"
+	ConsultNoticeOnly          DutyToConsultLevel = "NOTICE_ONLY"
+	ConsultSeriousConsultation DutyToConsultLevel = "SERIOUS_CONSULTATION"
+	ConsultDeepAccommodation   DutyToConsultLevel = "DEEP_ACCOMMODATION_AND_CONSENT"
 )
 
 // LitigationRiskRating evaluates vulnerability to Federal Court judicial review injunctions.
@@ -55,7 +55,7 @@ var (
 	indigCondRegex    = regexp.MustCompile(`(?i)(?:indigenous|first nations?|consultation)(?:\s+conditions)?[:\s]+([0-9]+)`)
 	aquaticCondRegex  = regexp.MustCompile(`(?i)(?:aquatic|fish|water quality)(?:\s+conditions)?[:\s]+([0-9]+)`)
 	wildlifeCondRegex = regexp.MustCompile(`(?i)(?:wildlife|caribou|migratory bird)(?:\s+conditions)?[:\s]+([0-9]+)`)
-	bondRegex        = regexp.MustCompile(`(?i)(?:bond|financial assurance|security deposit)[:\s]+(?:C\$|CAD|\$)?\s*([0-9]+(?:\.[0-9]+)?)\s*([BM])`)
+	bondRegex         = regexp.MustCompile(`(?i)(?:bond|financial assurance|security deposit)[:\s]+(?:C\$|CAD|\$)?\s*([0-9]+(?:\.[0-9]+)?)\s*([BM])`)
 )
 
 // ExtractIAACDecisionStatement parses an Impact Assessment Agency of Canada decision text.

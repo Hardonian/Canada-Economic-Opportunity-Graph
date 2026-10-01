@@ -70,8 +70,8 @@ func NewCMHCHousingAdapter(fixturePath string) *CMHCHousingAdapter {
 	}
 }
 
-func (a *CMHCHousingAdapter) Name() string { return adapterName }
-func (a *CMHCHousingAdapter) Tier() domain.SourceTier { return domain.SourceTier1 }
+func (a *CMHCHousingAdapter) Name() string                   { return adapterName }
+func (a *CMHCHousingAdapter) Tier() domain.SourceTier        { return domain.SourceTier1 }
 func (a *CMHCHousingAdapter) Health() *adapters.SourceHealth { return &a.health }
 
 func (a *CMHCHousingAdapter) Fetch(ctx context.Context) ([]byte, error) {
@@ -127,14 +127,14 @@ func (a *CMHCHousingAdapter) fetchLive(ctx context.Context) ([]byte, error) {
 }
 
 type rawIndicator struct {
-	IndicatorCode     string  `json:"indicator_code"`
-	IndicatorName     string  `json:"indicator_name"`
-	IndicatorNameFr   string  `json:"indicator_name_fr"`
-	Geography         string  `json:"geography"`
-	Value             float64 `json:"value"`
-	Unit              string  `json:"unit"`
-	ReferencePeriod   string  `json:"reference_period"`
-	SourceURL         string  `json:"source_url"`
+	IndicatorCode   string  `json:"indicator_code"`
+	IndicatorName   string  `json:"indicator_name"`
+	IndicatorNameFr string  `json:"indicator_name_fr"`
+	Geography       string  `json:"geography"`
+	Value           float64 `json:"value"`
+	Unit            string  `json:"unit"`
+	ReferencePeriod string  `json:"reference_period"`
+	SourceURL       string  `json:"source_url"`
 }
 
 type rawCMHCFile struct {

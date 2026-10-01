@@ -79,11 +79,11 @@ func (skp *SoftwareKeyProvider) Zeroize() {
 
 // HardwareSecurityModule simulates a PKCS#11 hardware token / AWS CloudHSM / YubiHSM2 device.
 type HardwareSecurityModule struct {
-	SlotID     uint
-	TokenLabel string
-	Pin        string
-	keys       map[string][]byte // Hardware-enclosed secure storage
-	mu         sync.RWMutex
+	SlotID      uint
+	TokenLabel  string
+	Pin         string
+	keys        map[string][]byte // Hardware-enclosed secure storage
+	mu          sync.RWMutex
 	sessionOpen bool
 }
 
@@ -158,9 +158,9 @@ func (hsm *HardwareSecurityModule) Zeroize() {
 // (e.g., Intel SGX DCAP / AWS Nitro Enclaves / AMD SEV-SNP).
 type EnclaveQuote struct {
 	EnclaveID      string    `json:"enclave_id"`
-	PCR0           string    `json:"pcr0"`           // Enclave software measurement
-	PCR1           string    `json:"pcr1"`           // Hypervisor / boot measurement
-	PCR2           string    `json:"pcr2"`           // Application configuration digest
+	PCR0           string    `json:"pcr0"` // Enclave software measurement
+	PCR1           string    `json:"pcr1"` // Hypervisor / boot measurement
+	PCR2           string    `json:"pcr2"` // Application configuration digest
 	UserDataDigest string    `json:"user_data_digest"`
 	IssuedAt       time.Time `json:"issued_at"`
 	Signature      string    `json:"signature"`

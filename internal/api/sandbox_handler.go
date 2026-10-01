@@ -31,15 +31,15 @@ func (s *Server) handleListAdapters(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type adapterOut struct {
-		Name         string            `json:"name"`
-		Version      string            `json:"version"`
-		SourceURL    string            `json:"source_url"`
-		Tier         string            `json:"tier"`
-		Contact      string            `json:"contact"`
-		Description  string            `json:"description"`
-		Capabilities []string          `json:"capabilities"`
-		RegisteredAt time.Time         `json:"registered_at"`
-		Approved     bool              `json:"approved"`
+		Name         string    `json:"name"`
+		Version      string    `json:"version"`
+		SourceURL    string    `json:"source_url"`
+		Tier         string    `json:"tier"`
+		Contact      string    `json:"contact"`
+		Description  string    `json:"description"`
+		Capabilities []string  `json:"capabilities"`
+		RegisteredAt time.Time `json:"registered_at"`
+		Approved     bool      `json:"approved"`
 	}
 	out := make([]adapterOut, 0, len(entries))
 	for _, e := range entries {
@@ -90,7 +90,7 @@ func (s *Server) handleApproveAdapter(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"status":  "approved",
 		"name":    name,
-		"message": "Adapter "+name+" has been approved.",
+		"message": "Adapter " + name + " has been approved.",
 	})
 }
 
@@ -121,7 +121,7 @@ func (s *Server) handleDeleteAdapter(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"status":  "deleted",
 		"name":    name,
-		"message": "Adapter "+name+" has been removed.",
+		"message": "Adapter " + name + " has been removed.",
 	})
 }
 

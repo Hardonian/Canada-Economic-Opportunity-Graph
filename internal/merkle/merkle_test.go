@@ -32,14 +32,14 @@ func TestBuildRoot_WithEvidence(t *testing.T) {
 	store := database.NewMemoryStore()
 	now := time.Now().UTC()
 	proj := &domain.Project{
-		ID:        "p1",
-		Name:      "Test Project",
-		Sector:    domain.SectorNuclearEnergy,
-		Province:  "ON",
+		ID:           "p1",
+		Name:         "Test Project",
+		Sector:       domain.SectorNuclearEnergy,
+		Province:     "ON",
 		CurrentStage: domain.StageFeasibility,
-		CapexCAD:  1_000_000_000,
-		EvidenceIDs: []string{"ev-1", "ev-2"},
-		UpdatedAt: now,
+		CapexCAD:     1_000_000_000,
+		EvidenceIDs:  []string{"ev-1", "ev-2"},
+		UpdatedAt:    now,
 	}
 	if err := store.SaveProject(context.Background(), proj); err != nil {
 		t.Fatal(err)

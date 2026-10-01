@@ -8,14 +8,14 @@ import (
 
 // DiscrepancyReport exposes discrepancies between corporate filings and satellite reality.
 type DiscrepancyReport struct {
-	ProjectID           string    `json:"project_id"`
-	ClaimedProgressPct  float64   `json:"claimed_progress_pct"`
-	ObservedProgressPct float64   `json:"observed_progress_pct"`
-	VariancePct         float64   `json:"variance_pct"`
-	IsDiscrepancyFlagged bool     `json:"is_discrepancy_flagged"`
-	RiskVerdict         string    `json:"risk_verdict"` // "VERIFIED_CONCURRENT", "SCHEDULE_RISK", "MATERIAL_DECEPTION_ALERT"
-	Explanation         string    `json:"explanation"`
-	EvaluatedAt         time.Time `json:"evaluated_at"`
+	ProjectID            string    `json:"project_id"`
+	ClaimedProgressPct   float64   `json:"claimed_progress_pct"`
+	ObservedProgressPct  float64   `json:"observed_progress_pct"`
+	VariancePct          float64   `json:"variance_pct"`
+	IsDiscrepancyFlagged bool      `json:"is_discrepancy_flagged"`
+	RiskVerdict          string    `json:"risk_verdict"` // "VERIFIED_CONCURRENT", "SCHEDULE_RISK", "MATERIAL_DECEPTION_ALERT"
+	Explanation          string    `json:"explanation"`
+	EvaluatedAt          time.Time `json:"evaluated_at"`
 }
 
 // GroundTruthDiscrepancyEngine cross-audits regulatory filings with orbital telemetry.

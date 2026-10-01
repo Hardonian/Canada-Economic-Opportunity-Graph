@@ -11,12 +11,12 @@ import (
 type OfftakeCommodity string
 
 const (
-	OfftakeCleanPowerPPA     OfftakeCommodity = "CLEAN_POWER_PPA"
-	OfftakeBatteryNickel     OfftakeCommodity = "BATTERY_GRADE_NICKEL_SULPHATE"
-	OfftakeLithiumHydroxide  OfftakeCommodity = "LITHIUM_HYDROXIDE_MONOHYDRATE"
-	OfftakeGreenHydrogen     OfftakeCommodity = "GREEN_HYDROGEN_AMMONIA"
-	OfftakeLNGLiquefaction   OfftakeCommodity = "LNG_EXPORT_VOLUME"
-	OfftakeAirportLeasing    OfftakeCommodity = "AEROSPACE_LOGISTICS_CONCESSION"
+	OfftakeCleanPowerPPA    OfftakeCommodity = "CLEAN_POWER_PPA"
+	OfftakeBatteryNickel    OfftakeCommodity = "BATTERY_GRADE_NICKEL_SULPHATE"
+	OfftakeLithiumHydroxide OfftakeCommodity = "LITHIUM_HYDROXIDE_MONOHYDRATE"
+	OfftakeGreenHydrogen    OfftakeCommodity = "GREEN_HYDROGEN_AMMONIA"
+	OfftakeLNGLiquefaction  OfftakeCommodity = "LNG_EXPORT_VOLUME"
+	OfftakeAirportLeasing   OfftakeCommodity = "AEROSPACE_LOGISTICS_CONCESSION"
 )
 
 // PricingStructure categorizes contractual pricing mechanisms.

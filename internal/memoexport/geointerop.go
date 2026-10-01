@@ -30,13 +30,13 @@ type GeoJSONGeometry struct {
 
 // STACItem models a SpatioTemporal Asset Catalog metadata record for satellite passes.
 type STACItem struct {
-	Type       string                 `json:"type"` // "Feature"
-	STACVersion string                `json:"stac_version"`
-	ID         string                 `json:"id"`
-	Bbox       []float64              `json:"bbox"`
-	Geometry   GeoJSONGeometry        `json:"geometry"`
-	Properties map[string]interface{} `json:"properties"`
-	Assets     map[string]interface{} `json:"assets"`
+	Type        string                 `json:"type"` // "Feature"
+	STACVersion string                 `json:"stac_version"`
+	ID          string                 `json:"id"`
+	Bbox        []float64              `json:"bbox"`
+	Geometry    GeoJSONGeometry        `json:"geometry"`
+	Properties  map[string]interface{} `json:"properties"`
+	Assets      map[string]interface{} `json:"assets"`
 }
 
 // ExportGeoJSON converts a list of projects into an OGC GeoJSON collection.

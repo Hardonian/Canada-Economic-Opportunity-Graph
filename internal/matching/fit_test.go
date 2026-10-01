@@ -11,7 +11,7 @@ func TestCalculateArchetypeFit_InfrastructureFundScoring(t *testing.T) {
 	now := time.Now()
 	t.Run("infra sector gets high sector fit", func(t *testing.T) {
 		ctx := FitContext{
-			Project: &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
+			Project:      &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
 			CapitalNeeds: []*domain.CapitalNeed{{Types: []domain.CapitalNeedType{domain.NeedInfrastructureEquity}}},
 		}
 		got := CalculateArchetypeFit(ctx, domain.CounterpartyInfrastructureFund, now)
@@ -66,7 +66,7 @@ func TestCalculateArchetypeFit_InstrumentFit(t *testing.T) {
 	now := time.Now()
 	t.Run("Bank with debt need", func(t *testing.T) {
 		ctx := FitContext{
-			Project: &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
+			Project:      &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
 			CapitalNeeds: []*domain.CapitalNeed{{Types: []domain.CapitalNeedType{domain.NeedSeniorDebt}}},
 		}
 		got := CalculateArchetypeFit(ctx, domain.CounterpartyBank, now)
@@ -111,7 +111,7 @@ func TestCalculateArchetypeFit_ScaleFit(t *testing.T) {
 func TestCalculateInvestorFit_TypeAlignment(t *testing.T) {
 	now := time.Now()
 	ctx := FitContext{
-		Project: &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
+		Project:      &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000},
 		CapitalNeeds: []*domain.CapitalNeed{{Types: []domain.CapitalNeedType{domain.NeedInfrastructureEquity}}},
 	}
 	profile := &domain.InvestorProfile{

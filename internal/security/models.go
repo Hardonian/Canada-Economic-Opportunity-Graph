@@ -39,12 +39,12 @@ const (
 
 // SecuritySubject represents the requesting entity/user in an ABAC decision.
 type SecuritySubject struct {
-	UserID        string              `json:"user_id"`
-	Clearance     ClassificationLevel `json:"clearance"`
-	Citizenship   string              `json:"citizenship"` // "CA", "US", "GB", etc.
-	Organization  string              `json:"organization"`
-	Compartments  []string            `json:"compartments"` // e.g. "NUCLEAR", "CRITICAL_MINERALS"
-	GrantedCaveats []Caveat           `json:"granted_caveats"`
+	UserID         string              `json:"user_id"`
+	Clearance      ClassificationLevel `json:"clearance"`
+	Citizenship    string              `json:"citizenship"` // "CA", "US", "GB", etc.
+	Organization   string              `json:"organization"`
+	Compartments   []string            `json:"compartments"` // e.g. "NUCLEAR", "CRITICAL_MINERALS"
+	GrantedCaveats []Caveat            `json:"granted_caveats"`
 }
 
 // SecurityObject represents a protected graph node, edge, or field.

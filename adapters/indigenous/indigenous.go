@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	adapterName         = "isc_indigenous_business_directory"
-	pipelineVersion     = "indigenous-business-v1"
-	parserVersion       = "indigenous-json-v1"
-	maxResponseBytes    int64 = 8 << 20
-	
+	adapterName            = "isc_indigenous_business_directory"
+	pipelineVersion        = "indigenous-business-v1"
+	parserVersion          = "indigenous-json-v1"
+	maxResponseBytes int64 = 8 << 20
+
 	// Indigenous Services Canada Business Directory
 	ISCBusinessDirectoryURL = "https://www.sac-isc.gc.ca/eng/1100100032800/1558373938872"
 )
@@ -57,12 +57,12 @@ type IndigenousBusinessRecord struct {
 }
 
 type IndigenousFixture struct {
-	Source        string                    `json:"source"`
-	SourceURL     string                    `json:"source_url"`
-	RetrievedAt   string                    `json:"retrieved_at"`
-	EffectiveAt   string                    `json:"effective_at"`
-	DatasetVintage string                   `json:"dataset_vintage"`
-	Businesses    []IndigenousBusinessRecord `json:"businesses"`
+	Source         string                     `json:"source"`
+	SourceURL      string                     `json:"source_url"`
+	RetrievedAt    string                     `json:"retrieved_at"`
+	EffectiveAt    string                     `json:"effective_at"`
+	DatasetVintage string                     `json:"dataset_vintage"`
+	Businesses     []IndigenousBusinessRecord `json:"businesses"`
 }
 
 // NewIndigenousAdapter creates a curated snapshot adapter for the ISC Indigenous Business Directory.
@@ -93,14 +93,14 @@ func (a *IndigenousAdapter) Fetch(ctx context.Context) ([]byte, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	
+
 	a.health.LastAttempt = time.Now().UTC()
 	data, err := adapters.ReadBoundedFile(a.fixturePath, maxResponseBytes)
 	if err != nil {
 		a.fail(err)
 		return nil, fmt.Errorf("read ISC Indigenous Business Directory snapshot: %w", err)
 	}
-	
+
 	a.fetchedAt = time.Now().UTC()
 	a.health.LastSuccess = a.fetchedAt
 	a.health.Status = string(domain.StatusHealthy)
@@ -113,56 +113,56 @@ func (a *IndigenousAdapter) Parse(data []byte) (*adapters.IngestionResult, error
 	if trimmed == "" {
 		return nil, a.parseError(fmt.Errorf("empty Indigenous Business Directory document"))
 	}
-	
+
 	var fixture IndigenousFixture
 	if err := json.Unmarshal(data, &fixture); err != nil {
 		return nil, a.parseError(fmt.Errorf("parse ISC Indigenous Business Directory JSON: %w", err))
 	}
-	
+
 	if len(fixture.Businesses) == 0 {
 		return nil, a.parseError(fmt.Errorf("Indigenous Business Directory contains no records"))
 	}
-	
+
 	if len(fixture.Businesses) > 10000 {
 		return nil, a.parseError(fmt.Errorf("ISC business directory exceeds 10000-record safety limit"))
 	}
-	
+
 	result := &adapters.IngestionResult{}
 	seen := make(map[string]struct{}, len(fixture.Businesses))
-	
+
 	retrieved, err := parseTimestamp(fixture.RetrievedAt)
 	if err != nil {
 		retrieved = time.Now().UTC()
 	}
-	
+
 	effective, err := parseTimestamp(fixture.EffectiveAt)
 	if err != nil {
 		effective = retrieved
 	}
-	
+
 	sourceURL := fixture.SourceURL
 	if sourceURL == "" {
 		sourceURL = ISCBusinessDirectoryURL
 	}
-	
+
 	for _, biz := range fixture.Businesses {
 		if strings.TrimSpace(biz.BusinessID) == "" || strings.TrimSpace(biz.BusinessName) == "" {
 			continue
 		}
-		
+
 		if _, exists := seen[biz.BusinessID]; exists {
 			continue
 		}
 		seen[biz.BusinessID] = struct{}{}
-		
+
 		featureHash, hashErr := adapters.HashRecord(biz)
 		if hashErr != nil {
 			return nil, a.parseError(hashErr)
 		}
-		
+
 		entityID := identity.StableID("entity", "ca:indigenous", biz.BusinessID)
 		evidenceID := identity.StableID("evidence", adapterName, biz.BusinessID+":"+featureHash)
-		
+
 		entity := &domain.Entity{
 			ID:           entityID,
 			Slug:         identity.Slug(biz.BusinessName),
@@ -176,13 +176,13 @@ func (a *IndigenousAdapter) Parse(data []byte) (*adapters.IngestionResult, error
 				"isc_business_id": biz.BusinessID,
 				"naics_code":      biz.NAICSCode,
 			},
-			Description:  buildBusinessDescription(biz),
-			EvidenceID:   evidenceID,
-			CreatedAt:    effective,
-			UpdatedAt:    effective,
-			Metadata:     biz.Metadata,
+			Description: buildBusinessDescription(biz),
+			EvidenceID:  evidenceID,
+			CreatedAt:   effective,
+			UpdatedAt:   effective,
+			Metadata:    biz.Metadata,
 		}
-		
+
 		evidence := &domain.Evidence{
 			ID:                 evidenceID,
 			SourceURL:          sourceURL,
@@ -204,11 +204,11 @@ func (a *IndigenousAdapter) Parse(data []byte) (*adapters.IngestionResult, error
 			RawSnippet:         truncate(buildBusinessDescription(biz), 500),
 		}
 		entity.Evidence = evidence
-		
+
 		result.Entities = append(result.Entities, entity)
 		result.Evidence = append(result.Evidence, evidence)
 	}
-	
+
 	a.health.DocumentsSeen = len(fixture.Businesses)
 	a.health.DocumentsChanged = len(result.Entities)
 	a.health.LastChange = effective
@@ -218,20 +218,20 @@ func (a *IndigenousAdapter) Parse(data []byte) (*adapters.IngestionResult, error
 // CrossReferenceProcurement finds Indigenous businesses eligible for specific procurement opportunities.
 func CrossReferenceProcurement(businesses []*domain.Entity, procurement *domain.Procurement) []*domain.Entity {
 	var matches []*domain.Entity
-	
+
 	procurementNAICS := extractNAICSFromProcurement(procurement)
 	procurementRegion := extractRegionFromProcurement(procurement)
-	
+
 	for _, biz := range businesses {
 		if biz.EntityType != "IndigenousBusiness" {
 			continue
 		}
-		
+
 		// Check if business is active
 		if !isBusinessActive(biz) {
 			continue
 		}
-		
+
 		// NAICS match
 		bizNAICS := biz.Identifiers["naics_code"]
 		if procurementNAICS != "" && bizNAICS != "" {
@@ -239,7 +239,7 @@ func CrossReferenceProcurement(businesses []*domain.Entity, procurement *domain.
 				continue
 			}
 		}
-		
+
 		// Regional match
 		if procurementRegion != "" {
 			bizRegion := extractProvinceFromJurisdiction(biz.Jurisdiction)
@@ -247,49 +247,49 @@ func CrossReferenceProcurement(businesses []*domain.Entity, procurement *domain.
 				continue
 			}
 		}
-		
+
 		// Ownership threshold for set-asides
 		ownership := getOwnershipPercent(biz)
 		if ownership < 51 {
 			continue
 		}
-		
+
 		matches = append(matches, biz)
 	}
-	
+
 	return matches
 }
 
 // FindIndigenousPartnersForProject finds Indigenous businesses that could partner on a project.
 func FindIndigenousPartnersForProject(businesses []*domain.Entity, project *domain.Project) []*domain.Entity {
 	var partners []*domain.Entity
-	
+
 	projectSector := mapSectorToNAICS(project.Sector)
 	projectProvince := project.Province
-	
+
 	for _, biz := range businesses {
 		if biz.EntityType != "IndigenousBusiness" {
 			continue
 		}
-		
+
 		if !isBusinessActive(biz) {
 			continue
 		}
-		
+
 		// Sector capability match
 		if !hasRelevantCapability(biz, projectSector, project.Subsector) {
 			continue
 		}
-		
+
 		// Geographic proximity
 		bizProvince := extractProvinceFromJurisdiction(biz.Jurisdiction)
 		if bizProvince != "" && projectProvince != "" && !provinceAdjacent(bizProvince, projectProvince) {
 			continue
 		}
-		
+
 		partners = append(partners, biz)
 	}
-	
+
 	return partners
 }
 
@@ -297,7 +297,7 @@ func isBusinessActive(biz *domain.Entity) bool {
 	if biz.Metadata == nil {
 		return true // Default to active if no metadata
 	}
-	
+
 	if status, ok := biz.Metadata["status"].(string); ok {
 		return strings.EqualFold(status, "active")
 	}
@@ -349,11 +349,11 @@ func naicsMatch(procNAICS, bizNAICS string) bool {
 func regionMatch(procRegion, bizRegion string) bool {
 	proc := strings.ToUpper(strings.TrimSpace(procRegion))
 	biz := strings.ToUpper(strings.TrimSpace(bizRegion))
-	
+
 	if proc == biz {
 		return true
 	}
-	
+
 	// Check if same province
 	provinceMap := map[string]string{
 		"ON": "ONTARIO", "QC": "QUEBEC", "BC": "BRITISH COLUMBIA",
@@ -362,14 +362,14 @@ func regionMatch(procRegion, bizRegion string) bool {
 		"PE": "PRINCE EDWARD ISLAND", "NT": "NORTHWEST TERRITORIES",
 		"NU": "NUNAVUT", "YT": "YUKON",
 	}
-	
+
 	if full, ok := provinceMap[biz]; ok && strings.Contains(strings.ToUpper(full), proc) {
 		return true
 	}
 	if full, ok := provinceMap[proc]; ok && strings.Contains(strings.ToUpper(full), biz) {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -395,12 +395,12 @@ func hasRelevantCapability(biz *domain.Entity, projectSector, projectSubsector s
 			}
 		}
 	}
-	
+
 	// Also check NAICS
 	bizNAICS := biz.Identifiers["naics_code"]
-	
+
 	sectorKeywords := sectorKeywordsFromStrings(projectSector, projectSubsector)
-	
+
 	for _, cap := range capabilities {
 		for _, keyword := range sectorKeywords {
 			if strings.Contains(cap, strings.ToLower(keyword)) {
@@ -408,7 +408,7 @@ func hasRelevantCapability(biz *domain.Entity, projectSector, projectSubsector s
 			}
 		}
 	}
-	
+
 	if bizNAICS != "" {
 		for _, keyword := range sectorKeywords {
 			if strings.Contains(bizNAICS, keyword) {
@@ -416,7 +416,7 @@ func hasRelevantCapability(biz *domain.Entity, projectSector, projectSubsector s
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -449,13 +449,13 @@ func sectorKeywordsFromStrings(sector, subsector string) []string {
 	default:
 		domainSector = domain.SectorIndustrialMfg
 	}
-	
+
 	return sectorKeywords(domainSector, domain.Sector(subsector))
 }
 
 func sectorKeywords(sector, subsector domain.Sector) []string {
 	keywords := []string{}
-	
+
 	switch sector {
 	case domain.SectorCriticalMinerals:
 		keywords = append(keywords, "mining", "mineral", "exploration", "processing", "nickel", "lithium", "cobalt", "copper")
@@ -478,7 +478,7 @@ func sectorKeywords(sector, subsector domain.Sector) []string {
 	case domain.SectorForestryBioeconomy:
 		keywords = append(keywords, "forest", "lumber", "pulp", "paper", "bioeconomy", "biomass")
 	}
-	
+
 	return keywords
 }
 
@@ -546,7 +546,7 @@ func provinceAdjacent(a, b string) bool {
 	if a == b {
 		return true
 	}
-	
+
 	// Adjacent provinces
 	adjacent := map[string][]string{
 		"ON": {"QC", "MB"},
@@ -563,7 +563,7 @@ func provinceAdjacent(a, b string) bool {
 		"NU": {"MB", "NT"},
 		"YT": {"BC", "NT"},
 	}
-	
+
 	if list, ok := adjacent[a]; ok {
 		for _, adj := range list {
 			if adj == b {
@@ -601,7 +601,7 @@ func parseTimestamp(raw string) (time.Time, error) {
 	if raw == "" {
 		return time.Time{}, fmt.Errorf("timestamp is required")
 	}
-	
+
 	formats := []string{
 		time.RFC3339,
 		"2006-01-02",
@@ -609,13 +609,13 @@ func parseTimestamp(raw string) (time.Time, error) {
 		"02/01/2006",
 		"January 2, 2006",
 	}
-	
+
 	for _, format := range formats {
 		if parsed, err := time.Parse(format, raw); err == nil {
 			return parsed.UTC(), nil
 		}
 	}
-	
+
 	return time.Time{}, fmt.Errorf("unable to parse timestamp: %s", raw)
 }
 

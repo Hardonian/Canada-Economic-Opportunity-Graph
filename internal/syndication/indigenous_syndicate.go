@@ -8,26 +8,26 @@ import (
 
 // FirstNationParticipant models a community equity partner in a regional infrastructure asset.
 type FirstNationParticipant struct {
-	BandCouncilName     string  `json:"band_council_name"`
-	TreatyOrTerritory   string  `json:"treaty_or_territory"`
-	CorridorKilometers  float64 `json:"corridor_kilometers"`
-	EquitySharePercent  float64 `json:"equity_share_percent"`
-	GuaranteedDebtCAD   int64   `json:"guaranteed_debt_cad"`
-	AnnualDividendCAD   int64   `json:"annual_dividend_cad"`
-	Cumulative30YrCAD   int64   `json:"cumulative_30yr_cad"`
+	BandCouncilName    string  `json:"band_council_name"`
+	TreatyOrTerritory  string  `json:"treaty_or_territory"`
+	CorridorKilometers float64 `json:"corridor_kilometers"`
+	EquitySharePercent float64 `json:"equity_share_percent"`
+	GuaranteedDebtCAD  int64   `json:"guaranteed_debt_cad"`
+	AnnualDividendCAD  int64   `json:"annual_dividend_cad"`
+	Cumulative30YrCAD  int64   `json:"cumulative_30yr_cad"`
 }
 
 // MultiNationSyndicate models co-ownership distribution across an infrastructure corridor.
 type MultiNationSyndicate struct {
-	CorridorProjectName    string                   `json:"corridor_project_name"`
-	TotalCorridorKM        float64                  `json:"total_corridor_km"`
-	TotalEquityValueCAD    int64                    `json:"total_equity_value_cad"`
-	FederalILGPGreaterCAD  int64                    `json:"federal_ilgp_guarantee_cad"`
-	Participants           []FirstNationParticipant `json:"participants"`
-	BlendedInterestSpreadBps int                    `json:"blended_interest_spread_bps"` // e.g. 235 bps savings
-	TotalAnnualDividendsCAD int64                   `json:"total_annual_dividends_cad"`
-	Total30YearWealthCAD   int64                    `json:"total_30_year_wealth_cad"`
-	AuditHash              string                   `json:"audit_hash"`
+	CorridorProjectName      string                   `json:"corridor_project_name"`
+	TotalCorridorKM          float64                  `json:"total_corridor_km"`
+	TotalEquityValueCAD      int64                    `json:"total_equity_value_cad"`
+	FederalILGPGreaterCAD    int64                    `json:"federal_ilgp_guarantee_cad"`
+	Participants             []FirstNationParticipant `json:"participants"`
+	BlendedInterestSpreadBps int                      `json:"blended_interest_spread_bps"` // e.g. 235 bps savings
+	TotalAnnualDividendsCAD  int64                    `json:"total_annual_dividends_cad"`
+	Total30YearWealthCAD     int64                    `json:"total_30_year_wealth_cad"`
+	AuditHash                string                   `json:"audit_hash"`
 }
 
 // BuildMultiNationSyndicate computes deterministic syndication shares proportional to territory traversed.
@@ -52,7 +52,7 @@ func BuildMultiNationSyndicate(projectName string, totalEquityCAD int64, communi
 	for i, c := range communities {
 		sharePct := (c.KM / totalKM) * 100.0
 		allocatedDebt := int64(float64(ilgpGuarantee) * (c.KM / totalKM))
-		
+
 		// Return assumptions: 9.5% gross yield, debt service amortized over 20 years at ~3.75% sovereign base
 		grossReturn := float64(totalEquityCAD) * (c.KM / totalKM) * 0.095
 		debtService := (float64(allocatedDebt) / 20.0) + (float64(allocatedDebt) * 0.0375)
@@ -60,7 +60,7 @@ func BuildMultiNationSyndicate(projectName string, totalEquityCAD int64, communi
 		if netAnnual < 0 {
 			netAnnual = int64(grossReturn * 0.25) // minimum floor distribution
 		}
-		cum30Yr := (netAnnual * 20) + int64(grossReturn * 10) // 10 years unencumbered post-debt amortization
+		cum30Yr := (netAnnual * 20) + int64(grossReturn*10) // 10 years unencumbered post-debt amortization
 
 		participants[i] = FirstNationParticipant{
 			BandCouncilName:    c.Name,

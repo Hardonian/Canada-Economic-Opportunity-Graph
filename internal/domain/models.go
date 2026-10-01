@@ -166,7 +166,7 @@ type CapitalItem struct {
 	OriginalAmount   *MonetaryAmount `json:"original_amount,omitempty"`
 	Instrument       CapitalNeedType `json:"instrument,omitempty"`
 	StackTreatment   string          `json:"stack_treatment,omitempty"` // ADDITIVE, OVERLAPPING, CONTINGENT, UNKNOWN
-	AmountType       string          `json:"amount_type"` // exact, maximum, estimated, unknown
+	AmountType       string          `json:"amount_type"`               // exact, maximum, estimated, unknown
 	ProviderEntityID string          `json:"provider_entity_id,omitempty"`
 	ProviderName     string          `json:"provider_name"`
 	Notes            string          `json:"notes,omitempty"`
@@ -200,31 +200,31 @@ type Procurement struct {
 
 // Opportunity represents an inferred or confirmed downstream demand.
 type Opportunity struct {
-	ID               string             `json:"id"`
-	ProjectID        string             `json:"project_id"`
-	ProjectName      string             `json:"project_name"`
-	Title            string             `json:"title"`
-	Sector           Sector             `json:"sector"`
-	RequirementClass RequirementClass   `json:"requirement_class"` // CONFIRMED, DERIVED, SPECULATIVE
-	Category         string             `json:"category"`          // engineering, electrical, environmental, etc.
-	EstimatedCAD     int64              `json:"estimated_cad,omitempty"`
-	EstimateStatus   ConfidenceLevel    `json:"estimate_status"`
-	EstimatedAmount  *MonetaryAmount    `json:"estimated_amount,omitempty"`
-	Description      string             `json:"description"`
-	TriggerMilestone string             `json:"trigger_milestone"` // e.g., "FID", "ENVIRONMENTAL_APPROVAL"
-	OpportunityKind  string             `json:"opportunity_kind,omitempty"` // CAPITAL, OFFTAKE, TENANCY, PARTNERSHIP, PROCUREMENT
+	ID               string                 `json:"id"`
+	ProjectID        string                 `json:"project_id"`
+	ProjectName      string                 `json:"project_name"`
+	Title            string                 `json:"title"`
+	Sector           Sector                 `json:"sector"`
+	RequirementClass RequirementClass       `json:"requirement_class"` // CONFIRMED, DERIVED, SPECULATIVE
+	Category         string                 `json:"category"`          // engineering, electrical, environmental, etc.
+	EstimatedCAD     int64                  `json:"estimated_cad,omitempty"`
+	EstimateStatus   ConfidenceLevel        `json:"estimate_status"`
+	EstimatedAmount  *MonetaryAmount        `json:"estimated_amount,omitempty"`
+	Description      string                 `json:"description"`
+	TriggerMilestone string                 `json:"trigger_milestone"`          // e.g., "FID", "ENVIRONMENTAL_APPROVAL"
+	OpportunityKind  string                 `json:"opportunity_kind,omitempty"` // CAPITAL, OFFTAKE, TENANCY, PARTNERSHIP, PROCUREMENT
 	FunnelState      OpportunityFunnelState `json:"funnel_state,omitempty"`
-	CapitalNeedID    string             `json:"capital_need_id,omitempty"`
-	Instruments      []CapitalNeedType  `json:"instruments,omitempty"`
-	Counterparties   []CounterpartyType `json:"counterparties,omitempty"`
-	EvidenceIDs      []string           `json:"evidence_ids,omitempty"`
-	EvidenceQuality  ConfidenceLevel    `json:"evidence_quality,omitempty"`
-	Visibility       VisibilityClass    `json:"visibility,omitempty"`
-	Publishable      bool               `json:"publishable,omitempty"`
-	PublicationState PublicationState   `json:"publication_state,omitempty"`
-	LastVerified     *time.Time         `json:"last_verified,omitempty"`
-	CreatedAt        time.Time          `json:"created_at"`
-	UpdatedAt        time.Time          `json:"updated_at,omitempty"`
+	CapitalNeedID    string                 `json:"capital_need_id,omitempty"`
+	Instruments      []CapitalNeedType      `json:"instruments,omitempty"`
+	Counterparties   []CounterpartyType     `json:"counterparties,omitempty"`
+	EvidenceIDs      []string               `json:"evidence_ids,omitempty"`
+	EvidenceQuality  ConfidenceLevel        `json:"evidence_quality,omitempty"`
+	Visibility       VisibilityClass        `json:"visibility,omitempty"`
+	Publishable      bool                   `json:"publishable,omitempty"`
+	PublicationState PublicationState       `json:"publication_state,omitempty"`
+	LastVerified     *time.Time             `json:"last_verified,omitempty"`
+	CreatedAt        time.Time              `json:"created_at"`
+	UpdatedAt        time.Time              `json:"updated_at,omitempty"`
 }
 
 // Signal records calculated inflection points.

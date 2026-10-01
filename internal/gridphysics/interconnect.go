@@ -69,7 +69,7 @@ func (e *Engine) AssessProject(project *domain.Project) *InterconnectAssessment 
 		baseQueueMonths = 20
 	case "QC", "QUEBEC":
 		op = OperatorHydroQuebec
-		cleanPurity = 99.5 // Pure Hydro
+		cleanPurity = 99.5   // Pure Hydro
 		baseQueueMonths = 36 // Heavy queue backlog for large industrial loads
 	case "BC", "BRITISH COLUMBIA":
 		op = OperatorBCHydro

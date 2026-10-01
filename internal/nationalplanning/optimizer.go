@@ -31,10 +31,10 @@ type BudgetEnvelopes struct {
 
 // OptimizationRequest specifies constraints and objectives for capital deployment.
 type OptimizationRequest struct {
-	Objective         ObjectiveType   `json:"objective"`
-	Envelopes         BudgetEnvelopes `json:"envelopes"`
-	MinProvincialCap  float64         `json:"min_provincial_cap"`  // Minimum % required for any funded province
-	TargetSectors     []domain.Sector `json:"target_sectors,omitempty"`
+	Objective        ObjectiveType   `json:"objective"`
+	Envelopes        BudgetEnvelopes `json:"envelopes"`
+	MinProvincialCap float64         `json:"min_provincial_cap"` // Minimum % required for any funded province
+	TargetSectors    []domain.Sector `json:"target_sectors,omitempty"`
 }
 
 // ProjectAllocation details public co-investment tranches for a selected project.
@@ -55,18 +55,18 @@ type ProjectAllocation struct {
 
 // OptimizationResult summarizes the optimal sovereign portfolio.
 type OptimizationResult struct {
-	RequestID               string              `json:"request_id"`
-	Objective               ObjectiveType       `json:"objective"`
-	AllocatedProjects       []ProjectAllocation `json:"allocated_projects"`
-	TotalPublicInvestedCAD  int64               `json:"total_public_invested_cad"`
-	TotalPrivateMobilizedCAD int64              `json:"total_private_mobilized_cad"`
-	CrowdingInMultiplier    float64             `json:"crowding_in_multiplier"`
-	TotalGHGAbatedMtPerYear float64             `json:"total_ghg_abated_mt_yr"`
-	ProvincialAllocations   map[string]int64    `json:"provincial_allocations"`
-	SectorAllocations       map[string]int64    `json:"sector_allocations"`
-	RemainingEnvelopes      BudgetEnvelopes     `json:"remaining_envelopes"`
-	AuditHash               string              `json:"audit_hash"`
-	SolvedAt                time.Time           `json:"solved_at"`
+	RequestID                string              `json:"request_id"`
+	Objective                ObjectiveType       `json:"objective"`
+	AllocatedProjects        []ProjectAllocation `json:"allocated_projects"`
+	TotalPublicInvestedCAD   int64               `json:"total_public_invested_cad"`
+	TotalPrivateMobilizedCAD int64               `json:"total_private_mobilized_cad"`
+	CrowdingInMultiplier     float64             `json:"crowding_in_multiplier"`
+	TotalGHGAbatedMtPerYear  float64             `json:"total_ghg_abated_mt_yr"`
+	ProvincialAllocations    map[string]int64    `json:"provincial_allocations"`
+	SectorAllocations        map[string]int64    `json:"sector_allocations"`
+	RemainingEnvelopes       BudgetEnvelopes     `json:"remaining_envelopes"`
+	AuditHash                string              `json:"audit_hash"`
+	SolvedAt                 time.Time           `json:"solved_at"`
 }
 
 // Optimizer implements mathematical portfolio allocation over the economic graph.

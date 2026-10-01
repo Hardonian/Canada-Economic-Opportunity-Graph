@@ -172,4 +172,3 @@ func TestLiveGazetteAdapter(t *testing.T) {
 		t.Fatalf("expected 1 project, got %d", len(result.Projects))
 	}
 }
-

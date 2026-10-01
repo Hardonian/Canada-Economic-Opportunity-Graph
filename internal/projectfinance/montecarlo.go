@@ -21,19 +21,19 @@ type MetricDistribution struct {
 
 // MonteCarloSimulationResult summarizes 10,000 randomized project finance paths.
 type MonteCarloSimulationResult struct {
-	ProjectID              string             `json:"project_id"`
-	ProjectName            string             `json:"project_name"`
-	IterationsRun          int                `json:"iterations_run"`
-	BaselineCapexCAD       int64              `json:"baseline_capex_cad"`
-	ProjectIRRPercent      MetricDistribution `json:"project_irr_percent"`
-	EquityIRRPercent       MetricDistribution `json:"equity_irr_percent"`
-	MinDSCR                MetricDistribution `json:"min_dscr"` // Minimum Debt Service Coverage Ratio
-	AvgDSCR                MetricDistribution `json:"avg_dscr"`
-	LoanLifeCoverageRatio  MetricDistribution `json:"loan_life_coverage_ratio"`
-	ProbabilityOfDefaultPct float64           `json:"probability_of_default_pct"` // % of runs where DSCR < 1.05
-	SyntheticCreditRating  string             `json:"synthetic_credit_rating"`    // "AAA", "AA", "A", "BBB+", "BBB-", "BB", "B"
-	InvestmentGrade        bool               `json:"investment_grade"`
-	AuditHash              string             `json:"audit_hash"`
+	ProjectID               string             `json:"project_id"`
+	ProjectName             string             `json:"project_name"`
+	IterationsRun           int                `json:"iterations_run"`
+	BaselineCapexCAD        int64              `json:"baseline_capex_cad"`
+	ProjectIRRPercent       MetricDistribution `json:"project_irr_percent"`
+	EquityIRRPercent        MetricDistribution `json:"equity_irr_percent"`
+	MinDSCR                 MetricDistribution `json:"min_dscr"` // Minimum Debt Service Coverage Ratio
+	AvgDSCR                 MetricDistribution `json:"avg_dscr"`
+	LoanLifeCoverageRatio   MetricDistribution `json:"loan_life_coverage_ratio"`
+	ProbabilityOfDefaultPct float64            `json:"probability_of_default_pct"` // % of runs where DSCR < 1.05
+	SyntheticCreditRating   string             `json:"synthetic_credit_rating"`    // "AAA", "AA", "A", "BBB+", "BBB-", "BB", "B"
+	InvestmentGrade         bool               `json:"investment_grade"`
+	AuditHash               string             `json:"audit_hash"`
 }
 
 // FinanceSimulator runs stochastic project finance cash flow modeling.

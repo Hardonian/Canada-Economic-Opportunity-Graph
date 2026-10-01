@@ -9,8 +9,8 @@ import (
 
 func TestParseCapexPreservesSemantics(t *testing.T) {
 	tests := []struct {
-		raw, currency string
-		kind          domain.AmountType
+		raw, currency    string
+		kind             domain.AmountType
 		amount, min, max int64
 	}{
 		{"$1.9B", "UNSPECIFIED", domain.AmountExact, 1_900_000_000, 0, 0},
@@ -66,7 +66,9 @@ func TestPrivateExtractorRejectsPublicVisibility(t *testing.T) {
 }
 
 func deref(value *int64) int64 {
-	if value == nil { return 0 }
+	if value == nil {
+		return 0
+	}
 	return *value
 }
 
@@ -124,4 +126,3 @@ Indigenous Equity Loan: $200M`
 		t.Fatalf("unexpected WACC: %.2f%%", waterfall.BlendedWACCPct)
 	}
 }
-

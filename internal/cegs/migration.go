@@ -42,13 +42,13 @@ func MigrateSchema(raw []byte) (*MigratedSchema, error) {
 	}
 
 	migrated := &MigratedSchema{
-		ID:           strings.TrimPrefix(legacy.ID, "cegs:"),
-		Version:      SpecVersion,
-		Type:         legacy.Type,
-		Vocabulary:   []string{"cegs-1.0"},
-		Properties:   legacy.Properties,
-		Required:     legacy.Required,
-		MigratedFrom: legacy.ID,
+		ID:            strings.TrimPrefix(legacy.ID, "cegs:"),
+		Version:       SpecVersion,
+		Type:          legacy.Type,
+		Vocabulary:    []string{"cegs-1.0"},
+		Properties:    legacy.Properties,
+		Required:      legacy.Required,
+		MigratedFrom:  legacy.ID,
 		MigrationNote: fmt.Sprintf("Migrated from %s using %s. Canonical vocabulary is cegs-1.0.", legacy.ID, MigrationVersion),
 	}
 

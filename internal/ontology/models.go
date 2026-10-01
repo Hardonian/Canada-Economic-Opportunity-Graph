@@ -12,13 +12,13 @@ import (
 type ActionType string
 
 const (
-	ActionApproveILGPGuarantee        ActionType = "APPROVE_ILGP_GUARANTEE"
+	ActionApproveILGPGuarantee         ActionType = "APPROVE_ILGP_GUARANTEE"
 	ActionTriggerSection35Consultation ActionType = "TRIGGER_SECTION_35_CONSULTATION"
-	ActionDispatchFirmPower           ActionType = "DISPATCH_FIRM_POWER"
-	ActionAdjustCapitalTranche        ActionType = "ADJUST_CAPITAL_TRANCHE"
+	ActionDispatchFirmPower            ActionType = "DISPATCH_FIRM_POWER"
+	ActionAdjustCapitalTranche         ActionType = "ADJUST_CAPITAL_TRANCHE"
 	ActionRecordEnvironmentalPermit    ActionType = "RECORD_ENVIRONMENTAL_PERMIT"
-	ActionUpdateProjectStage          ActionType = "UPDATE_PROJECT_STAGE"
-	ActionSetMilestoneDelay           ActionType = "SET_MILESTONE_DELAY"
+	ActionUpdateProjectStage           ActionType = "UPDATE_PROJECT_STAGE"
+	ActionSetMilestoneDelay            ActionType = "SET_MILESTONE_DELAY"
 )
 
 // ActionStatus represents the lifecycle state of a write-back action.
@@ -83,7 +83,7 @@ type Branch struct {
 	CreatedBy   string     `json:"created_by"`
 	CreatedAt   time.Time  `json:"created_at"`
 	MergedAt    *time.Time `json:"merged_at,omitempty"`
-	Status      string     `json:"status"` // "ACTIVE", "MERGED", "ABANDONED"
+	Status      string     `json:"status"`  // "ACTIVE", "MERGED", "ABANDONED"
 	Actions     []string   `json:"actions"` // Ordered list of Action IDs
 }
 

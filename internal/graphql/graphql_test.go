@@ -684,4 +684,3 @@ func TestGraphQL_IntelligenceQueries(t *testing.T) {
 		})
 	}
 }
-

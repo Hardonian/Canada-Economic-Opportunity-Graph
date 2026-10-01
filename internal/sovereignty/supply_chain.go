@@ -105,15 +105,15 @@ var CanonicalNRCanCriticalMinerals = map[string]CriticalMineral{
 
 // MineralProjectProfile profiles an economic project's contribution to Canadian supply sovereignty.
 type MineralProjectProfile struct {
-	ProjectID             string   `json:"project_id"`
-	ProjectName           string   `json:"project_name"`
-	TargetMineral         string   `json:"target_mineral"`
-	HasExtraction         bool     `json:"has_extraction"`
-	HasDomesticRefining   bool     `json:"has_domestic_refining"`
-	HasEndProductMfg      bool     `json:"has_end_product_mfg"`
-	AnnualCapacityTonnes  float64  `json:"annual_capacity_tonnes"`
-	AlliedOfftakePct      float64  `json:"allied_offtake_pct"` // % off-take committed to Canada / CUSMA / NATO
-	IndigenousEquityShare float64  `json:"indigenous_equity_share"` // 0.0 to 1.0
+	ProjectID             string  `json:"project_id"`
+	ProjectName           string  `json:"project_name"`
+	TargetMineral         string  `json:"target_mineral"`
+	HasExtraction         bool    `json:"has_extraction"`
+	HasDomesticRefining   bool    `json:"has_domestic_refining"`
+	HasEndProductMfg      bool    `json:"has_end_product_mfg"`
+	AnnualCapacityTonnes  float64 `json:"annual_capacity_tonnes"`
+	AlliedOfftakePct      float64 `json:"allied_offtake_pct"`      // % off-take committed to Canada / CUSMA / NATO
+	IndigenousEquityShare float64 `json:"indigenous_equity_share"` // 0.0 to 1.0
 }
 
 // SupplyChainVulnerability flags critical single points of failure in value chains.
@@ -125,16 +125,16 @@ type SupplyChainVulnerability struct {
 
 // SelfSufficiencyEvaluation stores output metrics for Canadian supply chain resilience.
 type SelfSufficiencyEvaluation struct {
-	ProjectID              string                     `json:"project_id"`
-	TargetMineral          string                     `json:"target_mineral"`
-	SelfSufficiencyIndex   float64                    `json:"self_sufficiency_index"` // 0.0 to 100.0
-	ExtractionScore        float64                    `json:"extraction_score"`
-	RefiningScore          float64                    `json:"refining_score"`
-	SovereignRetentionScore float64                   `json:"sovereign_retention_score"`
-	ChokePointMitigation   float64                    `json:"choke_point_mitigation"`
-	Vulnerabilities        []SupplyChainVulnerability `json:"vulnerabilities"`
-	StrategicDirectives    []string                   `json:"strategic_directives"`
-	EvaluatedAt            time.Time                  `json:"evaluated_at"`
+	ProjectID               string                     `json:"project_id"`
+	TargetMineral           string                     `json:"target_mineral"`
+	SelfSufficiencyIndex    float64                    `json:"self_sufficiency_index"` // 0.0 to 100.0
+	ExtractionScore         float64                    `json:"extraction_score"`
+	RefiningScore           float64                    `json:"refining_score"`
+	SovereignRetentionScore float64                    `json:"sovereign_retention_score"`
+	ChokePointMitigation    float64                    `json:"choke_point_mitigation"`
+	Vulnerabilities         []SupplyChainVulnerability `json:"vulnerabilities"`
+	StrategicDirectives     []string                   `json:"strategic_directives"`
+	EvaluatedAt             time.Time                  `json:"evaluated_at"`
 }
 
 // SupplyChainEvaluator calculates sovereign critical mineral and value-chain self-sufficiency.
@@ -232,15 +232,15 @@ func (e *SupplyChainEvaluator) Evaluate(profile MineralProjectProfile) *SelfSuff
 	}
 
 	return &SelfSufficiencyEvaluation{
-		ProjectID:              profile.ProjectID,
-		TargetMineral:          refMineral.Name,
-		SelfSufficiencyIndex:   math.Round(totalIndex*10) / 10,
-		ExtractionScore:        math.Round(extractionScore*10) / 10,
-		RefiningScore:          math.Round(refiningScore*10) / 10,
+		ProjectID:               profile.ProjectID,
+		TargetMineral:           refMineral.Name,
+		SelfSufficiencyIndex:    math.Round(totalIndex*10) / 10,
+		ExtractionScore:         math.Round(extractionScore*10) / 10,
+		RefiningScore:           math.Round(refiningScore*10) / 10,
 		SovereignRetentionScore: math.Round(retentionScore*10) / 10,
-		ChokePointMitigation:   math.Round(chokeMitigation*10) / 10,
-		Vulnerabilities:        vulns,
-		StrategicDirectives:    directives,
-		EvaluatedAt:            time.Now(),
+		ChokePointMitigation:    math.Round(chokeMitigation*10) / 10,
+		Vulnerabilities:         vulns,
+		StrategicDirectives:     directives,
+		EvaluatedAt:             time.Now(),
 	}
 }

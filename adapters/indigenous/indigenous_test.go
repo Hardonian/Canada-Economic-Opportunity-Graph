@@ -180,16 +180,16 @@ func TestCrossReferenceProcurementNAICS(t *testing.T) {
 	businesses := result.Entities
 
 	procurement := &domain.Procurement{
-		ID:            "P-001",
-		TenderID:      "T-001",
-		Title:         "Environmental Remediation Contract",
-		Buyer:         "Environment and Climate Change Canada",
-		BuyerType:     "Federal",
-		SourceURL:     "https://example.com",
-		Categories:    []string{"environmental"},
-		EvidenceID:    "E-001",
-		CreatedAt:     result.Evidence[0].RetrievalTimestamp,
-		Metadata:      map[string]interface{}{"naics_code": "5416", "province": "AB"},
+		ID:         "P-001",
+		TenderID:   "T-001",
+		Title:      "Environmental Remediation Contract",
+		Buyer:      "Environment and Climate Change Canada",
+		BuyerType:  "Federal",
+		SourceURL:  "https://example.com",
+		Categories: []string{"environmental"},
+		EvidenceID: "E-001",
+		CreatedAt:  result.Evidence[0].RetrievalTimestamp,
+		Metadata:   map[string]interface{}{"naics_code": "5416", "province": "AB"},
 	}
 	matches := CrossReferenceProcurement(businesses, procurement)
 	if len(matches) != 1 {
@@ -214,10 +214,10 @@ func TestCrossReferenceProcurementRegion(t *testing.T) {
 	businesses := result.Entities
 
 	procurement := &domain.Procurement{
-		ID:     "P-002",
-		TenderID: "T-002",
-		Title:  "Construction Project in Ontario",
-		Buyer:  "Province of Ontario",
+		ID:         "P-002",
+		TenderID:   "T-002",
+		Title:      "Construction Project in Ontario",
+		Buyer:      "Province of Ontario",
 		Categories: []string{"construction"},
 		EvidenceID: "E-002",
 		CreatedAt:  result.Evidence[0].RetrievalTimestamp,

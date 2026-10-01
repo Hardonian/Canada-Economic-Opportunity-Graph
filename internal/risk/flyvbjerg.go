@@ -74,10 +74,10 @@ func DefaultReferenceClasses(sector domain.Sector) ReferenceClassParam {
 
 // PercentilePoint holds a probability threshold prediction.
 type PercentilePoint struct {
-	Percentile         int   `json:"percentile"` // e.g. 10, 50, 80, 90
-	CostOverrunPct     float64 `json:"cost_overrun_pct"`
-	ForecastCapexCAD   int64   `json:"forecast_capex_cad"`
-	ScheduleDelayMonths int    `json:"schedule_delay_months"`
+	Percentile          int     `json:"percentile"` // e.g. 10, 50, 80, 90
+	CostOverrunPct      float64 `json:"cost_overrun_pct"`
+	ForecastCapexCAD    int64   `json:"forecast_capex_cad"`
+	ScheduleDelayMonths int     `json:"schedule_delay_months"`
 }
 
 // FlyvbjergRiskForecast provides full reference-class risk distributions.

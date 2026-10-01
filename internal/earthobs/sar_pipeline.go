@@ -8,15 +8,15 @@ import (
 
 // InSARCoherenceAnalysis represents interferometric radar analysis across repeat satellite passes.
 type InSARCoherenceAnalysis struct {
-	PairID                string    `json:"pair_id"`
-	MasterPassDate        time.Time `json:"master_pass_date"`
-	SlavePassDate         time.Time `json:"slave_pass_date"`
-	BaselineDistanceM     float64   `json:"baseline_distance_m"`
-	TemporalBaselineDays  int       `json:"temporal_baseline_days"`
-	InterferometricCoherence float64 `json:"interferometric_coherence"` // 0.0 to 1.0
-	LineOfSightDisplacementMM float64 `json:"los_displacement_mm"`      // Surface displacement in mm
-	TailingsStabilityRating   string  `json:"tailings_stability_rating"` // "STABLE", "MONITOR", "UNSTABLE"
-	SoilMoistureEstimatePct   float64 `json:"soil_moisture_estimate_pct"`
+	PairID                    string    `json:"pair_id"`
+	MasterPassDate            time.Time `json:"master_pass_date"`
+	SlavePassDate             time.Time `json:"slave_pass_date"`
+	BaselineDistanceM         float64   `json:"baseline_distance_m"`
+	TemporalBaselineDays      int       `json:"temporal_baseline_days"`
+	InterferometricCoherence  float64   `json:"interferometric_coherence"` // 0.0 to 1.0
+	LineOfSightDisplacementMM float64   `json:"los_displacement_mm"`       // Surface displacement in mm
+	TailingsStabilityRating   string    `json:"tailings_stability_rating"` // "STABLE", "MONITOR", "UNSTABLE"
+	SoilMoistureEstimatePct   float64   `json:"soil_moisture_estimate_pct"`
 }
 
 // SARPipeline analyzes multi-temporal Sentinel-1 and RADARSAT Constellation radar data.
@@ -51,14 +51,14 @@ func (sp *SARPipeline) ComputeInSAR(masterDate, slaveDate time.Time, rawPhaseDif
 	moisture := math.Min(100.0, math.Max(5.0, depolRatio*120.0))
 
 	return &InSARCoherenceAnalysis{
-		PairID:                   fmt.Sprintf("INSAR-%d", slaveDate.Unix()),
-		MasterPassDate:           masterDate,
-		SlavePassDate:            slaveDate,
-		BaselineDistanceM:        85.4,
-		TemporalBaselineDays:     days,
-		InterferometricCoherence: math.Round(coherence*100) / 100,
+		PairID:                    fmt.Sprintf("INSAR-%d", slaveDate.Unix()),
+		MasterPassDate:            masterDate,
+		SlavePassDate:             slaveDate,
+		BaselineDistanceM:         85.4,
+		TemporalBaselineDays:      days,
+		InterferometricCoherence:  math.Round(coherence*100) / 100,
 		LineOfSightDisplacementMM: math.Round(losDispMM*10) / 10,
-		TailingsStabilityRating:  stability,
-		SoilMoistureEstimatePct:  math.Round(moisture*10) / 10,
+		TailingsStabilityRating:   stability,
+		SoilMoistureEstimatePct:   math.Round(moisture*10) / 10,
 	}
 }

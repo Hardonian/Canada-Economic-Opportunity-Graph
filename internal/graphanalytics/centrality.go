@@ -23,15 +23,15 @@ type NodeCentrality struct {
 
 // CascadingFailureResult models the system-wide fallout of a compromised or delayed node.
 type CascadingFailureResult struct {
-	TriggerNodeID       string           `json:"trigger_node_id"`
-	TriggerNodeName     string           `json:"trigger_node_name"`
-	DirectlyAffectedIDs []string         `json:"directly_affected_ids"`
-	TotalCompromisedIDs []string         `json:"total_compromised_ids"`
-	FrozenCapexCAD      int64            `json:"frozen_capex_cad"`
-	CascadingDepth      int              `json:"cascading_depth"`
-	VulnerableSectors   []domain.Sector  `json:"vulnerable_sectors"`
-	SystemicRiskScore   float64          `json:"systemic_risk_score"` // 0.0 - 100.0
-	EvaluatedAt         time.Time        `json:"evaluated_at"`
+	TriggerNodeID       string          `json:"trigger_node_id"`
+	TriggerNodeName     string          `json:"trigger_node_name"`
+	DirectlyAffectedIDs []string        `json:"directly_affected_ids"`
+	TotalCompromisedIDs []string        `json:"total_compromised_ids"`
+	FrozenCapexCAD      int64           `json:"frozen_capex_cad"`
+	CascadingDepth      int             `json:"cascading_depth"`
+	VulnerableSectors   []domain.Sector `json:"vulnerable_sectors"`
+	SystemicRiskScore   float64         `json:"systemic_risk_score"` // 0.0 - 100.0
+	EvaluatedAt         time.Time       `json:"evaluated_at"`
 }
 
 // GraphAnalyzer computes topological properties and simulates cascades.

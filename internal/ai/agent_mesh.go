@@ -62,7 +62,7 @@ func (amo *AgentMeshOrchestrator) EvaluateProject(project *domain.Project) *Cons
 		}
 	}
 
-	consensusScore := math.Round((totalScore / float64(len(roles))) * 10) / 10
+	consensusScore := math.Round((totalScore/float64(len(roles)))*10) / 10
 	verdict := "APPROVED_WITH_CONDITIONS"
 	if approvedCount == len(roles) && consensusScore >= 80.0 {
 		verdict = "APPROVED"

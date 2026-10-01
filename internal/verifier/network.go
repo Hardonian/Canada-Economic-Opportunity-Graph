@@ -15,8 +15,8 @@ import (
 // PeerNode represents a remote verifier auditor in the decentralized network.
 type PeerNode struct {
 	ID        NodeID    `json:"id"`
-	Name      string    `json:"name"`      // e.g. "Alberta Energy Regulator", "Hydro-Québec", "IESO"
-	Endpoint  string    `json:"endpoint"`  // https://peer-url:port/api/verifier
+	Name      string    `json:"name"`     // e.g. "Alberta Energy Regulator", "Hydro-Québec", "IESO"
+	Endpoint  string    `json:"endpoint"` // https://peer-url:port/api/verifier
 	PublicKey string    `json:"public_key"`
 	Active    bool      `json:"active"`
 	LastSeen  time.Time `json:"last_seen"`

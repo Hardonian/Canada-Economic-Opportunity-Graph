@@ -10,27 +10,27 @@ import (
 type StrategicGateway string
 
 const (
-	GatewayVancouver   StrategicGateway = "PORT_OF_VANCOUVER"
+	GatewayVancouver    StrategicGateway = "PORT_OF_VANCOUVER"
 	GatewayPrinceRupert StrategicGateway = "PORT_OF_PRINCE_RUPERT"
-	GatewayMontreal    StrategicGateway = "PORT_OF_MONTREAL"
-	GatewayChurchill   StrategicGateway = "PORT_OF_CHURCHILL_ARCTIC"
+	GatewayMontreal     StrategicGateway = "PORT_OF_MONTREAL"
+	GatewayChurchill    StrategicGateway = "PORT_OF_CHURCHILL_ARCTIC"
 )
 
 // PortLogisticsProfile models dynamic throughput, rail turnaround, and bottleneck status.
 type PortLogisticsProfile struct {
-	GatewayID               StrategicGateway `json:"gateway_id"`
-	PortName                string           `json:"port_name"`
-	Province                string           `json:"province"`
-	Class1RailConnections   []string         `json:"class1_rail_connections"` // "CN", "CPKC"
-	AnnualThroughputMNTonnes float64         `json:"annual_throughput_mn_tonnes"`
-	AverageVesselDwellHours float64          `json:"average_vessel_dwell_hours"`
-	AverageRailcarDwellHours float64         `json:"average_railcar_dwell_hours"`
-	BerthCapacityUtilizationPercent float64  `json:"berth_capacity_utilization_percent"`
-	RailHeadTurnaroundCyclesDays float64     `json:"rail_head_turnaround_cycles_days"`
-	IceClassEscortRequired  bool             `json:"ice_class_escort_required"`
-	ActiveBottleneckStatus  string           `json:"active_bottleneck_status"` // "ELEVATED", "OPTIMAL", "CONGESTED"
-	MitigationAction        string           `json:"mitigation_action"`
-	AuditHash               string           `json:"audit_hash"`
+	GatewayID                       StrategicGateway `json:"gateway_id"`
+	PortName                        string           `json:"port_name"`
+	Province                        string           `json:"province"`
+	Class1RailConnections           []string         `json:"class1_rail_connections"` // "CN", "CPKC"
+	AnnualThroughputMNTonnes        float64          `json:"annual_throughput_mn_tonnes"`
+	AverageVesselDwellHours         float64          `json:"average_vessel_dwell_hours"`
+	AverageRailcarDwellHours        float64          `json:"average_railcar_dwell_hours"`
+	BerthCapacityUtilizationPercent float64          `json:"berth_capacity_utilization_percent"`
+	RailHeadTurnaroundCyclesDays    float64          `json:"rail_head_turnaround_cycles_days"`
+	IceClassEscortRequired          bool             `json:"ice_class_escort_required"`
+	ActiveBottleneckStatus          string           `json:"active_bottleneck_status"` // "ELEVATED", "OPTIMAL", "CONGESTED"
+	MitigationAction                string           `json:"mitigation_action"`
+	AuditHash                       string           `json:"audit_hash"`
 }
 
 // CanonicalGateways returns the four major national gateways.

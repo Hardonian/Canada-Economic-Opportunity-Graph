@@ -21,32 +21,32 @@ const (
 
 // GroundTruthObservation represents a single satellite pass observation.
 type GroundTruthObservation struct {
-	ObservationID          string        `json:"observation_id"`
-	ProjectID              string        `json:"project_id"`
-	Constellation          Constellation `json:"constellation"`
-	PassDate               time.Time     `json:"pass_date"`
-	SARCoherenceChange     float64       `json:"sar_coherence_change"`     // -1.0 to 1.0 (High positive indicates massive surface displacement/earthworks)
-	OpticalVegetationIndex float64       `json:"optical_vegetation_index"` // NDVI (Drop indicates site clearing)
-	StructuralRadarCrossSec float64      `json:"structural_rcs_db"`        // Backscatter in dB (Increase indicates steel/concrete erect structures)
-	EarthworksDetected     bool          `json:"earthworks_detected"`
-	StructuralPourDetected bool          `json:"structural_pour_detected"`
-	ResolutionMeters       float64       `json:"resolution_meters"`
-	EvidenceID             string        `json:"evidence_id"`
+	ObservationID           string        `json:"observation_id"`
+	ProjectID               string        `json:"project_id"`
+	Constellation           Constellation `json:"constellation"`
+	PassDate                time.Time     `json:"pass_date"`
+	SARCoherenceChange      float64       `json:"sar_coherence_change"`     // -1.0 to 1.0 (High positive indicates massive surface displacement/earthworks)
+	OpticalVegetationIndex  float64       `json:"optical_vegetation_index"` // NDVI (Drop indicates site clearing)
+	StructuralRadarCrossSec float64       `json:"structural_rcs_db"`        // Backscatter in dB (Increase indicates steel/concrete erect structures)
+	EarthworksDetected      bool          `json:"earthworks_detected"`
+	StructuralPourDetected  bool          `json:"structural_pour_detected"`
+	ResolutionMeters        float64       `json:"resolution_meters"`
+	EvidenceID              string        `json:"evidence_id"`
 }
 
 // GroundTruthDossier provides satellite verification of physical progress vs claimed milestone.
 type GroundTruthDossier struct {
-	ProjectID                string                   `json:"project_id"`
-	ClaimedStage             domain.LifecycleStage    `json:"claimed_stage"`
-	CorroborationStatus      domain.ConfidenceLevel   `json:"corroboration_status"` // VERIFIED, REPORTED, CONFLICTED
-	PhysicalProgressScore    float64                  `json:"physical_progress_score"` // 0.0 - 100.0
-	EarthworksConfirmed      bool                     `json:"earthworks_confirmed"`
-	StructuresConfirmed      bool                     `json:"structures_confirmed"`
-	LastSatellitePass        time.Time                `json:"last_satellite_pass"`
-	Observations             []GroundTruthObservation `json:"observations"`
-	TelemetrySummary         string                   `json:"telemetry_summary"`
-	AuditHash                string                   `json:"audit_hash"`
-	EvaluatedAt              time.Time                `json:"evaluated_at"`
+	ProjectID             string                   `json:"project_id"`
+	ClaimedStage          domain.LifecycleStage    `json:"claimed_stage"`
+	CorroborationStatus   domain.ConfidenceLevel   `json:"corroboration_status"`    // VERIFIED, REPORTED, CONFLICTED
+	PhysicalProgressScore float64                  `json:"physical_progress_score"` // 0.0 - 100.0
+	EarthworksConfirmed   bool                     `json:"earthworks_confirmed"`
+	StructuresConfirmed   bool                     `json:"structures_confirmed"`
+	LastSatellitePass     time.Time                `json:"last_satellite_pass"`
+	Observations          []GroundTruthObservation `json:"observations"`
+	TelemetrySummary      string                   `json:"telemetry_summary"`
+	AuditHash             string                   `json:"audit_hash"`
+	EvaluatedAt           time.Time                `json:"evaluated_at"`
 }
 
 // Evaluator correlates satellite passes with economic graph milestones.

@@ -11,8 +11,8 @@ import (
 // with an explanation of which dimensions matched.
 type PrecedentMatch struct {
 	Deal          domain.DealPrecedent `json:"deal"`
-	SimilarityPct float64             `json:"similarity_pct"` // 0-100
-	MatchedOn     []string            `json:"matched_on"`     // sector, province, stage, instrument, scale
+	SimilarityPct float64              `json:"similarity_pct"` // 0-100
+	MatchedOn     []string             `json:"matched_on"`     // sector, province, stage, instrument, scale
 }
 
 // FindDealPrecedents searches investor profiles for historical transactions

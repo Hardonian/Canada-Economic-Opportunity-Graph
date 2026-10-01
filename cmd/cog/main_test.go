@@ -173,4 +173,3 @@ func TestCLIKPI(t *testing.T) {
 		t.Fatalf("expected KPI scorecard for Darlington, got: %s", outShow)
 	}
 }
-

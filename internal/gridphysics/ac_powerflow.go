@@ -23,7 +23,7 @@ type Bus struct {
 	QGenMVAR  float64 `json:"q_gen_mvar"`
 	PLoadMW   float64 `json:"p_load_mw"`
 	QLoadMVAR float64 `json:"q_load_mvar"`
-	VMagPU    float64 `json:"v_mag_pu"` // Voltage magnitude in per-unit
+	VMagPU    float64 `json:"v_mag_pu"`  // Voltage magnitude in per-unit
 	VAngRad   float64 `json:"v_ang_rad"` // Voltage phase angle in radians
 }
 
@@ -32,23 +32,23 @@ type TransmissionLine struct {
 	ID          string  `json:"id"`
 	FromBus     int     `json:"from_bus"`
 	ToBus       int     `json:"to_bus"`
-	Resistance  float64 `json:"resistance_pu"`  // R (p.u.)
-	Reactance   float64 `json:"reactance_pu"`   // X (p.u.)
-	MVARating   float64 `json:"mva_rating"`     // Thermal ampacity rating
+	Resistance  float64 `json:"resistance_pu"` // R (p.u.)
+	Reactance   float64 `json:"reactance_pu"`  // X (p.u.)
+	MVARating   float64 `json:"mva_rating"`    // Thermal ampacity rating
 	CurrentFlow float64 `json:"current_flow_mw"`
 }
 
 // ACSolverResult contains the converged Newton-Raphson power flow state.
 type ACSolverResult struct {
-	Converged        bool                `json:"converged"`
-	Iterations       int                 `json:"iterations"`
-	MaxMismatch      float64             `json:"max_mismatch"`
-	TotalGenMW       float64             `json:"total_gen_mw"`
-	TotalLoadMW      float64             `json:"total_load_mw"`
-	TotalLossesMW    float64             `json:"total_losses_mw"`
-	Buses            []Bus               `json:"buses"`
-	Lines            []TransmissionLine  `json:"lines"`
-	OverloadedLines  []string            `json:"overloaded_lines"`
+	Converged         bool               `json:"converged"`
+	Iterations        int                `json:"iterations"`
+	MaxMismatch       float64            `json:"max_mismatch"`
+	TotalGenMW        float64            `json:"total_gen_mw"`
+	TotalLoadMW       float64            `json:"total_load_mw"`
+	TotalLossesMW     float64            `json:"total_losses_mw"`
+	Buses             []Bus              `json:"buses"`
+	Lines             []TransmissionLine `json:"lines"`
+	OverloadedLines   []string           `json:"overloaded_lines"`
 	VoltageViolations []string           `json:"voltage_violations"`
 }
 

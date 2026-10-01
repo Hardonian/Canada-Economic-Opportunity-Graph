@@ -12,7 +12,7 @@ type AgentRole string
 
 const (
 	RoleFinanceAnalyst        AgentRole = "FINANCE_ANALYST"
-	RoleIndigenousJurist       AgentRole = "INDIGENOUS_JURIST"
+	RoleIndigenousJurist      AgentRole = "INDIGENOUS_JURIST"
 	RoleGridPhysicist         AgentRole = "GRID_PHYSICIST"
 	RoleSupplyChainSpecialist AgentRole = "SUPPLY_CHAIN_SPECIALIST"
 )
@@ -55,7 +55,7 @@ type AgentEvaluation struct {
 	AgentID         string             `json:"agent_id"`
 	Role            AgentRole          `json:"role"`
 	ProjectID       string             `json:"project_id"`
-	Recommendation  string             `json:"recommendation"` // "PROCEED", "CONDITIONS_MANDATED", "HOLD", "REJECT"
+	Recommendation  string             `json:"recommendation"`   // "PROCEED", "CONDITIONS_MANDATED", "HOLD", "REJECT"
 	ConfidenceScore float64            `json:"confidence_score"` // 0.0 - 100.0
 	KeyFindings     []string           `json:"key_findings"`
 	CriticalRisks   []string           `json:"critical_risks"`
@@ -65,11 +65,11 @@ type AgentEvaluation struct {
 
 // ConsensusReport synthesizes the multi-agent peer review into an executive decision memo.
 type ConsensusReport struct {
-	ReportID             string            `json:"report_id"`
-	ProjectID            string            `json:"project_id"`
-	ConsensusVerdict     string            `json:"consensus_verdict"` // "APPROVED", "APPROVED_WITH_CONDITIONS", "REJECTED"
-	ConsensusScore       float64           `json:"consensus_score"`   // 0.0 - 100.0
+	ReportID             string                         `json:"report_id"`
+	ProjectID            string                         `json:"project_id"`
+	ConsensusVerdict     string                         `json:"consensus_verdict"` // "APPROVED", "APPROVED_WITH_CONDITIONS", "REJECTED"
+	ConsensusScore       float64                        `json:"consensus_score"`   // 0.0 - 100.0
 	EvaluationsByRole    map[AgentRole]*AgentEvaluation `json:"evaluations_by_role"`
-	ConsensusActionItems []string          `json:"consensus_action_items"`
-	GeneratedAt          time.Time         `json:"generated_at"`
+	ConsensusActionItems []string                       `json:"consensus_action_items"`
+	GeneratedAt          time.Time                      `json:"generated_at"`
 }

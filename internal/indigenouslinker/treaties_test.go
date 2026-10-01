@@ -6,12 +6,12 @@ import (
 
 func TestFindTreatiesForLocation(t *testing.T) {
 	tests := []struct {
-		name         string
-		lat          float64
-		lng          float64
-		province     string
-		expectedID   string
-		expectFound  bool
+		name        string
+		lat         float64
+		lng         float64
+		province    string
+		expectedID  string
+		expectFound bool
 	}{
 		{
 			name:        "Ring of Fire (Treaty 9 Ontario)",

@@ -9,11 +9,11 @@ import (
 type ChokepointID string
 
 const (
-	ChokepointSeawayLocks       ChokepointID = "ST_LAWRENCE_SEAWAY_LOCKS"
-	ChokepointVancouverGateway   ChokepointID = "PORT_OF_VANCOUVER_BURRARD"
-	ChokepointFraserCanyonRail  ChokepointID = "FRASER_CANYON_RAIL_CORRIDOR"
-	ChokepointAmbassadorBridge  ChokepointID = "DETROIT_WINDSOR_AMBASSADOR"
-	ChokepointCansoStrait       ChokepointID = "CANSO_STRAIT_CAUSEWAY"
+	ChokepointSeawayLocks      ChokepointID = "ST_LAWRENCE_SEAWAY_LOCKS"
+	ChokepointVancouverGateway ChokepointID = "PORT_OF_VANCOUVER_BURRARD"
+	ChokepointFraserCanyonRail ChokepointID = "FRASER_CANYON_RAIL_CORRIDOR"
+	ChokepointAmbassadorBridge ChokepointID = "DETROIT_WINDSOR_AMBASSADOR"
+	ChokepointCansoStrait      ChokepointID = "CANSO_STRAIT_CAUSEWAY"
 )
 
 // ChokepointProfile models the capacity and throughput of a national logistics chokepoint.

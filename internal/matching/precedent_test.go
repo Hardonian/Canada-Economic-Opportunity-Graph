@@ -43,11 +43,11 @@ func TestFindDealPrecedents_TopNLimits(t *testing.T) {
 func TestFindDealPrecedents_MatchesAllDimensions(t *testing.T) {
 	project := &domain.Project{ID: "p1", Sector: domain.SectorCleanEnergy, Province: "ON", CurrentStage: domain.StageFEED, CapexCAD: 1_000_000_000}
 	deal := domain.DealPrecedent{
-		Sector:     domain.SectorCleanEnergy,
-		Province:   "ON",
-		Stage:      domain.StageFEED,
-		AmountCAD:  1_000_000_000,
-		Year:       2024,
+		Sector:    domain.SectorCleanEnergy,
+		Province:  "ON",
+		Stage:     domain.StageFEED,
+		AmountCAD: 1_000_000_000,
+		Year:      2024,
 	}
 	profile := &domain.InvestorProfile{EntityID: "e1", PublicDealHistory: []domain.DealPrecedent{deal}}
 	got := FindDealPrecedents(project, []*domain.InvestorProfile{profile}, 5)
@@ -109,10 +109,10 @@ func TestCalculateArchetypeFit_InfrastructureFund(t *testing.T) {
 	now := time.Now()
 	ctx := FitContext{
 		Project: &domain.Project{
-			ID:            "p1",
-			Sector:        domain.SectorCleanEnergy,
-			CurrentStage:  domain.StageConstruction,
-			CapexCAD:      1_000_000_000,
+			ID:           "p1",
+			Sector:       domain.SectorCleanEnergy,
+			CurrentStage: domain.StageConstruction,
+			CapexCAD:     1_000_000_000,
 		},
 		CapitalNeeds: []*domain.CapitalNeed{{Types: []domain.CapitalNeedType{domain.NeedInfrastructureEquity}}},
 	}
@@ -166,21 +166,21 @@ func TestCalculateInvestorFit_ScoreRange(t *testing.T) {
 	now := time.Now()
 	ctx := FitContext{
 		Project: &domain.Project{
-			ID:            "p1",
-			Sector:        domain.SectorCleanEnergy,
-			CurrentStage:  domain.StageConstruction,
-			CapexCAD:      1_000_000_000,
+			ID:           "p1",
+			Sector:       domain.SectorCleanEnergy,
+			CurrentStage: domain.StageConstruction,
+			CapexCAD:     1_000_000_000,
 		},
 		CapitalNeeds: []*domain.CapitalNeed{{Types: []domain.CapitalNeedType{domain.NeedInfrastructureEquity}}},
 	}
 	profile := &domain.InvestorProfile{
-		EntityID:            "e1",
-		InvestorTypes:       []domain.CounterpartyType{domain.CounterpartyInfrastructureFund},
-		TargetSectors:       []domain.Sector{domain.SectorCleanEnergy},
-		TargetGeographies:   []string{"ON"},
-		MinTicketCAD:        100_000_000,
-		MaxTicketCAD:        2_000_000_000,
-		PreferredStages:     []domain.LifecycleStage{domain.StageConstruction, domain.StageOperating},
+		EntityID:          "e1",
+		InvestorTypes:     []domain.CounterpartyType{domain.CounterpartyInfrastructureFund},
+		TargetSectors:     []domain.Sector{domain.SectorCleanEnergy},
+		TargetGeographies: []string{"ON"},
+		MinTicketCAD:      100_000_000,
+		MaxTicketCAD:      2_000_000_000,
+		PreferredStages:   []domain.LifecycleStage{domain.StageConstruction, domain.StageOperating},
 	}
 	got := CalculateInvestorFit(ctx, profile, now)
 	if got == nil {

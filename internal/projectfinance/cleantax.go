@@ -12,26 +12,26 @@ import (
 type ITCType string
 
 const (
-	ITCCleanTechnology         ITCType = "CLEAN_TECHNOLOGY_ITC_30"
-	ITCCleanHydrogen           ITCType = "CLEAN_HYDROGEN_ITC_40"
-	ITCCleanElectricity        ITCType = "CLEAN_ELECTRICITY_ITC_15"
-	ITCCleanManufacturing      ITCType = "CLEAN_TECH_MANUFACTURING_ITC_30"
-	ITCCarbonCaptureStorage    ITCType = "CCUS_ITC_50"
+	ITCCleanTechnology      ITCType = "CLEAN_TECHNOLOGY_ITC_30"
+	ITCCleanHydrogen        ITCType = "CLEAN_HYDROGEN_ITC_40"
+	ITCCleanElectricity     ITCType = "CLEAN_ELECTRICITY_ITC_15"
+	ITCCleanManufacturing   ITCType = "CLEAN_TECH_MANUFACTURING_ITC_30"
+	ITCCarbonCaptureStorage ITCType = "CCUS_ITC_50"
 )
 
 // CleanTaxCreditProfile models refundable federal tax benefits and CCfD underwriting.
 type CleanTaxCreditProfile struct {
-	ProjectID                 string  `json:"project_id"`
-	ApplicableITC             ITCType `json:"applicable_itc"`
-	EligibleCapexCAD          int64   `json:"eligible_capex_cad"`
-	BaseCreditRatePercent     float64 `json:"base_credit_rate_percent"`
-	LaborConditionBonusPercent float64 `json:"labor_condition_bonus_percent"` // +10% for prevailing wage and apprentice ratios
-	EffectiveCreditRatePercent float64 `json:"effective_credit_rate_percent"`
-	TotalTaxCreditYieldCAD    int64   `json:"total_tax_credit_yield_cad"`
-	CCfDEligible              bool    `json:"ccfd_eligible"`
-	CCfDStrikePriceCADTonne   float64 `json:"ccfd_strike_price_cad_tonne"`
-	EstimatedAnnualCCfDSubsidyCAD int64 `json:"estimated_annual_ccfd_subsidy_cad"`
-	AuditHash                 string  `json:"audit_hash"`
+	ProjectID                     string  `json:"project_id"`
+	ApplicableITC                 ITCType `json:"applicable_itc"`
+	EligibleCapexCAD              int64   `json:"eligible_capex_cad"`
+	BaseCreditRatePercent         float64 `json:"base_credit_rate_percent"`
+	LaborConditionBonusPercent    float64 `json:"labor_condition_bonus_percent"` // +10% for prevailing wage and apprentice ratios
+	EffectiveCreditRatePercent    float64 `json:"effective_credit_rate_percent"`
+	TotalTaxCreditYieldCAD        int64   `json:"total_tax_credit_yield_cad"`
+	CCfDEligible                  bool    `json:"ccfd_eligible"`
+	CCfDStrikePriceCADTonne       float64 `json:"ccfd_strike_price_cad_tonne"`
+	EstimatedAnnualCCfDSubsidyCAD int64   `json:"estimated_annual_ccfd_subsidy_cad"`
+	AuditHash                     string  `json:"audit_hash"`
 }
 
 // TaxCreditCalculator evaluates federal tax incentives under Bills C-59 and C-69.
@@ -95,15 +95,15 @@ func (c *TaxCreditCalculator) CalculateCredits(project *domain.Project) *CleanTa
 	totalCredit := int64(float64(eligibleCapex) * (effectiveRate / 100.0))
 
 	profile := &CleanTaxCreditProfile{
-		ProjectID:                  project.ID,
-		ApplicableITC:              itcType,
-		EligibleCapexCAD:           eligibleCapex,
-		BaseCreditRatePercent:      baseRate,
-		LaborConditionBonusPercent: laborBonus,
-		EffectiveCreditRatePercent: effectiveRate,
-		TotalTaxCreditYieldCAD:     totalCredit,
-		CCfDEligible:               isCCfD,
-		CCfDStrikePriceCADTonne:    strikePrice,
+		ProjectID:                     project.ID,
+		ApplicableITC:                 itcType,
+		EligibleCapexCAD:              eligibleCapex,
+		BaseCreditRatePercent:         baseRate,
+		LaborConditionBonusPercent:    laborBonus,
+		EffectiveCreditRatePercent:    effectiveRate,
+		TotalTaxCreditYieldCAD:        totalCredit,
+		CCfDEligible:                  isCCfD,
+		CCfDStrikePriceCADTonne:       strikePrice,
 		EstimatedAnnualCCfDSubsidyCAD: annualCCfD,
 	}
 

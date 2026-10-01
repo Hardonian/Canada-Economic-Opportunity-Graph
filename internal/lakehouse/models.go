@@ -40,24 +40,24 @@ type PartitionSpec struct {
 
 // Snapshot represents an immutable point-in-time state of an Iceberg table.
 type Snapshot struct {
-	SnapshotID   int64     `json:"snapshot_id"`
-	ParentID     int64     `json:"parent_snapshot_id,omitempty"`
-	TimestampMs  int64     `json:"timestamp_ms"`
-	ManifestList string    `json:"manifest_list"`
-	RecordCount  int64     `json:"record_count"`
-	ContentHash  string    `json:"content_hash"`
+	SnapshotID   int64  `json:"snapshot_id"`
+	ParentID     int64  `json:"parent_snapshot_id,omitempty"`
+	TimestampMs  int64  `json:"timestamp_ms"`
+	ManifestList string `json:"manifest_list"`
+	RecordCount  int64  `json:"record_count"`
+	ContentHash  string `json:"content_hash"`
 }
 
 // IcebergMetadata stores table metadata according to Apache Iceberg format v2.
 type IcebergMetadata struct {
-	TableUUID        string        `json:"table_uuid"`
-	FormatVersion    int           `json:"format_version"`
-	Location         string        `json:"location"`
-	CurrentSchemaID  int           `json:"current_schema_id"`
-	Schemas          []TableSchema `json:"schemas"`
-	PartitionSpec    PartitionSpec `json:"partition_spec"`
-	CurrentSnapshot  int64         `json:"current_snapshot_id"`
-	Snapshots        []Snapshot    `json:"snapshots"`
+	TableUUID       string        `json:"table_uuid"`
+	FormatVersion   int           `json:"format_version"`
+	Location        string        `json:"location"`
+	CurrentSchemaID int           `json:"current_schema_id"`
+	Schemas         []TableSchema `json:"schemas"`
+	PartitionSpec   PartitionSpec `json:"partition_spec"`
+	CurrentSnapshot int64         `json:"current_snapshot_id"`
+	Snapshots       []Snapshot    `json:"snapshots"`
 }
 
 // RecordBatch represents an in-memory columnar slice (Arrow-compatible).

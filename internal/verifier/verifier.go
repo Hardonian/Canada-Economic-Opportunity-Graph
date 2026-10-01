@@ -28,12 +28,12 @@ type NodeID string
 
 // Attestation is a single node's signed observation of a milestone.
 type Attestation struct {
-	NodeID       NodeID     `json:"node_id"`
-	MilestoneID  string     `json:"milestone_id"`
-	ProjectID    string     `json:"project_id"`
-	EvidenceHash string     `json:"evidence_hash"`
-	ObservedAt   time.Time  `json:"observed_at"`
-	Signature    string     `json:"signature"`
+	NodeID       NodeID    `json:"node_id"`
+	MilestoneID  string    `json:"milestone_id"`
+	ProjectID    string    `json:"project_id"`
+	EvidenceHash string    `json:"evidence_hash"`
+	ObservedAt   time.Time `json:"observed_at"`
+	Signature    string    `json:"signature"`
 }
 
 // NotarizedMilestone is the result of a quorum vote.

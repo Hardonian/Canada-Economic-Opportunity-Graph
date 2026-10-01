@@ -16,15 +16,15 @@ import (
 
 // SentinelProduct represents a remote sensing acquisition catalog item from ESA Copernicus CDSE.
 type SentinelProduct struct {
-	ID                 string    `json:"id"`
-	Name               string    `json:"name"`
-	ContentType        string    `json:"content_type"`
-	ContentLength      int64     `json:"content_length"`
-	OriginDate         time.Time `json:"origin_date"`
-	OrbitDirection     string    `json:"orbit_direction"`      // "ASCENDING", "DESCENDING"
-	PolarisationChannels string  `json:"polarisation_channels"` // "VV", "VH", "HH", "HV"
-	FootprintGeoJSON   string    `json:"footprint_geojson"`
-	DownloadURL        string    `json:"download_url"`
+	ID                   string    `json:"id"`
+	Name                 string    `json:"name"`
+	ContentType          string    `json:"content_type"`
+	ContentLength        int64     `json:"content_length"`
+	OriginDate           time.Time `json:"origin_date"`
+	OrbitDirection       string    `json:"orbit_direction"`       // "ASCENDING", "DESCENDING"
+	PolarisationChannels string    `json:"polarisation_channels"` // "VV", "VH", "HH", "HV"
+	FootprintGeoJSON     string    `json:"footprint_geojson"`
+	DownloadURL          string    `json:"download_url"`
 }
 
 // CopernicusClient queries the European Space Agency CDSE OData API for radar scenes.

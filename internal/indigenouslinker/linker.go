@@ -21,10 +21,10 @@ import (
 
 // LinkResult summarises a cross-referencing cycle.
 type LinkResult struct {
-	ProjectsScanned     int
-	ProcurementsScanned int
+	ProjectsScanned      int
+	ProcurementsScanned  int
 	RelationshipsCreated int
-	Errors              []string
+	Errors               []string
 }
 
 // Link runs cross-referencing over the projects and procurements currently in

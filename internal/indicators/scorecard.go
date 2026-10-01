@@ -285,7 +285,7 @@ func (pe *ProjectEvaluator) evaluateSupplyChain(p *domain.Project, reg map[KPICo
 	} else if p.Sector == domain.SectorCriticalMinerals {
 		domContent = 62.0
 		bottleneck = 48.0
-		tariffExp = 22.0  // U.S. auto market exposure
+		tariffExp = 22.0 // U.S. auto market exposure
 		importRep = 650.0
 	}
 

@@ -29,14 +29,14 @@ func TestDetectSignals_StageChangeSignals(t *testing.T) {
 	project := &domain.Project{ID: "p1", Name: "Test", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFID}
 	events := []*domain.Event{
 		{
-			ID:        "e1",
-			ProjectID: "p1",
-			EventType: "stage_change",
-			EventDate: now,
+			ID:            "e1",
+			ProjectID:     "p1",
+			EventType:     "stage_change",
+			EventDate:     now,
 			PreviousStage: func() *domain.LifecycleStage { s := domain.StageConstruction; return &s }(),
 			NewStage:      func() *domain.LifecycleStage { s := domain.StageFID; return &s }(),
-			Title:       "FID Reached",
-			EvidenceID:  "ev1",
+			Title:         "FID Reached",
+			EvidenceID:    "ev1",
 		},
 	}
 	got := DetectSignals(project, events, nil, nil)
@@ -64,14 +64,14 @@ func TestDetectSignals_RegulatorySignals(t *testing.T) {
 	project := &domain.Project{ID: "p1", Name: "Test", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StagePermitting}
 	events := []*domain.Event{
 		{
-			ID:        "e1",
-			ProjectID: "p1",
-			EventType: "regulatory_filing",
-			EventDate: time.Now(),
+			ID:            "e1",
+			ProjectID:     "p1",
+			EventType:     "regulatory_filing",
+			EventDate:     time.Now(),
 			PreviousStage: func() *domain.LifecycleStage { s := domain.StageFEED; return &s }(),
 			NewStage:      func() *domain.LifecycleStage { s := domain.StagePermitting; return &s }(),
-			Title:       "Permit Filed",
-			EvidenceID:  "ev1",
+			Title:         "Permit Filed",
+			EvidenceID:    "ev1",
 		},
 	}
 	got := DetectSignals(project, events, nil, nil)
@@ -91,11 +91,11 @@ func TestDetectSignals_IndigenousSignals(t *testing.T) {
 	project := &domain.Project{ID: "p1", Name: "Test", Sector: domain.SectorCleanEnergy, CurrentStage: domain.StageFEED}
 	events := []*domain.Event{
 		{
-			ID:        "e1",
-			ProjectID: "p1",
-			EventType: "indigenous_agreement",
-			EventDate: time.Now(),
-			Title:     "IBA Signed",
+			ID:         "e1",
+			ProjectID:  "p1",
+			EventType:  "indigenous_agreement",
+			EventDate:  time.Now(),
+			Title:      "IBA Signed",
 			EvidenceID: "ev1",
 		},
 	}

@@ -102,14 +102,14 @@ func ReconcileClaims(candidate *domain.Claim, observations []*domain.Claim, acto
 		result = append(result, &promoted)
 	}
 	audits = append(audits, &domain.AuditEntry{
-		ID: "audit-promote-" + candidate.ID,
-		Action: domain.AuditClaimPromoted,
-		Actor: actor,
-		SubjectID: candidate.ID,
-		Reason: "Matching publishable public evidence independently corroborated the restricted candidate claim.",
+		ID:             "audit-promote-" + candidate.ID,
+		Action:         domain.AuditClaimPromoted,
+		Actor:          actor,
+		SubjectID:      candidate.ID,
+		Reason:         "Matching publishable public evidence independently corroborated the restricted candidate claim.",
 		FromVisibility: candidate.SourceVisibility,
-		ToVisibility: matching[0].SourceVisibility,
-		OccurredAt: now.UTC(),
+		ToVisibility:   matching[0].SourceVisibility,
+		OccurredAt:     now.UTC(),
 	})
 	return result, audits
 }

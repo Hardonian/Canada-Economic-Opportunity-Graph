@@ -9,15 +9,15 @@ import (
 
 // TailRiskProfile quantifies extreme fat-tailed megaproject distributions beyond Gaussian assumptions.
 type TailRiskProfile struct {
-	ProjectID             string    `json:"project_id"`
-	TailIndexAlpha        float64   `json:"tail_index_alpha"`        // Pareto power-law parameter (1.2 to 1.8 for megaprojects)
-	ProbExceeding100Pct   float64   `json:"prob_exceeding_100pct"`   // Probability of doubling base Capex (0.0 to 1.0)
-	ProbExceedingDoubling float64   `json:"prob_exceeding_doubling"` // Probability of 2x schedule extension
-	VaR99CAD              int64     `json:"var_99_cad"`              // 99th percentile Value at Risk (Capex)
-	ExpectedShortfall99CAD int64    `json:"expected_shortfall_99_cad"` // CVaR-99: Average loss given overrun is in worst 1%
-	FragilityRating       string    `json:"fragility_rating"`        // "ANTIFRAGILE", "ROBUST", "FRAGILE", "EXTREME_HAZARD"
-	DeRiskingMeasures     []string  `json:"de_risking_measures"`
-	EvaluatedAt           time.Time `json:"evaluated_at"`
+	ProjectID              string    `json:"project_id"`
+	TailIndexAlpha         float64   `json:"tail_index_alpha"`          // Pareto power-law parameter (1.2 to 1.8 for megaprojects)
+	ProbExceeding100Pct    float64   `json:"prob_exceeding_100pct"`     // Probability of doubling base Capex (0.0 to 1.0)
+	ProbExceedingDoubling  float64   `json:"prob_exceeding_doubling"`   // Probability of 2x schedule extension
+	VaR99CAD               int64     `json:"var_99_cad"`                // 99th percentile Value at Risk (Capex)
+	ExpectedShortfall99CAD int64     `json:"expected_shortfall_99_cad"` // CVaR-99: Average loss given overrun is in worst 1%
+	FragilityRating        string    `json:"fragility_rating"`          // "ANTIFRAGILE", "ROBUST", "FRAGILE", "EXTREME_HAZARD"
+	DeRiskingMeasures      []string  `json:"de_risking_measures"`
+	EvaluatedAt            time.Time `json:"evaluated_at"`
 }
 
 // EvaluateTailRisk computes power-law extreme hazard estimates calibrated from historical megaprojects.

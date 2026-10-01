@@ -21,19 +21,19 @@ const (
 
 // TenderAmendment captures a formal change or award notice for a public procurement tender.
 type TenderAmendment struct {
-	ID                string        `json:"id"`
-	TenderReference   string        `json:"tender_reference"`
-	AmendmentNumber   int           `json:"amendment_number"`
-	Type              AmendmentType `json:"type"`
-	IssuedDate        time.Time     `json:"issued_date"`
-	OriginalClosing   time.Time     `json:"original_closing,omitempty"`
-	RevisedClosing    *time.Time    `json:"revised_closing,omitempty"`
-	WinningBidder     string        `json:"winning_bidder,omitempty"`
-	WinningBidderBN   string        `json:"winning_bidder_bn,omitempty"` // Canadian Business Number
-	ContractValueCAD  int64         `json:"contract_value_cad,omitempty"`
-	Summary           string        `json:"summary"`
-	SourceURL         string        `json:"source_url"`
-	AuditHash         string        `json:"audit_hash"`
+	ID               string        `json:"id"`
+	TenderReference  string        `json:"tender_reference"`
+	AmendmentNumber  int           `json:"amendment_number"`
+	Type             AmendmentType `json:"type"`
+	IssuedDate       time.Time     `json:"issued_date"`
+	OriginalClosing  time.Time     `json:"original_closing,omitempty"`
+	RevisedClosing   *time.Time    `json:"revised_closing,omitempty"`
+	WinningBidder    string        `json:"winning_bidder,omitempty"`
+	WinningBidderBN  string        `json:"winning_bidder_bn,omitempty"` // Canadian Business Number
+	ContractValueCAD int64         `json:"contract_value_cad,omitempty"`
+	Summary          string        `json:"summary"`
+	SourceURL        string        `json:"source_url"`
+	AuditHash        string        `json:"audit_hash"`
 }
 
 // AmendmentTracker processes tender amendments and awards.

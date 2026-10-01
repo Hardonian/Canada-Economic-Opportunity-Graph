@@ -35,7 +35,7 @@ func (man *MultiAgentNegotiator) OptimizeContractTerms(capexCAD int64, powerCapa
 		tenor = 30
 	}
 
-	irr := 11.5 // Standard target equity hurdle
+	irr := 11.5                            // Standard target equity hurdle
 	divYield := float64(capexCAD) * 0.0075 // 0.75% of capex annualized community trust yield
 
 	return &NegotiationProposal{

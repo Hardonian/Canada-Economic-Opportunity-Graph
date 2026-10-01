@@ -11,7 +11,7 @@ import (
 type WriteBackEngine struct {
 	mu           sync.RWMutex
 	actions      map[string]*Action
-	nodeActions  map[string][]string               // nodeID -> actionIDs
+	nodeActions  map[string][]string                          // nodeID -> actionIDs
 	branchStates map[string]map[string]map[string]interface{} // branchID -> nodeID -> properties
 	invalidator  *CascadeInvalidator
 }

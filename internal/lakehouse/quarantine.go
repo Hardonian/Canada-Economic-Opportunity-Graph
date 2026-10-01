@@ -14,9 +14,9 @@ type QualityRule struct {
 
 // QuarantineEngine inspects records before ingestion and quarantines malformed data.
 type QuarantineEngine struct {
-	mu         sync.RWMutex
-	records    []*QuarantineRecord
-	rules      map[string][]QualityRule // table -> rules
+	mu      sync.RWMutex
+	records []*QuarantineRecord
+	rules   map[string][]QualityRule // table -> rules
 }
 
 // NewQuarantineEngine initializes the data quality firewall.

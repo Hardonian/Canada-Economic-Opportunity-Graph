@@ -51,11 +51,11 @@ func TestLinkResult_WithIndigenousBusiness(t *testing.T) {
 	}
 	biz := &domain.Entity{
 		ID:           "ib-1",
-	 CommonName:   "Test Indigenous Business",
-	 LegalName:    "Test Indigenous Business Ltd",
-	 EntityType:   "IndigenousBusiness",
-	 Jurisdiction: "ON",
-	 Identifiers: map[string]string{
+		CommonName:   "Test Indigenous Business",
+		LegalName:    "Test Indigenous Business Ltd",
+		EntityType:   "IndigenousBusiness",
+		Jurisdiction: "ON",
+		Identifiers: map[string]string{
 			"naics_code": "221113",
 		},
 		UpdatedAt: time.Now().UTC(),
@@ -84,11 +84,11 @@ func TestLinkResult_Idempotent(t *testing.T) {
 	}
 	biz := &domain.Entity{
 		ID:           "ib-1",
-	 CommonName:   "Test Indigenous Business",
-	 LegalName:    "Test Indigenous Business Ltd",
-	 EntityType:   "IndigenousBusiness",
-	 Jurisdiction: "ON",
-	 Identifiers: map[string]string{
+		CommonName:   "Test Indigenous Business",
+		LegalName:    "Test Indigenous Business Ltd",
+		EntityType:   "IndigenousBusiness",
+		Jurisdiction: "ON",
+		Identifiers: map[string]string{
 			"naics_code": "221113",
 		},
 		UpdatedAt: time.Now().UTC(),
@@ -126,11 +126,11 @@ func TestLinkResult_ProcurementScanned(t *testing.T) {
 	}
 	biz := &domain.Entity{
 		ID:           "ib-1",
-	 CommonName:   "Test Indigenous Business",
-	 LegalName:    "Test Indigenous Business Ltd",
-	 EntityType:   "IndigenousBusiness",
-	 Jurisdiction: "ON",
-	 Identifiers: map[string]string{
+		CommonName:   "Test Indigenous Business",
+		LegalName:    "Test Indigenous Business Ltd",
+		EntityType:   "IndigenousBusiness",
+		Jurisdiction: "ON",
+		Identifiers: map[string]string{
 			"naics_code": "221113",
 		},
 		UpdatedAt: time.Now().UTC(),

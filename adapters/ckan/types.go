@@ -17,40 +17,40 @@ import (
 type Family string
 
 const (
-	FamilyUnknown          Family = "unknown"
-	FamilyRESTAPI          Family = "rest_api"
-	FamilyGraphQL          Family = "graphql"
-	FamilyOpenAPI          Family = "openapi"
-	FamilyCKAN             Family = "ckan"
-	FamilySocrata          Family = "socrata"
-	FamilyArcGISFeature    Family = "arcgis_feature_server"
-	FamilyArcGISMap        Family = "arcgis_map_server"
-	FamilyGeoJSON          Family = "geojson"
-	FamilyWFS              Family = "wfs"
-	FamilyWMS              Family = "wms"
-	FamilyWMTS             Family = "wmts"
-	FamilySDMX             Family = "sdmx"
-	FamilyCSV              Family = "csv"
-	FamilyTSV              Family = "tsv"
-	FamilyXLS              Family = "xls"
-	FamilyXLSX             Family = "xlsx"
-	FamilyJSON             Family = "json"
-	FamilyJSONL            Family = "jsonl"
-	FamilyXML              Family = "xml"
-	FamilyRSS              Family = "rss"
-	FamilyAtom             Family = "atom"
-	FamilyDCAT             Family = "dcat"
-	FamilyJSONLD           Family = "json_ld"
-	FamilyRDF              Family = "rdf"
-	FamilySPARQL           Family = "sparql"
-	FamilyHTML             Family = "html"
-	FamilyPDF              Family = "pdf"
-	FamilyZIP              Family = "zip"
-	FamilyKML              Family = "kml"
-	FamilyKMZ              Family = "kmz"
-	FamilyShapefile        Family = "shapefile"
-	FamilyGeoPackage       Family = "geopackage"
-	FamilyGit              Family = "git"
+	FamilyUnknown       Family = "unknown"
+	FamilyRESTAPI       Family = "rest_api"
+	FamilyGraphQL       Family = "graphql"
+	FamilyOpenAPI       Family = "openapi"
+	FamilyCKAN          Family = "ckan"
+	FamilySocrata       Family = "socrata"
+	FamilyArcGISFeature Family = "arcgis_feature_server"
+	FamilyArcGISMap     Family = "arcgis_map_server"
+	FamilyGeoJSON       Family = "geojson"
+	FamilyWFS           Family = "wfs"
+	FamilyWMS           Family = "wms"
+	FamilyWMTS          Family = "wmts"
+	FamilySDMX          Family = "sdmx"
+	FamilyCSV           Family = "csv"
+	FamilyTSV           Family = "tsv"
+	FamilyXLS           Family = "xls"
+	FamilyXLSX          Family = "xlsx"
+	FamilyJSON          Family = "json"
+	FamilyJSONL         Family = "jsonl"
+	FamilyXML           Family = "xml"
+	FamilyRSS           Family = "rss"
+	FamilyAtom          Family = "atom"
+	FamilyDCAT          Family = "dcat"
+	FamilyJSONLD        Family = "json_ld"
+	FamilyRDF           Family = "rdf"
+	FamilySPARQL        Family = "sparql"
+	FamilyHTML          Family = "html"
+	FamilyPDF           Family = "pdf"
+	FamilyZIP           Family = "zip"
+	FamilyKML           Family = "kml"
+	FamilyKMZ           Family = "kmz"
+	FamilyShapefile     Family = "shapefile"
+	FamilyGeoPackage    Family = "geopackage"
+	FamilyGit           Family = "git"
 )
 
 // LocalizedText retains Canada's English/French sibling representations.
@@ -114,26 +114,26 @@ type Relevance struct {
 
 // Resource is a source candidate enumerated from a CKAN dataset.
 type Resource struct {
-	ID                string        `json:"id"`
-	RemoteID          string        `json:"remote_id,omitempty"`
-	DatasetID         string        `json:"dataset_id"`
-	Name              LocalizedText `json:"name,omitempty"`
-	Description       LocalizedText `json:"description,omitempty"`
-	URL               string        `json:"url"`
-	DeclaredFormat    string        `json:"declared_format,omitempty"`
-	MIMEType          string        `json:"mime_type,omitempty"`
-	ResourceType      string        `json:"resource_type,omitempty"`
-	URLType           string        `json:"url_type,omitempty"`
-	Family            Family        `json:"family"`
-	ArchiveContains   Family        `json:"archive_contains,omitempty"`
-	Languages         []string      `json:"languages,omitempty"`
-	State             string        `json:"state,omitempty"`
-	Hash              string        `json:"hash,omitempty"`
-	Position          int           `json:"position"`
-	DataStoreActive   bool          `json:"datastore_active"`
-	CreatedAt         *time.Time    `json:"created_at,omitempty"`
-	LastModified      *time.Time    `json:"last_modified,omitempty"`
-	MetadataModified  *time.Time    `json:"metadata_modified,omitempty"`
+	ID               string        `json:"id"`
+	RemoteID         string        `json:"remote_id,omitempty"`
+	DatasetID        string        `json:"dataset_id"`
+	Name             LocalizedText `json:"name,omitempty"`
+	Description      LocalizedText `json:"description,omitempty"`
+	URL              string        `json:"url"`
+	DeclaredFormat   string        `json:"declared_format,omitempty"`
+	MIMEType         string        `json:"mime_type,omitempty"`
+	ResourceType     string        `json:"resource_type,omitempty"`
+	URLType          string        `json:"url_type,omitempty"`
+	Family           Family        `json:"family"`
+	ArchiveContains  Family        `json:"archive_contains,omitempty"`
+	Languages        []string      `json:"languages,omitempty"`
+	State            string        `json:"state,omitempty"`
+	Hash             string        `json:"hash,omitempty"`
+	Position         int           `json:"position"`
+	DataStoreActive  bool          `json:"datastore_active"`
+	CreatedAt        *time.Time    `json:"created_at,omitempty"`
+	LastModified     *time.Time    `json:"last_modified,omitempty"`
+	MetadataModified *time.Time    `json:"metadata_modified,omitempty"`
 }
 
 // Dataset is a CKAN package plus all automatically enumerated resources.
@@ -166,21 +166,21 @@ type Dataset struct {
 
 // SearchPage represents one package_search response.
 type SearchPage struct {
-	Total        int                      `json:"total"`
-	Start        int                      `json:"start"`
-	Rows         int                      `json:"rows"`
-	Sort         string                   `json:"sort,omitempty"`
-	Datasets     []Dataset                `json:"datasets,omitempty"`
-	Checkpoint   safefetch.Checkpoint     `json:"checkpoint,omitempty"`
-	NotModified  bool                     `json:"not_modified"`
+	Total       int                  `json:"total"`
+	Start       int                  `json:"start"`
+	Rows        int                  `json:"rows"`
+	Sort        string               `json:"sort,omitempty"`
+	Datasets    []Dataset            `json:"datasets,omitempty"`
+	Checkpoint  safefetch.Checkpoint `json:"checkpoint,omitempty"`
+	NotModified bool                 `json:"not_modified"`
 }
 
 // DiscoveryResult combines bounded package_search pages.
 type DiscoveryResult struct {
-	TotalAvailable int                              `json:"total_available"`
-	Pages          int                              `json:"pages"`
-	Datasets       []Dataset                        `json:"datasets,omitempty"`
-	Checkpoints    map[int]safefetch.Checkpoint     `json:"checkpoints,omitempty"`
+	TotalAvailable int                          `json:"total_available"`
+	Pages          int                          `json:"pages"`
+	Datasets       []Dataset                    `json:"datasets,omitempty"`
+	Checkpoints    map[int]safefetch.Checkpoint `json:"checkpoints,omitempty"`
 }
 
 // ChangeKind normalizes common CKAN activity names without treating them as
@@ -188,30 +188,30 @@ type DiscoveryResult struct {
 type ChangeKind string
 
 const (
-	ChangeUnknown  ChangeKind = "UNKNOWN"
-	ChangeCreated  ChangeKind = "DATASET_CREATED"
-	ChangeUpdated  ChangeKind = "DATASET_CHANGED"
-	ChangeDeleted  ChangeKind = "DATASET_DELETED"
+	ChangeUnknown ChangeKind = "UNKNOWN"
+	ChangeCreated ChangeKind = "DATASET_CREATED"
+	ChangeUpdated ChangeKind = "DATASET_CHANGED"
+	ChangeDeleted ChangeKind = "DATASET_DELETED"
 )
 
 // Change is one recently_changed_packages_activity_list entry.
 type Change struct {
-	ID               string      `json:"id"`
-	RemoteActivityID string      `json:"remote_activity_id"`
-	DatasetID        string      `json:"dataset_id"`
-	RemoteDatasetID  string      `json:"remote_dataset_id"`
-	ActivityType     string      `json:"activity_type"`
-	Kind             ChangeKind  `json:"kind"`
-	Timestamp        time.Time   `json:"timestamp"`
-	Dataset          *Dataset    `json:"dataset,omitempty"`
+	ID               string     `json:"id"`
+	RemoteActivityID string     `json:"remote_activity_id"`
+	DatasetID        string     `json:"dataset_id"`
+	RemoteDatasetID  string     `json:"remote_dataset_id"`
+	ActivityType     string     `json:"activity_type"`
+	Kind             ChangeKind `json:"kind"`
+	Timestamp        time.Time  `json:"timestamp"`
+	Dataset          *Dataset   `json:"dataset,omitempty"`
 }
 
 // ChangePage carries a changed-activity checkpoint independently of catalog
 // activation state.
 type ChangePage struct {
-	Offset       int                  `json:"offset"`
-	Limit        int                  `json:"limit"`
-	Changes      []Change             `json:"changes,omitempty"`
-	Checkpoint   safefetch.Checkpoint `json:"checkpoint,omitempty"`
-	NotModified  bool                 `json:"not_modified"`
+	Offset      int                  `json:"offset"`
+	Limit       int                  `json:"limit"`
+	Changes     []Change             `json:"changes,omitempty"`
+	Checkpoint  safefetch.Checkpoint `json:"checkpoint,omitempty"`
+	NotModified bool                 `json:"not_modified"`
 }

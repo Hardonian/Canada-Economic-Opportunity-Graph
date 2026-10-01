@@ -17,14 +17,14 @@ const FitMethodologyVersion = "counterparty-fit-v1.0"
 
 // FitScore is a decomposed compatibility assessment.
 type FitScore struct {
-	ProjectID   string             `json:"project_id"`
-	EntityID    string             `json:"entity_id,omitempty"`
-	Archetype   domain.CounterpartyType `json:"archetype"`
-	Score       float64            `json:"score"` // 0-100
-	Factors     map[string]float64 `json:"factors"`
-	Explanation []string           `json:"explanation"`
-	Methodology string             `json:"methodology"`
-	CalculatedAt time.Time         `json:"calculated_at"`
+	ProjectID    string                  `json:"project_id"`
+	EntityID     string                  `json:"entity_id,omitempty"`
+	Archetype    domain.CounterpartyType `json:"archetype"`
+	Score        float64                 `json:"score"` // 0-100
+	Factors      map[string]float64      `json:"factors"`
+	Explanation  []string                `json:"explanation"`
+	Methodology  string                  `json:"methodology"`
+	CalculatedAt time.Time               `json:"calculated_at"`
 }
 
 // FitContext gathers the project-side data for matching.
@@ -183,10 +183,10 @@ func counterpartyNeedFactor(needs []*domain.CapitalNeed, archetype domain.Counte
 func sectorArchetypeFit(sector domain.Sector, archetype domain.CounterpartyType) float64 {
 	// Infrastructure funds typically invest in infra sectors.
 	infraSectors := map[domain.Sector]bool{
-		domain.SectorCleanEnergy:   true,
-		domain.SectorNuclearEnergy: true,
+		domain.SectorCleanEnergy:    true,
+		domain.SectorNuclearEnergy:  true,
 		domain.SectorTransportation: true,
-		domain.SectorAICompute:     true,
+		domain.SectorAICompute:      true,
 	}
 	switch archetype {
 	case domain.CounterpartyInfrastructureFund, domain.CounterpartyPensionFund:

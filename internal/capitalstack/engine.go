@@ -18,38 +18,38 @@ const (
 
 // CapitalProgram defines a Canadian federal or provincial funding or tax program.
 type CapitalProgram struct {
-	ID                  string              `json:"id"`
-	Name                string              `json:"name"`
-	Administrator       string              `json:"administrator"` // CRA, NRCan, CIB, CGF, ISED, provincial
-	ProgramType         string              `json:"program_type"` // refundable_tax_credit, concessionary_loan, grant, equity
-	SectorEligibility   []domain.Sector     `json:"sector_eligibility"`
-	MaxSupportRatePct   float64             `json:"max_support_rate_pct"` // e.g. 30% for Clean Tech ITC
-	LaborConditionsReq  bool                `json:"labor_conditions_req"` // Prevailing wage and apprenticeship rules
-	MutuallyExclusive   []string            `json:"mutually_exclusive"`   // Program IDs that cannot be claimed on identical capital assets
-	StackingCapPct      float64             `json:"stacking_cap_pct"`     // Total government assistance ceiling
-	Summary             string              `json:"summary"`
-	StatutoryReference  string              `json:"statutory_reference"`
-	Jurisdiction        string              `json:"jurisdiction"` // Federal, ON, QC, BC, AB
+	ID                 string          `json:"id"`
+	Name               string          `json:"name"`
+	Administrator      string          `json:"administrator"` // CRA, NRCan, CIB, CGF, ISED, provincial
+	ProgramType        string          `json:"program_type"`  // refundable_tax_credit, concessionary_loan, grant, equity
+	SectorEligibility  []domain.Sector `json:"sector_eligibility"`
+	MaxSupportRatePct  float64         `json:"max_support_rate_pct"` // e.g. 30% for Clean Tech ITC
+	LaborConditionsReq bool            `json:"labor_conditions_req"` // Prevailing wage and apprenticeship rules
+	MutuallyExclusive  []string        `json:"mutually_exclusive"`   // Program IDs that cannot be claimed on identical capital assets
+	StackingCapPct     float64         `json:"stacking_cap_pct"`     // Total government assistance ceiling
+	Summary            string          `json:"summary"`
+	StatutoryReference string          `json:"statutory_reference"`
+	Jurisdiction       string          `json:"jurisdiction"` // Federal, ON, QC, BC, AB
 }
 
 // StackingEvaluation evaluates stacking feasibility and net eligible incentives.
 type StackingEvaluation struct {
-	ProjectID          string              `json:"project_id"`
-	ProjectCapexCAD    int64               `json:"project_capex_cad"`
-	MatchedPrograms    []*ProgramMatch     `json:"matched_programs"`
-	TotalPotentialCAD  int64               `json:"total_potential_cad"`
-	StackingConflicts  []string            `json:"stacking_conflicts"`
-	EffectiveFundingPct float64            `json:"effective_funding_pct"`
-	Disclaimer         string              `json:"disclaimer"`
+	ProjectID           string          `json:"project_id"`
+	ProjectCapexCAD     int64           `json:"project_capex_cad"`
+	MatchedPrograms     []*ProgramMatch `json:"matched_programs"`
+	TotalPotentialCAD   int64           `json:"total_potential_cad"`
+	StackingConflicts   []string        `json:"stacking_conflicts"`
+	EffectiveFundingPct float64         `json:"effective_funding_pct"`
+	Disclaimer          string          `json:"disclaimer"`
 }
 
 // ProgramMatch details program eligibility for a project.
 type ProgramMatch struct {
-	Program            *CapitalProgram     `json:"program"`
-	Classification     MatchClassification `json:"classification"`
-	EstimatedValueCAD  int64               `json:"estimated_value_cad"`
-	LaborRequirement   string              `json:"labor_requirement"`
-	Rationale          string              `json:"rationale"`
+	Program           *CapitalProgram     `json:"program"`
+	Classification    MatchClassification `json:"classification"`
+	EstimatedValueCAD int64               `json:"estimated_value_cad"`
+	LaborRequirement  string              `json:"labor_requirement"`
+	Rationale         string              `json:"rationale"`
 }
 
 // CanonicalPrograms returns major Canadian capital stack programs.
@@ -294,7 +294,7 @@ func CanonicalPrograms() []*CapitalProgram {
 			StatutoryReference: "OMERS Act",
 			Jurisdiction:       "Federal",
 		},
-		
+
 		// ALBERTA PROVINCIAL PROGRAMS
 		{
 			ID:                 "era_emissions_reduction",
@@ -380,7 +380,7 @@ func CanonicalPrograms() []*CapitalProgram {
 			StatutoryReference: "Alberta Carbon Competitiveness Incentive Regulation",
 			Jurisdiction:       "AB",
 		},
-		
+
 		// QUEBEC PROVINCIAL PROGRAMS
 		{
 			ID:                 "investissement_quebec_credit",
@@ -466,7 +466,7 @@ func CanonicalPrograms() []*CapitalProgram {
 			StatutoryReference: "Québec Battery Value Chain Strategy",
 			Jurisdiction:       "QC",
 		},
-		
+
 		// BRITISH COLUMBIA PROVINCIAL PROGRAMS
 		{
 			ID:                 "inbc_investment",

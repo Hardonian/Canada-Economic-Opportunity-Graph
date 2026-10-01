@@ -248,12 +248,12 @@ func TestEventIndex_ConsistentAfterRepeatedSaves(t *testing.T) {
 	}
 	for i := 0; i < 15; i++ {
 		e := &domain.Event{
-			ID:          fmt.Sprintf("evt-%d", i),
-			ProjectID:   "proj-ev-idx",
-			EvidenceID:  "ev-idx-1",
-			EventType:   "stage_change",
-			EventDate:   time.Now().UTC(),
-			Title:       fmt.Sprintf("Event %d", i),
+			ID:         fmt.Sprintf("evt-%d", i),
+			ProjectID:  "proj-ev-idx",
+			EvidenceID: "ev-idx-1",
+			EventType:  "stage_change",
+			EventDate:  time.Now().UTC(),
+			Title:      fmt.Sprintf("Event %d", i),
 		}
 		if err := store.SaveEvent(ctx, e); err != nil {
 			t.Fatal(err)

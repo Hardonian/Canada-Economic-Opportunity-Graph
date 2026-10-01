@@ -10,11 +10,11 @@ func TestLinkPredictor(t *testing.T) {
 	lp := NewLinkPredictor()
 
 	target := &domain.Project{
-		ID:           "p-darlington",
-		Name:         "Darlington SMR Project",
-		Sector:       domain.SectorNuclearEnergy,
-		Province:     "ON",
-		ProponentID:  "e-opg",
+		ID:          "p-darlington",
+		Name:        "Darlington SMR Project",
+		Sector:      domain.SectorNuclearEnergy,
+		Province:    "ON",
+		ProponentID: "e-opg",
 	}
 
 	entities := []*domain.Entity{

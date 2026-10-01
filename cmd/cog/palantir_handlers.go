@@ -273,11 +273,11 @@ func handleAICLI(args []string) {
 		project, _ := store.GetProject(context.Background(), "crawford-nickel")
 		if project == nil {
 			project = &domain.Project{
-				ID:        "crawford-nickel",
-				Name:      "Crawford Nickel Sulphide",
-				Sector:    domain.SectorCriticalMinerals,
-				CapexCAD:  3500000000,
-				Province:  "ON",
+				ID:       "crawford-nickel",
+				Name:     "Crawford Nickel Sulphide",
+				Sector:   domain.SectorCriticalMinerals,
+				CapexCAD: 3500000000,
+				Province: "ON",
 			}
 		}
 

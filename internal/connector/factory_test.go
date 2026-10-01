@@ -15,8 +15,8 @@ type stubAdapter struct {
 	tier domain.SourceTier
 }
 
-func (s *stubAdapter) Name() string                 { return s.name }
-func (s *stubAdapter) Tier() domain.SourceTier      { return s.tier }
+func (s *stubAdapter) Name() string            { return s.name }
+func (s *stubAdapter) Tier() domain.SourceTier { return s.tier }
 func (s *stubAdapter) Fetch(ctx context.Context) ([]byte, error) {
 	return nil, nil
 }

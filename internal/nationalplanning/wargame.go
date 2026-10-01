@@ -24,10 +24,10 @@ const (
 
 // WarGameRequest specifies shock scenario parameters.
 type WarGameRequest struct {
-	Scenario        ShockScenario `json:"scenario"`
-	TariffRatePct   float64       `json:"tariff_rate_pct,omitempty"`   // e.g. 25.0
-	DurationMonths  int           `json:"duration_months,omitempty"`  // e.g. 24
-	CustomNotes     string        `json:"custom_notes,omitempty"`
+	Scenario       ShockScenario `json:"scenario"`
+	TariffRatePct  float64       `json:"tariff_rate_pct,omitempty"` // e.g. 25.0
+	DurationMonths int           `json:"duration_months,omitempty"` // e.g. 24
+	CustomNotes    string        `json:"custom_notes,omitempty"`
 }
 
 // StalledProjectDetail holds project-specific shock vulnerability.
@@ -37,25 +37,25 @@ type StalledProjectDetail struct {
 	Sector            domain.Sector `json:"sector"`
 	Province          string        `json:"province"`
 	OriginalCapexCAD  int64         `json:"original_capex_cad"`
-	StallLikelihood   float64       `json:"stall_likelihood"`   // 0.0 - 1.0
+	StallLikelihood   float64       `json:"stall_likelihood"` // 0.0 - 1.0
 	VulnerabilityNote string        `json:"vulnerability_note"`
 	RecommendedAction string        `json:"recommended_action"`
 }
 
 // WarGameSimulationResult holds the system-wide fallout and tactical countermeasures.
 type WarGameSimulationResult struct {
-	SimulationID            string                 `json:"simulation_id"`
-	Scenario                ShockScenario          `json:"scenario"`
-	ScenarioTitle           string                 `json:"scenario_title"`
-	ScenarioDescription     string                 `json:"scenario_description"`
-	TotalAssetsStalledCount int                    `json:"total_assets_stalled_count"`
-	TotalFrozenCapexCAD     int64                  `json:"total_frozen_capex_cad"`
-	EstimatedNationalGDPLossCAD int64              `json:"estimated_national_gdp_loss_cad"`
-	AffectedSectors         []domain.Sector        `json:"affected_sectors"`
-	StalledProjects         []StalledProjectDetail `json:"stalled_projects"`
-	SovereignMitigations    []string               `json:"sovereign_mitigations"`
-	AuditHash               string                 `json:"audit_hash"`
-	SimulatedAt             time.Time              `json:"simulated_at"`
+	SimulationID                string                 `json:"simulation_id"`
+	Scenario                    ShockScenario          `json:"scenario"`
+	ScenarioTitle               string                 `json:"scenario_title"`
+	ScenarioDescription         string                 `json:"scenario_description"`
+	TotalAssetsStalledCount     int                    `json:"total_assets_stalled_count"`
+	TotalFrozenCapexCAD         int64                  `json:"total_frozen_capex_cad"`
+	EstimatedNationalGDPLossCAD int64                  `json:"estimated_national_gdp_loss_cad"`
+	AffectedSectors             []domain.Sector        `json:"affected_sectors"`
+	StalledProjects             []StalledProjectDetail `json:"stalled_projects"`
+	SovereignMitigations        []string               `json:"sovereign_mitigations"`
+	AuditHash                   string                 `json:"audit_hash"`
+	SimulatedAt                 time.Time              `json:"simulated_at"`
 }
 
 // WarGameEngine runs systemic geopolitical shock stress-testing over the economic graph.
@@ -184,17 +184,17 @@ func (wge *WarGameEngine) SimulateScenario(projects []*domain.Project, req WarGa
 	simID := fmt.Sprintf("war_%x", sum[:8])
 
 	res := &WarGameSimulationResult{
-		SimulationID:            simID,
-		Scenario:                req.Scenario,
-		ScenarioTitle:           title,
-		ScenarioDescription:     desc,
-		TotalAssetsStalledCount: len(stalled),
-		TotalFrozenCapexCAD:     frozenCapex,
+		SimulationID:                simID,
+		Scenario:                    req.Scenario,
+		ScenarioTitle:               title,
+		ScenarioDescription:         desc,
+		TotalAssetsStalledCount:     len(stalled),
+		TotalFrozenCapexCAD:         frozenCapex,
 		EstimatedNationalGDPLossCAD: gdpLoss,
-		AffectedSectors:         sectors,
-		StalledProjects:         stalled,
-		SovereignMitigations:    mitigations,
-		SimulatedAt:             time.Now().UTC(),
+		AffectedSectors:             sectors,
+		StalledProjects:             stalled,
+		SovereignMitigations:        mitigations,
+		SimulatedAt:                 time.Now().UTC(),
 	}
 
 	h := sha256.Sum256([]byte(fmt.Sprintf("%s|%d|%d", res.SimulationID, res.TotalAssetsStalledCount, res.TotalFrozenCapexCAD)))

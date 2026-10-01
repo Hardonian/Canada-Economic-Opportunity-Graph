@@ -55,16 +55,16 @@ type IndigenousLoanGuaranteeReq struct {
 
 // IndigenousLoanGuaranteeResult output of the deterministic debt syndication model.
 type IndigenousLoanGuaranteeResult struct {
-	ProjectCapexCAD                    int64   `json:"project_capex_cad"`
-	EquityAmountCAD                    int64   `json:"equity_amount_cad"`
-	LoanGuaranteeAmountCAD             int64   `json:"loan_guarantee_amount_cad"`
-	SovereignDiscountBps               int     `json:"sovereign_discount_bps"`
-	GuaranteedSeniorRatePct            float64 `json:"guaranteed_senior_rate_pct"`
-	AnnualDebtServiceSavingsCAD        int64   `json:"annual_debt_service_savings_cad"`
-	CumulativeInterestSavingsCAD       int64   `json:"cumulative_interest_savings_cad"`
+	ProjectCapexCAD                     int64   `json:"project_capex_cad"`
+	EquityAmountCAD                     int64   `json:"equity_amount_cad"`
+	LoanGuaranteeAmountCAD              int64   `json:"loan_guarantee_amount_cad"`
+	SovereignDiscountBps                int     `json:"sovereign_discount_bps"`
+	GuaranteedSeniorRatePct             float64 `json:"guaranteed_senior_rate_pct"`
+	AnnualDebtServiceSavingsCAD         int64   `json:"annual_debt_service_savings_cad"`
+	CumulativeInterestSavingsCAD        int64   `json:"cumulative_interest_savings_cad"`
 	ProjectedAnnualCommunityDividendCAD int64   `json:"projected_annual_community_dividend_cad"`
-	ThirtyYearCumulativeDividendCAD    int64   `json:"thirty_year_cumulative_dividend_cad"`
-	RecommendedFacility                string  `json:"recommended_facility"` // e.g. "FEDERAL_ILGP", "AIOC", "ALGP"
+	ThirtyYearCumulativeDividendCAD     int64   `json:"thirty_year_cumulative_dividend_cad"`
+	RecommendedFacility                 string  `json:"recommended_facility"` // e.g. "FEDERAL_ILGP", "AIOC", "ALGP"
 }
 
 // IndigenousProjectOverview represents a partnered capital project.
@@ -97,21 +97,21 @@ type InterProvincialFriction struct {
 	OriginProvince        string   `json:"origin_province"`
 	DestProvince          string   `json:"dest_province"`
 	AnnualTradeVolumeCAD  int64    `json:"annual_trade_volume_cad"`
-	FrictionTaxCAD        int64    `json:"friction_tax_cad"`       // Estimated cost of internal barriers
-	BarrierIndex          float64  `json:"barrier_index"`          // 1.0 (low) to 10.0 (high)
-	DivergenceAreas       []string `json:"divergence_areas"`       // "Axle weights", "Environmental duplication", "Labor certification"
-	HarmonizationStatus   string   `json:"harmonization_status"`   // "FRAGMENTED", "ACTIVE_MOU", "HARMONIZED"
-	PotentialSavingsCAD   int64    `json:"potential_savings_cad"`  // One Project One Assessment dividend
+	FrictionTaxCAD        int64    `json:"friction_tax_cad"`      // Estimated cost of internal barriers
+	BarrierIndex          float64  `json:"barrier_index"`         // 1.0 (low) to 10.0 (high)
+	DivergenceAreas       []string `json:"divergence_areas"`      // "Axle weights", "Environmental duplication", "Labor certification"
+	HarmonizationStatus   string   `json:"harmonization_status"`  // "FRAGMENTED", "ACTIVE_MOU", "HARMONIZED"
+	PotentialSavingsCAD   int64    `json:"potential_savings_cad"` // One Project One Assessment dividend
 	ScheduleCompressWeeks int      `json:"schedule_compress_weeks"`
 }
 
 // TradeFrictionReport summarizes Canada-wide internal market friction.
 type TradeFrictionReport struct {
-	TotalAnnualFrictionTaxCAD      int64                     `json:"total_annual_friction_tax_cad"`
-	NationalHarmonizationDividendCAD int64                   `json:"national_harmonization_dividend_cad"`
-	AverageBarrierIndex            float64                   `json:"average_barrier_index"`
-	Corridors                      []InterProvincialFriction `json:"corridors"`
-	GeneratedAt                    time.Time                 `json:"generated_at"`
+	TotalAnnualFrictionTaxCAD        int64                     `json:"total_annual_friction_tax_cad"`
+	NationalHarmonizationDividendCAD int64                     `json:"national_harmonization_dividend_cad"`
+	AverageBarrierIndex              float64                   `json:"average_barrier_index"`
+	Corridors                        []InterProvincialFriction `json:"corridors"`
+	GeneratedAt                      time.Time                 `json:"generated_at"`
 }
 
 // --- Pillar D: Clean Baseload Power vs Sovereign AI Hyperscale Nexus ---

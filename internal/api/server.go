@@ -15,7 +15,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/adaptersandbox"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/adaptersandbox"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/capitalstack"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
@@ -33,7 +33,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/trust"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/verifier"
 	"github.com/google/uuid"
-	)
+)
 
 const (
 	maxRequestIDLength     = 64
@@ -340,7 +340,7 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 	}
 	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
 		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/") ||
-		strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/"))
+			strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/"))
 	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
@@ -560,8 +560,12 @@ func (s *Server) handleRadar(w http.ResponseWriter, r *http.Request) {
 	}
 	filteredEvents := make([]*domain.Event, 0, 5)
 	for _, event := range recentEvents {
-		if s.publicEvidence(ctx, event.EvidenceID) { filteredEvents = append(filteredEvents, event) }
-		if len(filteredEvents) == 5 { break }
+		if s.publicEvidence(ctx, event.EvidenceID) {
+			filteredEvents = append(filteredEvents, event)
+		}
+		if len(filteredEvents) == 5 {
+			break
+		}
 	}
 
 	resp := map[string]interface{}{
@@ -715,17 +719,17 @@ func (s *Server) handleGetProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]interface{}{
-		"project":       bundle.Project,
-		"scores":        bundle.Scores,
-		"events":        bundle.Events,
-		"relationships": bundle.Relationships,
-		"capital_items": bundle.CapitalItems,
-		"capital_needs": bundle.CapitalNeeds,
+		"project":              bundle.Project,
+		"scores":               bundle.Scores,
+		"events":               bundle.Events,
+		"relationships":        bundle.Relationships,
+		"capital_items":        bundle.CapitalItems,
+		"capital_needs":        bundle.CapitalNeeds,
 		"capital_requirements": bundle.CapitalRequirements,
-		"milestones":    bundle.Milestones,
-		"readiness":     bundle.Readiness,
-		"opportunities": bundle.Opportunities,
-		"status":        domain.StatusHealthy,
+		"milestones":           bundle.Milestones,
+		"readiness":            bundle.Readiness,
+		"opportunities":        bundle.Opportunities,
+		"status":               domain.StatusHealthy,
 	}
 
 	writeJSON(w, http.StatusOK, resp)
@@ -776,7 +780,11 @@ func (s *Server) handleGetProjectScoreHistory(w http.ResponseWriter, r *http.Req
 		return
 	}
 	history := make([]*domain.ProjectScore, 0)
-	for _, score := range bundle.ScoreHistory { if scoreType == "" || score.ScoreType == scoreType { history = append(history, score) } }
+	for _, score := range bundle.ScoreHistory {
+		if scoreType == "" || score.ScoreType == scoreType {
+			history = append(history, score)
+		}
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"project_id": project.ID, "history": history})
 }
 
@@ -856,8 +864,19 @@ func (s *Server) handleListProcurements(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	public := make([]*domain.Procurement, 0, len(procs))
-	for _, procurement := range procs { if s.publicEvidence(r.Context(), procurement.EvidenceID) { public = append(public, procurement) } }
-	start := offset; if start > len(public) { start = len(public) }; end := start + limit; if end > len(public) { end = len(public) }
+	for _, procurement := range procs {
+		if s.publicEvidence(r.Context(), procurement.EvidenceID) {
+			public = append(public, procurement)
+		}
+	}
+	start := offset
+	if start > len(public) {
+		start = len(public)
+	}
+	end := start + limit
+	if end > len(public) {
+		end = len(public)
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"procurements": public[start:end], "limit": limit, "offset": offset, "status": domain.StatusHealthy})
 }
 
@@ -1065,9 +1084,13 @@ func (s *Server) handleCEGSExport(w http.ResponseWriter, r *http.Request) {
 	var cegsList []*cegs.Project
 	for _, p := range projects {
 		bundle, bundleErr := export.ExportProjectBundle(r.Context(), s.store, p.ID)
-		if bundleErr != nil { continue }
+		if bundleErr != nil {
+			continue
+		}
 		cegsProject, convertErr := bundle.ToCEGSExport()
-		if convertErr == nil { cegsList = append(cegsList, cegsProject) }
+		if convertErr == nil {
+			cegsList = append(cegsList, cegsProject)
+		}
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"cegs":         cegs.SpecVersion,
@@ -1113,10 +1136,10 @@ func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 			"/api/v1/projects/{id}/trust":          map[string]interface{}{"get": map[string]interface{}{"summary": "Fetch deterministic evidence-quality assessment"}},
-			"/api/v1/opportunities": map[string]interface{}{"get": map[string]interface{}{"summary": "Query publication-safe investment and counterparty opportunities"}},
-			"/api/v1/capital-needs": map[string]interface{}{"get": map[string]interface{}{"summary": "Query publicly corroborated capital needs"}},
-			"/api/v1/milestones": map[string]interface{}{"get": map[string]interface{}{"summary": "Query sourced project milestones"}},
-			"/api/v1/projects/{id}/readiness": map[string]interface{}{"get": map[string]interface{}{"summary": "Fetch deterministic investment-readiness decomposition"}},
+			"/api/v1/opportunities":                map[string]interface{}{"get": map[string]interface{}{"summary": "Query publication-safe investment and counterparty opportunities"}},
+			"/api/v1/capital-needs":                map[string]interface{}{"get": map[string]interface{}{"summary": "Query publicly corroborated capital needs"}},
+			"/api/v1/milestones":                   map[string]interface{}{"get": map[string]interface{}{"summary": "Query sourced project milestones"}},
+			"/api/v1/projects/{id}/readiness":      map[string]interface{}{"get": map[string]interface{}{"summary": "Fetch deterministic investment-readiness decomposition"}},
 			"/api/v1/projects/{id}/scores/history": map[string]interface{}{"get": map[string]interface{}{"summary": "Fetch append-only score history"}},
 			"/api/v1/cegs/projects/{id}": map[string]interface{}{
 				"get": map[string]interface{}{
@@ -1190,9 +1213,9 @@ func (s *Server) handleProjectCapitalStack(w http.ResponseWriter, r *http.Reques
 		}
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"project_id":   project.ID,
+		"project_id":    project.ID,
 		"capital_items": public,
-		"status":       domain.StatusHealthy,
+		"status":        domain.StatusHealthy,
 	})
 }
 
@@ -1283,10 +1306,10 @@ func (s *Server) handleProjectCorroboration(w http.ResponseWriter, r *http.Reque
 		}
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"project_id":   project.ID,
-		"claims":       publicClaims,
+		"project_id":    project.ID,
+		"claims":        publicClaims,
 		"audit_entries": audits,
-		"status":       domain.StatusHealthy,
+		"status":        domain.StatusHealthy,
 	})
 }
 
@@ -1694,12 +1717,12 @@ func (s *Server) handleForecastProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := forecast.Context{
-		Project:        bundle.Project,
-		Events:         bundle.Events,
-		CapitalItems:   bundle.CapitalItems,
-		Relationships:  bundle.Relationships,
-		Procurements:   bundle.Procurements,
-		Opportunities:  bundle.Opportunities,
+		Project:       bundle.Project,
+		Events:        bundle.Events,
+		CapitalItems:  bundle.CapitalItems,
+		Relationships: bundle.Relationships,
+		Procurements:  bundle.Procurements,
+		Opportunities: bundle.Opportunities,
 	}
 	req := forecast.Request{AsOf: time.Now().UTC()}
 	report, err := forecast.Evaluate(ctx, req)
@@ -1723,12 +1746,12 @@ func (s *Server) handleForecastPortfolio(w http.ResponseWriter, r *http.Request)
 			continue
 		}
 		contexts = append(contexts, forecast.Context{
-			Project:        bundle.Project,
-			Events:         bundle.Events,
-			CapitalItems:   bundle.CapitalItems,
-			Relationships:  bundle.Relationships,
-			Procurements:   bundle.Procurements,
-			Opportunities:  bundle.Opportunities,
+			Project:       bundle.Project,
+			Events:        bundle.Events,
+			CapitalItems:  bundle.CapitalItems,
+			Relationships: bundle.Relationships,
+			Procurements:  bundle.Procurements,
+			Opportunities: bundle.Opportunities,
 		})
 	}
 	if len(contexts) == 0 {
@@ -1787,9 +1810,9 @@ func (s *Server) handleProjectPrecedents(w http.ResponseWriter, r *http.Request)
 	profiles := s.collectInvestorProfiles()
 	matches := matching.FindDealPrecedents(project, profiles, 10)
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"project_id":  project.ID,
-		"precedents":  matches,
-		"status":      domain.StatusHealthy,
+		"project_id": project.ID,
+		"precedents": matches,
+		"status":     domain.StatusHealthy,
 	})
 }
 
