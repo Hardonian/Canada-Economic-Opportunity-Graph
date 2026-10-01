@@ -94,7 +94,13 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 - **10-Pillars Palantir Sovereign Capabilities Architecture**: Fully registered, tested, and validated routes across all 10 pillars (Pillar 6 `/api/v1/corridor/pathfind`, `/api/v1/corridor/gateways` and Pillar 9 `/api/v1/palantir/planning/optimize`, `/api/v1/palantir/planning/wargame`, `/api/v1/palantir/planning/labor`).
 - **Institutional Precedent Matching**: Canonical institutional investor profiles across Maple 8 pensions (CPPIB, CDPQ, OTPP, OMERS, AIMCo), Crown corporations (CIB, CGF), and sovereign allocators with 5-dimensional similarity scoring.
 - **Production Metrics & Alerts**: Real-time request telemetry with status & duration histograms, `cog_ingestion_dlq_size` gauge, and Prometheus alert rules (`COGDeadLetterQueueGrowing`, `COGRateLimitSaturation`, `COGReconciliationConflictsSpike`, `COGC69StatutoryClockBreach`).
-- **Comprehensive E2E Suite**: Extended to 7 full automated tests in `apps/web/tests/e2e.test.mjs`.
+- **Comprehensive E2E Suite**: Extended to 10 full automated tests in `apps/web/tests/e2e.test.mjs`.
+
+## Phase 8 Updates: Cloud-Native Mesh, Real-Time Streaming & Provenance (v3.0)
+- **Cloud-Native Deployment & Helm Orchestration**: Production Helm templates (`deploy/helm/templates/deployment.yaml`, `ingress.yaml`, `hpa.yaml`) and Kubernetes manifests (`deploy/k8s/ingress.yaml`, `pdb.yaml`) supporting zero-downtime rolling updates, cert-manager TLS, and PodDisruptionBudgets.
+- **Real-Time Event Streaming Hub (SSE)**: High-throughput Server-Sent Events broadcaster (`internal/eventsse/`) wired to `GET /api/v1/stream/events` with React hook client (`apps/web/lib/useLiveEvents.ts`).
+- **SEDAR+ Public Markets Ingestion Adapter**: Full statutory adapter (`adapters/sedar/`) ingesting Canadian public issuer capital disclosures, MD&As, and NI 43-101 technical reports into CEGS domain records.
+- **Hardware-Grade KMS Merkle Attestation**: NIST P-256 ECDSA digital signing engine (`internal/merkle/signer.go`) cryptographically signing transparency roots with tamper-detection verification.
 
 ## Verification Commands
 
@@ -102,21 +108,28 @@ All Phase 1, 2, 3, and 4 roadmap items are **complete**. Full QA closure achieve
 go build ./...              # all packages compile
 go vet ./...                # static analysis
 go test ./...               # full test suite
-go test -race ./...         # race detector
-npm --prefix apps/web test  # 7 E2E tests pass
+go test -race ./...         # race detector (0 data races)
+npm --prefix apps/web test  # 10/10 E2E tests pass
 npm --prefix apps/web run typecheck # TypeScript clean
+npm --prefix apps/web run build     # 39/39 Next.js pages build
 ```
 
 ## Relevant Files
 
-- `ROADMAP.md` — strategic roadmap (phases 1-7, all [x])
+- `ROADMAP.md` — strategic roadmap (phases 1-8, all [x])
 - `Makefile` — build/test/verify/bench/vet/lint targets
 - `HANDOFF.md` — this file
-- `internal/api/server.go` — API routes, rate-limiting, security headers, metrics
+- `deploy/helm/templates/` — Helm deployment, ingress, hpa, pvc, service templates
+- `deploy/k8s/` — Kubernetes deployment, ingress, hpa, pdb, networkpolicy, pvc, service manifests
+- `internal/eventsse/` — Server-Sent Events streaming hub, subscriber channels, and HTTP handler
+- `apps/web/lib/useLiveEvents.ts` — React hook for live SSE milestone event streaming
+- `adapters/sedar/` — SEDAR+ public market capital disclosures adapter
+- `internal/merkle/signer.go` — KMS cryptographic signing and signature verification for Merkle roots
+- `internal/api/server.go` — API routes, SSE streaming, rate-limiting, security headers, metrics
 - `internal/api/palantir_routes.go` — 10-Pillar Palantir Sovereign routes and handlers
 - `internal/matching/precedent.go` — Institutional deal precedent matching engine
 - `deploy/prometheus/alerts.yml` — Prometheus alerting mesh
-- `apps/web/tests/e2e.test.mjs` — Automated E2E verification contracts
+- `apps/web/tests/e2e.test.mjs` — Automated 10-test E2E verification contracts
 - `cmd/worker/main.go` — worker daemon with polling, reconciliation, merkle, indigenous linker
 - `cmd/api/main.go` — API server wiring
 - `cmd/cog/main.go` — CLI with `extract` subcommand

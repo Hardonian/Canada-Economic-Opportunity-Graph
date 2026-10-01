@@ -151,7 +151,7 @@ test('E2E Test 5: WCAG 2.2 AAA Accessibility, FIP Branding & Bilingual Complianc
   assert.ok(footerContent.includes('WCAG 2.2 AAA'), 'Footer must declare WCAG AAA bilingual compliance');
 });
 
-test('E2E Test 8: Filings fallback is explicitly labelled and time-stable', async () => {
+test('E2E Test 6: Filings Fallback Is Explicitly Labelled and Time-Stable', async () => {
   const dataPath = path.join(__dirname, '../lib/data.ts');
   const explorerPath = path.join(__dirname, '../components/ProcurementExplorer.tsx');
   const dataContent = fs.readFileSync(dataPath, 'utf8');
@@ -163,7 +163,7 @@ test('E2E Test 8: Filings fallback is explicitly labelled and time-stable', asyn
   assert.ok(explorerContent.includes('Demonstration snapshot:'), 'UI must disclose non-live data');
 });
 
-test('E2E Test 6: 10-Pillars Palantir Sovereign Capabilities Architecture Contract', async (t) => {
+test('E2E Test 7: 10-Pillars Palantir Sovereign Capabilities Architecture Contract', async (t) => {
   // Verify architectural contract of all 10 Sovereign Pillars in palantir_routes.go
   const routesPath = path.join(rootDir, 'internal/api/palantir_routes.go');
   assert.ok(fs.existsSync(routesPath), 'palantir_routes.go must exist');
@@ -190,7 +190,7 @@ test('E2E Test 6: 10-Pillars Palantir Sovereign Capabilities Architecture Contra
   }
 });
 
-test('E2E Test 7: Institutional Deal Precedents and Maple 8 Allocator Matching Contract', async (t) => {
+test('E2E Test 8: Institutional Deal Precedents and Maple 8 Allocator Matching Contract', async (t) => {
   // Validate the institutional matching weights and similarity scoring formula
   // from internal/matching/precedent.go
   function calculateSimilarity(project, deal) {
@@ -241,3 +241,52 @@ test('E2E Test 7: Institutional Deal Precedents and Maple 8 Allocator Matching C
   assert.ok(result.score >= 85, `Institutional match score should exceed 85%, got ${result.score}%`);
   assert.deepEqual(result.matched, ['sector', 'province', 'stage', 'scale', 'recent']);
 });
+
+test('E2E Test 9: Cloud-Native Helm and Kubernetes Deployment Manifests Contract', async (t) => {
+  const helmDeployment = path.join(rootDir, 'deploy/helm/templates/deployment.yaml');
+  const helmIngress = path.join(rootDir, 'deploy/helm/templates/ingress.yaml');
+  const helmHPA = path.join(rootDir, 'deploy/helm/templates/hpa.yaml');
+  const k8sIngress = path.join(rootDir, 'deploy/k8s/ingress.yaml');
+  const k8sPDB = path.join(rootDir, 'deploy/k8s/pdb.yaml');
+
+  assert.ok(fs.existsSync(helmDeployment), 'helm deployment.yaml must exist');
+  assert.ok(fs.existsSync(helmIngress), 'helm ingress.yaml must exist');
+  assert.ok(fs.existsSync(helmHPA), 'helm hpa.yaml must exist');
+  assert.ok(fs.existsSync(k8sIngress), 'k8s ingress.yaml must exist');
+  assert.ok(fs.existsSync(k8sPDB), 'k8s pdb.yaml must exist');
+
+  const k8sIngressContent = fs.readFileSync(k8sIngress, 'utf8');
+  assert.ok(k8sIngressContent.includes('opportunity.canada.ca'), 'ingress must route opportunity.canada.ca');
+  assert.ok(k8sIngressContent.includes('api.opportunity.canada.ca'), 'ingress must route api.opportunity.canada.ca');
+  assert.ok(k8sIngressContent.includes('cert-manager.io/cluster-issuer'), 'ingress must declare cert-manager issuer');
+
+  const k8sPDBContent = fs.readFileSync(k8sPDB, 'utf8');
+  assert.ok(k8sPDBContent.includes('PodDisruptionBudget'), 'pdb must declare PodDisruptionBudget');
+  assert.ok(k8sPDBContent.includes('minAvailable'), 'pdb must configure minAvailable threshold');
+});
+
+test('E2E Test 10: Cryptographic Merkle KMS Attestation and SSE Streaming Contract', async (t) => {
+  const signerPath = path.join(rootDir, 'internal/merkle/signer.go');
+  const sseHubPath = path.join(rootDir, 'internal/eventsse/hub.go');
+  const sseHookPath = path.join(__dirname, '../lib/useLiveEvents.ts');
+  const sedarPath = path.join(rootDir, 'adapters/sedar/sedar.go');
+
+  assert.ok(fs.existsSync(signerPath), 'merkle signer.go must exist');
+  assert.ok(fs.existsSync(sseHubPath), 'eventsse hub.go must exist');
+  assert.ok(fs.existsSync(sseHookPath), 'useLiveEvents.ts hook must exist');
+  assert.ok(fs.existsSync(sedarPath), 'sedar.go adapter must exist');
+
+  const signerContent = fs.readFileSync(signerPath, 'utf8');
+  assert.ok(signerContent.includes('KMSSigner'), 'signer must define KMSSigner interface');
+  assert.ok(signerContent.includes('SignRoot'), 'signer must provide SignRoot function');
+  assert.ok(signerContent.includes('VerifySignedRoot'), 'signer must provide VerifySignedRoot function');
+
+  const sseHookContent = fs.readFileSync(sseHookPath, 'utf8');
+  assert.ok(sseHookContent.includes('useLiveEvents'), 'hook must export useLiveEvents function');
+  assert.ok(sseHookContent.includes('/api/v1/stream/events'), 'hook must connect to /api/v1/stream/events');
+
+  const sedarContent = fs.readFileSync(sedarPath, 'utf8');
+  assert.ok(sedarContent.includes('sedar_plus_disclosures'), 'adapter must name sedar_plus_disclosures');
+  assert.ok(sedarContent.includes('CanonicalSEDARFilings'), 'adapter must provide CanonicalSEDARFilings');
+});
+

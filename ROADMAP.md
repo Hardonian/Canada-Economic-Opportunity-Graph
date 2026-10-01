@@ -85,6 +85,17 @@ This document outlines the phased milestone roadmap for CanadaOpportunityGraph a
 * [x] **Enterprise Prometheus Alerting Mesh**: Production-grade alerts covering `COGDeadLetterQueueGrowing`, `COGRateLimitSaturation`, `COGReconciliationConflictsSpike`, and `COGC69StatutoryClockBreach` in `deploy/prometheus/alerts.yml`.
 * [x] **Comprehensive End-to-End Test Suite**: Complete automated testing contract in `apps/web/tests/e2e.test.mjs` verifying manifest cryptographic hashes, financial capital stack math, GQL queries, ABAC redaction, WCAG AAA bilingual compliance, 10-Pillar Palantir architecture, and institutional allocator deal matching.
 
+---
+
+## Phase 8: Cloud-Native Deployment, Real-Time Streaming & Cryptographic Provenance (v3.0) (Completed)
+
+* [x] **Cloud-Native Kubernetes & Helm Orchestration Mesh**: Production Helm chart templates (`deploy/helm/templates/deployment.yaml`, `ingress.yaml`, `hpa.yaml`) and Kubernetes manifests (`deploy/k8s/ingress.yaml`, `pdb.yaml`) supporting multi-replica zero-downtime rolling upgrades, PodDisruptionBudgets, cert-manager TLS termination, and Horizontal Pod Autoscaling.
+* [x] **Real-Time Event Streaming Hub (Server-Sent Events)**: Non-blocking thread-safe SSE broadcast hub (`internal/eventsse/`) wired to `GET /api/v1/stream/events`, supporting project and event type filtering, keep-alive heartbeat pings, client drop protection, and React hook integration (`apps/web/lib/useLiveEvents.ts`).
+* [x] **Live Public Markets Ingestion Adapter (SEDAR+)**: Official statutory adapter (`adapters/sedar/`) ingesting Canadian public issuer capital market disclosures (MD&As, NI 43-101 technical reports, prospectuses) extracting capital requirements, proponent entities, and verified evidence hashes.
+* [x] **Hardware-Grade KMS Merkle Attestation & Cryptographic Signing**: ECDSA P-256 digital signature engine (`internal/merkle/signer.go`) signing daily Merkle roots with tamper-detection verification and cloud KMS / HSM abstraction.
+* [x] **Extended Automated E2E Verification**: 10 comprehensive contract tests passing in `apps/web/tests/e2e.test.mjs` verifying the entire full-stack platform.
+
+
 
 
 
