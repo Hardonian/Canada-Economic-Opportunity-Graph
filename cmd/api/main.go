@@ -17,6 +17,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/lobbyist_registry"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/nrcan_major_projects"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/official"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/adaptersandbox"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/api"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/config"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/connector"
@@ -25,6 +26,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/merkle"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/reconciliation"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/sources"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/verifier"
 )
 
 func main() {
@@ -106,6 +108,13 @@ func main() {
 
 	log.Printf("[INFO] Runtime configuration: %s", cfg)
 
+	// Community Adapter Sandbox registry
+	adapterSandboxReg := adaptersandbox.NewRegistry()
+
+	// Decentralized Verifier node network & persistent attestation store
+	verifierNet := verifier.NewNetwork(5)
+	verifierStore := verifier.NewAttestationStore()
+
 	server, err := api.NewServerWithOptions(store, api.Options{
 		AllowedOrigins:      cfg.CORSOrigins,
 		EnableHSTS:          cfg.EnableHSTS,
@@ -116,6 +125,9 @@ func main() {
 		RequestTimeout:      cfg.RequestTimeout,
 		ReadinessTimeout:    cfg.ReadinessTimeout,
 		Logger:              log.Default(),
+		AdapterRegistry:     adapterSandboxReg,
+		VerifierStore:       verifierStore,
+		VerifierNetwork:     verifierNet,
 	})
 	if err != nil {
 		log.Fatalf("[FATAL] Invalid API security configuration: %v", err)

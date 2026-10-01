@@ -112,16 +112,25 @@ func TestFieldEncryption(t *testing.T) {
 
 func TestDLPScanner(t *testing.T) {
 	dlp := NewDLPScanner()
-	raw := "Employee lead John Doe SIN: 123-456-789 deployed to secret location NORAD_SITE_ALPHA4 for work."
+	raw := "Employee lead John Doe SIN: 123-456-789 deployed to secret location NORAD_SITE_ALPHA4 for work. " +
+		"Wire funds to INSTITUTION: 00123-004. Note sensitive coordinates near SACRED_SITE_CREE_01. " +
+		"Confidential vendor rate: CONFIDENTIAL_BID_PRICE_CAD_4500."
 
 	scrubbed, findings := dlp.ScrubText(raw)
-	if len(findings) != 2 {
-		t.Fatalf("expected 2 findings, got %d", len(findings))
+	if len(findings) != 5 {
+		t.Fatalf("expected 5 findings, got %d: %v", len(findings), findings)
 	}
-	if findings[0] != "CANADIAN_SIN" || findings[1] != "DEFENSE_SECRET" {
+	if findings[0] != "CANADIAN_SIN" || findings[1] != "DEFENSE_SECRET" || findings[2] != "BANK_TRANSIT" ||
+		findings[3] != "SACRED_INDIGENOUS_SITE" || findings[4] != "CONFIDENTIAL_BID_PRICING" {
 		t.Errorf("unexpected findings: %v", findings)
 	}
 	if !bytes.Contains([]byte(scrubbed), []byte("[REDACTED-SIN]")) {
 		t.Errorf("expected [REDACTED-SIN] in scrubbed text: %s", scrubbed)
+	}
+	if !bytes.Contains([]byte(scrubbed), []byte("[REDACTED-SACRED-SITE-OCAP]")) {
+		t.Errorf("expected [REDACTED-SACRED-SITE-OCAP] in scrubbed text: %s", scrubbed)
+	}
+	if !bytes.Contains([]byte(scrubbed), []byte("[REDACTED-CONFIDENTIAL-BID]")) {
+		t.Errorf("expected [REDACTED-CONFIDENTIAL-BID] in scrubbed text: %s", scrubbed)
 	}
 }

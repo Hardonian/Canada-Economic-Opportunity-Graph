@@ -19,6 +19,8 @@ type MetricsCollector struct {
 	verifierQuorumsReached atomic.Uint64
 	lakehouseQueries       atomic.Uint64
 	activeAuditorPeers     atomic.Int64
+	dlpRedactionsTotal     atomic.Uint64
+	abacDenialsTotal       atomic.Uint64
 }
 
 type durationStats struct {
@@ -76,6 +78,16 @@ func (mc *MetricsCollector) IncLakehouseQuery() {
 	mc.lakehouseQueries.Add(1)
 }
 
+// IncDLPRedaction records a redacted token during export or stream scanning.
+func (mc *MetricsCollector) IncDLPRedaction() {
+	mc.dlpRedactionsTotal.Add(1)
+}
+
+// IncABACDenial records an authorization refusal.
+func (mc *MetricsCollector) IncABACDenial() {
+	mc.abacDenialsTotal.Add(1)
+}
+
 // RenderPrometheus generates standard Prometheus exposition text format.
 func (mc *MetricsCollector) RenderPrometheus() string {
 	var sb strings.Builder
@@ -115,6 +127,14 @@ func (mc *MetricsCollector) RenderPrometheus() string {
 	sb.WriteString("\n# HELP cog_lakehouse_queries_total Total zero-copy lakehouse OLAP queries executed\n")
 	sb.WriteString("# TYPE cog_lakehouse_queries_total counter\n")
 	sb.WriteString(fmt.Sprintf("cog_lakehouse_queries_total %d\n", mc.lakehouseQueries.Load()))
+
+	sb.WriteString("\n# HELP cog_dlp_redactions_total Total number of sensitive tokens masked by DLP scanner\n")
+	sb.WriteString("# TYPE cog_dlp_redactions_total counter\n")
+	sb.WriteString(fmt.Sprintf("cog_dlp_redactions_total %d\n", mc.dlpRedactionsTotal.Load()))
+
+	sb.WriteString("\n# HELP cog_abac_denials_total Total number of access requests denied by ABAC evaluator\n")
+	sb.WriteString("# TYPE cog_abac_denials_total counter\n")
+	sb.WriteString(fmt.Sprintf("cog_abac_denials_total %d\n", mc.abacDenialsTotal.Load()))
 
 	return sb.String()
 }
