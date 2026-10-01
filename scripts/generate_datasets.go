@@ -97,19 +97,22 @@ func main() {
 	must(err)
 	sort.Slice(procurements, func(i, j int) bool { return procurements[i].ID < procurements[j].ID })
 	for _, proc := range procurements {
-		// Fixture-backed adapter records intentionally share the collection time
-		// of this immutable snapshot. Adapter health timings may use wall-clock
-		// time, but released evidence must not.
-		if isSnapshotGeneratedEvidence(proc.Evidence) {
-			proc.CreatedAt = collectedAt
-			proc.Evidence.RetrievalTimestamp = collectedAt
-		}
 		if proc.EvidenceID == "" {
 			continue
 		}
 		evidence, err := store.GetEvidence(ctx, proc.EvidenceID)
 		if err != nil || evidence == nil {
 			continue
+		}
+		// Fixture-backed adapter records intentionally share the collection time
+		// of this immutable snapshot. Adapter health timings may use wall-clock
+		// time, but released evidence must not.
+		if isSnapshotGeneratedEvidence(evidence) {
+			proc.CreatedAt = collectedAt
+			evidence.RetrievalTimestamp = collectedAt
+			if proc.Evidence != nil {
+				proc.Evidence.RetrievalTimestamp = collectedAt
+			}
 		}
 		evidenceByID[evidence.ID] = evidence
 	}
@@ -285,7 +288,13 @@ func writeCurrent(path string, data []byte) error {
 // current artifacts are changed. A missing release is valid: writeHistorical
 // will create it with O_EXCL after current artifacts have been generated.
 func validateHistoricalArtifacts(releaseRoot string, files map[string][]byte) error {
-	for name, data := range files {
+	names := make([]string, 0, len(files))
+	for name := range files {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		data := files[name]
 		path := filepath.Join(releaseRoot, filepath.FromSlash(name))
 		existing, err := os.ReadFile(path)
 		if err == nil {

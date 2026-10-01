@@ -14,6 +14,7 @@ function Show-Help {
     Write-Host "Targets:" -ForegroundColor Yellow
     Write-Host "  build           - Build all Go binaries (cog, api, worker)"
     Write-Host "  test            - Run all Go unit and integration tests"
+	Write-Host "  bench           - Run Go benchmarks with allocation metrics"
 	Write-Host "  lint            - Verify Go formatting and lint Go and web code"
     Write-Host "  cegs-validate   - Validate all spec schemas, examples, and public datasets"
     Write-Host "  release-check   - Verify release hashes, counts, ordering, and references"
@@ -39,6 +40,10 @@ switch ($Target.ToLower()) {
         Write-Host "[TEST] Running Go test suite with race detector..." -ForegroundColor Cyan
         go test -v -race ./...
     }
+	"bench" {
+		Write-Host "[BENCH] Running Go benchmarks..." -ForegroundColor Cyan
+		go test -bench=. -benchmem ./...
+	}
 	"lint" {
 		Write-Host "[LINT] Checking Go formatting, Go analysis, and web lint..." -ForegroundColor Cyan
 		$unformatted = @(Get-ChildItem -Path . -Recurse -Filter *.go -File | Where-Object { $_.FullName -notmatch '[\\/]\.kilo[\\/]' } | ForEach-Object { & gofmt -l $_.FullName })
@@ -98,9 +103,9 @@ switch ($Target.ToLower()) {
     "verify" {
         Write-Host "=== CanadaOpportunityGraph Full Verification Suite ===" -ForegroundColor Cyan
         & $PSCommandPath build
-        & $PSCommandPath seed
-		& $PSCommandPath lint
+        & $PSCommandPath lint
         & $PSCommandPath test
+		& $PSCommandPath bench
         & $PSCommandPath release-check
         & $PSCommandPath cegs-validate
         & $PSCommandPath demo

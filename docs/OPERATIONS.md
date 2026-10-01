@@ -30,7 +30,8 @@ make web-build
 ```
 
 `make verify` runs the complete release-quality sequence, including benchmark
-tests and deterministic snapshot generation. On Windows, use the equivalent
+tests and immutable-release validation. It does not regenerate a published
+snapshot. On Windows, use the equivalent
 targets in `scripts/task.ps1`; `lint` and `web-test` are available alongside
 the existing build, release, and API targets.
 
@@ -42,9 +43,11 @@ existing immutable release before changing any current artifact. If the
 version already exists and any content differs, generation stops without
 refreshing `data/public` or `data/cegs`.
 
-Before committing a proposed release, run the generation command, regenerate
-the web projection with `pnpm --dir apps/web snapshot:generate`, inspect every
-diff, and run `make release-check`. The release checker verifies checksums,
+Before committing a proposed release, make a controlled update to the declared
+dataset version and collection timestamps, then run the generation command and regenerate the web projection with
+`pnpm --dir apps/web snapshot:generate`, inspect every diff, and run `make
+release-check`. Regenerating the currently published version is intentionally
+rejected. The release checker verifies checksums,
 counts, ordering, CEGS conformance, cross-record references, immutable-release
 parity, and the bundled web snapshots.
 

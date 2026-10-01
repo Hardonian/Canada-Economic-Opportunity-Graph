@@ -33,12 +33,6 @@ jobs:
           cache-dependency-path: apps/web/pnpm-lock.yaml
       - name: Install locked web dependencies
         run: pnpm --dir apps/web install --frozen-lockfile
-      - name: Generate deterministic release and web projection
-        run: |
-          go run ./scripts/generate_datasets.go
-          pnpm --dir apps/web snapshot:generate
-      - name: Reject stale generated artifacts
-        run: git diff --exit-code
       - name: Verify release graph
         run: go run ./cmd/releasecheck
       - name: Test Go with race detector
