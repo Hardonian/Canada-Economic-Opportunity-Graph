@@ -178,41 +178,70 @@ func normalizeAllowedOrigin(origin string) (string, error) {
 	return strings.TrimSuffix(origin, "/"), nil
 }
 
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(code int) {
+	w.statusCode = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (w *statusResponseWriter) Write(b []byte) (int, error) {
+	if w.statusCode == 0 {
+		w.statusCode = http.StatusOK
+	}
+	return w.ResponseWriter.Write(b)
+}
+
+func (w *statusResponseWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	srw := &statusResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+	defer func() {
+		telemetry.DefaultCollector.IncHTTP(r.Method, r.URL.Path, srw.statusCode, time.Since(startTime))
+	}()
+
 	requestID := normalizedRequestID(r.Header.Get("X-Request-ID"))
 	ctx := context.WithValue(r.Context(), requestIDContextKey{}, requestID)
 	r = r.WithContext(ctx)
 
-	w.Header().Set("X-Request-ID", requestID)
-	s.setSecurityHeaders(w.Header())
-	originAllowed := s.setCORSHeaders(w.Header(), r.Header.Get("Origin"))
+	srw.Header().Set("X-Request-ID", requestID)
+	s.setSecurityHeaders(srw.Header())
+	originAllowed := s.setCORSHeaders(srw.Header(), r.Header.Get("Origin"))
 
 	defer func() {
 		if recover() != nil {
 			if s.logger != nil {
 				s.logger.Printf("[ERROR] recovered API panic request_id=%s", requestID)
 			}
-			w.Header().Set("Connection", "close")
-			writeError(w, r, http.StatusInternalServerError, "internal_error", "The request could not be completed.")
+			srw.Header().Set("Connection", "close")
+			writeError(srw, r, http.StatusInternalServerError, "internal_error", "The request could not be completed.")
 		}
 	}()
 
-	if !s.validateRequest(w, r) {
+	if !s.validateRequest(srw, r) {
 		return
 	}
 	if r.Method == http.MethodOptions {
-		s.handlePreflight(w, r, originAllowed)
+		s.handlePreflight(srw, r, originAllowed)
 		return
 	}
 	if s.limiter != nil && (r.Method == http.MethodGet || r.Method == http.MethodHead) &&
 		(strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/metrics") {
 		allowed, remaining, retryAfter := s.limiter.Allow(s.clientIdentity(r), time.Now())
-		w.Header().Set("RateLimit-Limit", strconv.Itoa(s.limiter.burst))
-		w.Header().Set("RateLimit-Remaining", strconv.Itoa(remaining))
-		w.Header().Set("RateLimit-Policy", fmt.Sprintf("%d;w=60;burst=%d", s.limiter.perMinute, s.limiter.burst))
+		srw.Header().Set("RateLimit-Limit", strconv.Itoa(s.limiter.burst))
+		srw.Header().Set("RateLimit-Remaining", strconv.Itoa(remaining))
+		srw.Header().Set("RateLimit-Policy", fmt.Sprintf("%d;w=60;burst=%d", s.limiter.perMinute, s.limiter.burst))
 		if !allowed {
-			w.Header().Set("Retry-After", strconv.Itoa(retryAfter))
-			writeError(w, r, http.StatusTooManyRequests, "rate_limit_exceeded", "Request rate limit exceeded; retry later.")
+			srw.Header().Set("Retry-After", strconv.Itoa(retryAfter))
+			writeError(srw, r, http.StatusTooManyRequests, "rate_limit_exceeded", "Request rate limit exceeded; retry later.")
 			return
 		}
 	}
@@ -220,7 +249,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestContext, cancel := context.WithTimeout(r.Context(), s.requestTimeout)
 	defer cancel()
 	r = r.WithContext(requestContext)
-	s.mux.ServeHTTP(w, r)
+	s.mux.ServeHTTP(srw, r)
 }
 
 type requestIDContextKey struct{}
