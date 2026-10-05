@@ -18,6 +18,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/adaptersandbox"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/capitalstack"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/connector"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/eventsse"
@@ -74,6 +75,12 @@ type Options struct {
 	// VerifierNetwork is used to compute quorum vote results for
 	// GET /api/v1/verifier/milestones/{id}. When nil, the endpoint responds 503.
 	VerifierNetwork *verifier.Network
+	// ConnectorRegistry exposes the health and operating mode of the exact
+	// adapter chain used by the ingestion pipeline.
+	ConnectorRegistry *connector.Registry
+	// RuntimeInfo contains non-secret deployment facts for the operational
+	// control plane. It must never contain credentials or internal URLs.
+	RuntimeInfo RuntimeInfo
 }
 
 func DefaultOptions() Options {
@@ -103,6 +110,8 @@ type Server struct {
 	adapterAdminSecret string
 	attStore           *verifier.AttestationStore
 	verifierNet        *verifier.Network
+	connectorRegistry  *connector.Registry
+	runtimeInfo        RuntimeInfo
 	kpiFeedEngine      *indicators.LiveFeedEngine
 	kpiEvaluator       *indicators.ProjectEvaluator
 }
@@ -139,6 +148,8 @@ func NewServerWithOptions(store database.Store, options Options) (*Server, error
 		adapterAdminSecret: options.AdapterAdminSecret,
 		attStore:           options.VerifierStore,
 		verifierNet:        options.VerifierNetwork,
+		connectorRegistry:  options.ConnectorRegistry,
+		runtimeInfo:        options.RuntimeInfo,
 		kpiFeedEngine:      indicators.NewLiveFeedEngine(),
 		kpiEvaluator:       indicators.NewProjectEvaluator(),
 	}
@@ -418,6 +429,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /ready", s.handleReady)
 	s.mux.HandleFunc("GET /metrics", s.handleMetrics)
 	s.mux.HandleFunc("GET /api/v1/openapi.json", s.handleOpenAPI)
+	s.mux.HandleFunc("GET /api/v1/system/status", s.handleSystemStatus)
 	s.mux.HandleFunc("GET /api/v1/ingestion/dlq", s.handleIngestionDLQ)
 
 	// Flagship Capital Radar
@@ -1198,6 +1210,9 @@ func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 			"description": "Investor-grade API for Canadian economic infrastructure, capital tracking, and CEGS data standard reference implementation.",
 		},
 		"paths": map[string]interface{}{
+			"/api/v1/system/status": map[string]interface{}{
+				"get": map[string]interface{}{"summary": "Fetch runtime, data, connector, and product capability status"},
+			},
 			"/api/v1/radar": map[string]interface{}{
 				"get": map[string]interface{}{
 					"summary": "Flagship Canada Capital Radar metrics",

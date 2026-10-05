@@ -3,6 +3,7 @@ import manifestSnapshot from "@/data/manifest.snapshot.json";
 import procurementsSnapshot from "@/data/procurements.snapshot.json";
 import signalsSnapshot from "@/data/signals.snapshot.json";
 import { Procurement, Project, ProjectEvidence, ProjectScore, RadarStats, Signal, FilingsResponse, FilingRecord, EARecord, TenderAmendment } from "./types";
+import { requestUpstreamAPI } from "./upstream";
 
 const SECTORS = new Set<Project["sector"]>([
   "Critical Minerals",
@@ -49,27 +50,6 @@ const CONFIDENCE = new Set<Project["confidence"]>([
   "STALE",
   "RETRACTED",
 ]);
-
-const EXTERNAL_API_BASE = process.env.COG_API_BASE || process.env.NEXT_PUBLIC_API_BASE;
-
-function configuredAPIBase(): string | null {
-  const base = EXTERNAL_API_BASE || (process.env.NODE_ENV !== "production" ? `http://127.0.0.1:${process.env.COG_API_PORT || 8080}` : null);
-  if (!base) return null;
-  try {
-    const parsed = new URL(base);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
-    let url = parsed.toString().replace(/\/$/, "");
-    if (!url.endsWith("/api/v1") && !url.includes("/api/")) {
-      url = `${url}/api/v1`;
-    }
-    return url;
-  } catch {
-    console.error("[data] Ignoring invalid API base URL", { configured: true });
-    return null;
-  }
-}
-
-export const API_BASE = configuredAPIBase();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -320,20 +300,11 @@ function normalizeRadarStats(value: unknown): RadarStats | null {
 }
 
 export async function fetchExternalAPI(path: string): Promise<Response | null> {
-  if (!API_BASE) return null;
-  try {
-    const response = await fetch(`${API_BASE}${path}`, {
-      next: { revalidate: 30 },
-      signal: AbortSignal.timeout(2_000),
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      return null;
-    }
-    return response;
-  } catch {
-    return null;
-  }
+  const result = await requestUpstreamAPI(path, {
+    next: { revalidate: 30 },
+    headers: { Accept: "application/json" },
+  }, 2_000);
+  return result.response?.ok ? result.response : null;
 }
 
 export async function getRadarData(): Promise<RadarData> {

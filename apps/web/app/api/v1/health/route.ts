@@ -1,22 +1,24 @@
-import { SNAPSHOT_MANIFEST, SNAPSHOT_PROJECTS } from "@/lib/data";
-import { VETTED_SOURCES } from "@/lib/source-data";
 import { publicJSON, publicOptions } from "@/lib/public-api";
-import { TRADE_METRICS } from "@/lib/trade-data";
+import { getOperationsStatus } from "@/lib/operations";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
+  const operations = await getOperationsStatus();
   return publicJSON({
-    status: "ok",
-    mode: "BUNDLED_REVIEWED_SNAPSHOT",
-    generated_at: SNAPSHOT_MANIFEST.generated_at,
-    dataset_version: SNAPSHOT_MANIFEST.dataset_version,
-    projects: SNAPSHOT_PROJECTS.length,
-    canonical_sources: VETTED_SOURCES.length,
-    evidence_records: SNAPSHOT_MANIFEST.record_counts.evidence,
-    score_records: SNAPSHOT_MANIFEST.record_counts.scores,
-    trade_metrics: TRADE_METRICS.length,
-  });
+    status: operations.status === "DEGRADED" ? "degraded" : "ok",
+    mode: operations.mode,
+    checked_at: operations.checked_at,
+    generated_at: operations.data.generated_at,
+    dataset_version: operations.data.dataset_version,
+    projects: operations.data.total_projects,
+    canonical_sources: operations.data.canonical_sources,
+    evidence_records: operations.data.evidence_records,
+    score_records: operations.data.score_records,
+    freshness: operations.data.freshness,
+    upstream: operations.upstream,
+    runtime: operations.runtime,
+  }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export const OPTIONS = publicOptions;

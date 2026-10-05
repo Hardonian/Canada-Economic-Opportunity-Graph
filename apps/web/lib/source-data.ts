@@ -11,22 +11,9 @@ import type {
 } from "./types";
 import sourceSnapshot from "@/data/sources.snapshot.json";
 import manifestSnapshot from "@/data/manifest.snapshot.json";
+import { getUpstreamLocation, requestUpstreamAPI } from "./upstream";
 
-const EXTERNAL_API_BASE = process.env.COG_API_BASE || process.env.NEXT_PUBLIC_API_BASE;
-
-function configuredAPIBase(): string | null {
-  if (!EXTERNAL_API_BASE) return null;
-  try {
-    const parsed = new URL(EXTERNAL_API_BASE);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
-    return parsed.toString().replace(/\/$/, "");
-  } catch {
-    console.error("[sources] Ignoring invalid API base URL", { configured: true });
-    return null;
-  }
-}
-
-const API_BASE = configuredAPIBase();
+const HAS_UPSTREAM = getUpstreamLocation().configured;
 
 const SOURCE_LIFECYCLES = new Set<SourceLifecycle>([
   "DISCOVERED",
@@ -349,24 +336,14 @@ function normalizeCoverage(value: unknown): SourceCoverageReport | null {
 }
 
 async function fetchSourceAPI(path: string, revalidate: number): Promise<Response | null> {
-  if (!API_BASE) return null;
-  try {
-    const response = await fetch(`${API_BASE}${path}`, {
-      headers: { Accept: "application/json" },
-      next: { revalidate },
-      signal: AbortSignal.timeout(5_000),
-    });
-    if (!response.ok && response.status !== 404) {
-      console.warn("[sources] Upstream source API returned a non-success response", { path, status: response.status });
-    }
-    return response;
-  } catch (error) {
-    console.error("[sources] Upstream source API failed; serving vetted snapshot", {
-      path,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return null;
+  const result = await requestUpstreamAPI(path, {
+    headers: { Accept: "application/json" },
+    next: { revalidate },
+  }, 5_000);
+  if (result.response && !result.response.ok && result.response.status !== 404) {
+    console.warn("[sources] Upstream source API returned a non-success response", { path, status: result.response.status });
   }
+  return result.response;
 }
 
 function boundedQueryValue(value: string | undefined): string | null {
@@ -478,7 +455,7 @@ export async function getSources(query: SourceQuery = {}): Promise<SourceDataRes
   params.set("limit", String(limit));
   params.set("offset", String(offset));
 
-  if (API_BASE) {
+  if (HAS_UPSTREAM) {
     const response = await fetchSourceAPI(`/sources?${params.toString()}`, 60);
     if (response?.ok) {
       try {
@@ -497,7 +474,7 @@ export async function getSources(query: SourceQuery = {}): Promise<SourceDataRes
 export async function getSource(id: string): Promise<SourceDataResult<PublicSource>> {
   const normalizedID = boundedQueryValue(id);
   if (!normalizedID) return { status: "not_found", data: null, origin: "bundled-snapshot" };
-  if (API_BASE) {
+  if (HAS_UPSTREAM) {
     const response = await fetchSourceAPI(`/sources/${encodeURIComponent(normalizedID)}`, 60);
     if (response?.ok) {
       try {
@@ -519,7 +496,7 @@ export async function getSource(id: string): Promise<SourceDataResult<PublicSour
 }
 
 export async function getSourceCoverage(): Promise<SourceDataResult<SourceCoverageReport>> {
-  if (API_BASE) {
+  if (HAS_UPSTREAM) {
     const response = await fetchSourceAPI("/sources/coverage", 60);
     if (response?.ok) {
       try {

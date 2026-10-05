@@ -445,9 +445,9 @@ export default function ExecutiveBriefingPage() {
             {copyStatus === "copied" ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
             Copy checksum
           </button>
-          <a href="/api/v1/cegs/export" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 font-black text-[#050b08] hover:bg-aurora-mint">
+          <Link href="/api/v1/cegs/export" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 font-black text-[#050b08] hover:bg-aurora-mint">
             <Database aria-hidden="true" className="h-4 w-4" /> Open export <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
       </section>
 

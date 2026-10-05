@@ -24,7 +24,7 @@ func TestPublicHTTPContract(t *testing.T) {
 	server := httptest.NewServer(mustServer(t, store, testOptions()))
 	defer server.Close()
 
-	for _, path := range []string{"/health", "/ready", "/api/v1/projects?limit=10", "/api/v1/radar"} {
+	for _, path := range []string{"/health", "/ready", "/api/v1/projects?limit=10", "/api/v1/radar", "/api/v1/system/status"} {
 		response, err := http.Get(server.URL + path) // #nosec G107 -- httptest server URL.
 		if err != nil {
 			t.Fatalf("GET %s: %v", path, err)
@@ -33,6 +33,23 @@ func TestPublicHTTPContract(t *testing.T) {
 		if response.StatusCode != http.StatusOK {
 			t.Fatalf("GET %s status = %d, want %d", path, response.StatusCode, http.StatusOK)
 		}
+	}
+
+	statusResponse, err := http.Get(server.URL + "/api/v1/system/status") // #nosec G107 -- httptest server URL.
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer statusResponse.Body.Close()
+	var systemStatus struct {
+		Status       string              `json:"status"`
+		Capabilities []productCapability `json:"capabilities"`
+		Data         database.RadarStats `json:"data"`
+	}
+	if err := json.NewDecoder(statusResponse.Body).Decode(&systemStatus); err != nil {
+		t.Fatal(err)
+	}
+	if systemStatus.Status != "OPERATIONAL" || len(systemStatus.Capabilities) < 7 || systemStatus.Data.TotalProjects != 1 {
+		t.Fatalf("system status = %#v", systemStatus)
 	}
 
 	response, err := http.Get(server.URL + "/api/v1/filings/recent") // #nosec G107 -- httptest server URL.

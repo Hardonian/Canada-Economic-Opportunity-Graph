@@ -1,11 +1,12 @@
 import { fetchExternalAPI } from "@/lib/data";
 import { publicJSON, publicOptions } from "@/lib/public-api";
+import { requestUpstreamAPI } from "@/lib/upstream";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const shock = url.searchParams.get("shock") || "USMCA_2026_TARIFF_25";
 
-  const res = await fetchExternalAPI(`/planning/wargame?shock=${encodeURIComponent(shock)}`);
+  const res = await fetchExternalAPI(`/planning/wargame?scenario=${encodeURIComponent(shock)}`);
   if (res?.ok) {
     try {
       const data = await res.json();
@@ -25,7 +26,21 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return GET(request);
+  const body = await request.text();
+  if (body.length > 64_000) {
+    return publicJSON({ error: "The war-game request exceeds the 64 KB gateway limit." }, { status: 413 });
+  }
+  const result = await requestUpstreamAPI("/planning/wargame", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body,
+    cache: "no-store",
+  }, 15_000);
+  if (!result.response) {
+    return publicJSON({ error: "The national war-game engine is unavailable.", source_mode: "UPSTREAM_UNAVAILABLE" }, { status: 503 });
+  }
+  const payload = await result.response.json().catch(() => ({ error: "The war-game engine returned an invalid response." }));
+  return publicJSON(payload, { status: result.response.status });
 }
 
 export const OPTIONS = publicOptions;

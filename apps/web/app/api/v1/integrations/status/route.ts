@@ -1,11 +1,23 @@
 import { publicJSON, publicOptions } from "@/lib/public-api";
+import { getOperationsStatus } from "@/lib/operations";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
+  const operations = await getOperationsStatus();
   return publicJSON({
     secrets_disclosed: false,
+    upstream: operations.upstream,
+    ingestion: operations.ingestion,
     integrations: [
+      ...operations.ingestion.connectors.map((connector) => ({
+        id: connector.name,
+        status: connector.status,
+        mode: connector.mode,
+        configured: true,
+        last_success: connector.last_success,
+        documents_seen: connector.documents_seen,
+      })),
       { id: "world_bank_indicators", status: "ACTIVE", credential: "NOT_REQUIRED", configured: true },
       { id: "statistics_canada_wds", status: "REGISTERED_NOT_INGESTED", credential: "NOT_REQUIRED", configured: true },
       { id: "oecd_sdmx", status: "REGISTERED_NOT_INGESTED", credential: "NOT_REQUIRED", configured: true },

@@ -2,6 +2,14 @@
 
 CanadaOpportunityGraph maintains a clean separation between the open-source platform / CEGS standard and optional commercial intelligence layers.
 
+> Implementation boundary: the checked-in reference product currently ships
+> the public intelligence console, same-origin API gateway, operational control
+> plane, persistent single-writer runtime, SDKs, exports, and deployment stack.
+> The account, billing, paid quota, private workspace, watchlist, and outbound
+> notification rows below describe the commercial extension architecture; they
+> are not presented as active services until identity, tenancy, and a billing
+> provider are explicitly configured.
+
 ---
 
 ## 1. The Open Standard Flywheel

@@ -14,11 +14,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: canada-economic-opportunity-graph
       app.kubernetes.io/component: api
+  # Persistent WAL storage is single-writer. Recreate prevents an old and new
+  # API pod from writing the same RWO volume during a rollout.
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   template:
     metadata:
       labels:
@@ -57,6 +56,8 @@ spec:
               value: "persistent"
             - name: STORAGE_DIR
               value: "/app/data/store"
+            - name: INGEST_INTERVAL
+              value: "5m"
             - name: LOG_LEVEL
               value: "info"
           ports:
@@ -153,13 +154,13 @@ spec:
               name: http
           livenessProbe:
             httpGet:
-              path: /
+              path: /api/v1/health
               port: 3000
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
-              path: /
+              path: /api/v1/health
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10

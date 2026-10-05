@@ -11,6 +11,7 @@ import (
 
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/bankofcanada"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/canadabuys"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/cmhc_housing"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/federal_contracts"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/adapters/global_trade"
@@ -59,6 +60,7 @@ func main() {
 		official.NewAdapter(""),
 		global_trade.NewFromEnv(),
 		bankofcanada.NewBoCAdapter(""),
+		canadabuys.NewCanadaBuysAdapter(""),
 		federal_contracts.NewFederalContractsAdapter(""),
 		lobbyist_registry.NewLobbyistRegistryAdapter(""),
 		cmhc_housing.NewCMHCHousingAdapter(""),
@@ -129,6 +131,13 @@ func main() {
 		AdapterAdminSecret:  cfg.AdapterAdminSecret,
 		VerifierStore:       verifierStore,
 		VerifierNetwork:     verifierNet,
+		ConnectorRegistry:   reg,
+		RuntimeInfo: api.RuntimeInfo{
+			Environment:       cfg.Env,
+			StorageMode:       cfg.StorageMode,
+			SchedulerEnabled:  cfg.IngestInterval > 0,
+			SchedulerInterval: cfg.IngestInterval.String(),
+		},
 	})
 	if err != nil {
 		log.Fatalf("[FATAL] Invalid API security configuration: %v", err)
@@ -146,6 +155,12 @@ func main() {
 
 	log.Printf("[INFO] CanadaOpportunityGraph API running on %s\n", cfg.ListenAddress())
 	log.Printf("[INFO] CEGS 1.0 Specification active at /api/v1/cegs/export\n")
+	if cfg.IngestInterval > 0 {
+		log.Printf("[INFO] Scheduled ingestion enabled every %s", cfg.IngestInterval)
+		go runScheduledIngestion(processContext, cfg.IngestInterval, pipeline, store)
+	} else {
+		log.Printf("[INFO] Scheduled ingestion disabled; serving the startup snapshot")
+	}
 
 	serverErrors := make(chan error, 1)
 	go func() {
@@ -168,6 +183,37 @@ func main() {
 		log.Printf("[ERROR] Graceful shutdown failed: %v", err)
 		if closeErr := httpServer.Close(); closeErr != nil {
 			log.Printf("[ERROR] Forced server close failed: %v", closeErr)
+		}
+	}
+}
+
+// runScheduledIngestion keeps refresh and serving in the same process and
+// store. This avoids the disconnected-worker failure mode where a second
+// process updated only its own memory and the API could never observe it.
+func runScheduledIngestion(ctx context.Context, interval time.Duration, pipeline *ingestion.Pipeline, store database.Store) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			cycleStart := time.Now()
+			report, err := pipeline.Run(ctx)
+			if err != nil {
+				log.Printf("[WARN] Scheduled ingestion failed after %s: %v", time.Since(cycleStart), err)
+				continue
+			}
+			reconReport := reconciliation.Reconcile(ctx, store)
+			root := merkle.PublishRoot(ctx, store)
+			log.Printf("[INFO] Scheduled ingestion complete: projects=%d entities=%d opportunities=%d conflicts=%d merkle_root=%s duration=%s",
+				report.ProjectsIngested,
+				report.EntitiesResolved,
+				report.OpportunitiesDerived,
+				reconReport.Summary.Conflicts,
+				root,
+				time.Since(cycleStart),
+			)
 		}
 	}
 }

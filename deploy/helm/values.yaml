@@ -22,6 +22,8 @@ api:
     dir: /app/data/store
     size: 100Gi
     storageClassName: premium-rwo
+  ingestion:
+    interval: 5m # set to "0" for immutable snapshot-only serving
   resources:
     requests:
       cpu: 500m

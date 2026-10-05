@@ -101,10 +101,14 @@ type ConnectorStatus struct {
 	Name        string    `json:"name"`
 	Tier        string    `json:"tier"`
 	Status      string    `json:"status"`
+	Mode        string    `json:"mode"`
 	LastAttempt time.Time `json:"last_attempt"`
 	LastSuccess time.Time `json:"last_success"`
 	LastHash    string    `json:"last_hash"`
 	Duplicate   bool      `json:"duplicate"`
+	Documents   int       `json:"documents_seen"`
+	Changed     int       `json:"documents_changed"`
+	Failures    int       `json:"parse_failures"`
 }
 
 // Status returns a snapshot suitable for monitoring/export.
@@ -118,9 +122,13 @@ func (c *Connector) Status() ConnectorStatus {
 		Name:        h.AdapterName,
 		Tier:        strconv.Itoa(int(h.Tier)),
 		Status:      h.Status,
+		Mode:        h.Mode,
 		LastAttempt: h.LastAttempt,
 		LastSuccess: h.LastSuccess,
 		LastHash:    lastHash,
 		Duplicate:   duplicate,
+		Documents:   h.DocumentsSeen,
+		Changed:     h.DocumentsChanged,
+		Failures:    h.ParseFailures,
 	}
 }

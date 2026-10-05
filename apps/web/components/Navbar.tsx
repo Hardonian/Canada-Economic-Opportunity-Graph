@@ -63,6 +63,7 @@ export default function Navbar() {
     { href: "/trade", label: lang === "en" ? "Trade Flows" : "Flux commerciaux", icon: Globe2 },
     { href: "/ai-sovereignty", label: lang === "en" ? "AI Sovereignty" : "Souveraineté IA", icon: Cpu },
     { href: "/cegs", label: lang === "en" ? "CEGS Standard" : "Norme CEGS", icon: FileCode2, badge: "0.1" },
+    { href: "/operations", label: lang === "en" ? "Operations" : "Opérations", icon: ShieldCheck, badge: "OPS" },
   ];
 
   return (

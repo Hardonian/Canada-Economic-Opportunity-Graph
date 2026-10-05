@@ -126,6 +126,14 @@ make cegs-validate
 make web-dev
 ```
 
+For the connected production-shaped stack, copy `.env.example` to `.env` and
+run `docker compose up --build`. Open `http://localhost:3000/operations` for
+live API readiness, connector health, storage/scheduler status, release
+freshness, and links into every product module. The web runtime exposes the Go
+engine through the same-origin `/api/v1/*` gateway, while retaining the
+checksummed reviewed snapshot when the upstream service is intentionally
+offline.
+
 ---
 
 ## The Official CLI: `cog`

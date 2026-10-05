@@ -10,7 +10,14 @@ services:
     environment:
       PORT: 8080
       ENV: production
-      STORAGE_MODE: snapshot
+      STORAGE_MODE: ${STORAGE_MODE:-persistent}
+      STORAGE_DIR: /app/data/store
+      INGEST_INTERVAL: ${INGEST_INTERVAL:-5m}
+      GLOBAL_TRADE_MODE: ${GLOBAL_TRADE_MODE:-snapshot}
+      BANKOFCANADA_LIVE: ${BANKOFCANADA_LIVE:-0}
+      FEDERAL_CONTRACTS_LIVE: ${FEDERAL_CONTRACTS_LIVE:-0}
+      LOBBYIST_REGISTRY_LIVE: ${LOBBYIST_REGISTRY_LIVE:-0}
+      CMHC_HOUSING_LIVE: ${CMHC_HOUSING_LIVE:-0}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
@@ -43,6 +50,11 @@ services:
       api:
         condition: service_healthy
     read_only: true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/v1/health"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
     tmpfs:
       - /tmp:size=32m,noexec,nosuid,nodev
     cap_drop: [ALL]
@@ -56,4 +68,3 @@ networks:
 
 volumes:
   cog-data:
-

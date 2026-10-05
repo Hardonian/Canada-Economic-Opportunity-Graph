@@ -4,7 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "canada-economic-opportunity-graph.fullname" . }}-web
   labels:
-    app.kubernetes.io/name: {{ include "canada-economic-opportunity-graph.name" . }}-web
+    app.kubernetes.io/name: {{ include "canada-economic-opportunity-graph.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: web
 spec:

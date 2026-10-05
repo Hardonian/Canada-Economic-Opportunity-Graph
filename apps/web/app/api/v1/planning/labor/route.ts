@@ -3,9 +3,9 @@ import { publicJSON, publicOptions } from "@/lib/public-api";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const prov = url.searchParams.get("prov") || "ALL";
+  const prov = url.searchParams.get("province") || url.searchParams.get("prov") || "ON";
 
-  const res = await fetchExternalAPI(`/planning/labor?prov=${encodeURIComponent(prov)}`);
+  const res = await fetchExternalAPI(`/planning/labor?province=${encodeURIComponent(prov)}`);
   if (res?.ok) {
     try {
       const data = await res.json();

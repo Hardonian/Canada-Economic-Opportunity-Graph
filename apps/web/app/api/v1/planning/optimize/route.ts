@@ -1,5 +1,6 @@
 import { fetchExternalAPI, SNAPSHOT_PROJECTS } from "@/lib/data";
 import { publicJSON, publicOptions } from "@/lib/public-api";
+import { requestUpstreamAPI } from "@/lib/upstream";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -29,7 +30,21 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return GET(request);
+  const body = await request.text();
+  if (body.length > 64_000) {
+    return publicJSON({ error: "The optimization request exceeds the 64 KB gateway limit." }, { status: 413 });
+  }
+  const result = await requestUpstreamAPI("/planning/optimize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body,
+    cache: "no-store",
+  }, 15_000);
+  if (!result.response) {
+    return publicJSON({ error: "The sovereign allocation engine is unavailable.", source_mode: "UPSTREAM_UNAVAILABLE" }, { status: 503 });
+  }
+  const payload = await result.response.json().catch(() => ({ error: "The allocation engine returned an invalid response." }));
+  return publicJSON(payload, { status: result.response.status });
 }
 
 export const OPTIONS = publicOptions;

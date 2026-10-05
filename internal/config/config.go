@@ -44,6 +44,7 @@ type Config struct {
 	IdleTimeout          time.Duration
 	ShutdownTimeout      time.Duration
 	InitialIngestTimeout time.Duration
+	IngestInterval       time.Duration
 	StorageDir           string
 	// AdapterAdminSecret protects the small set of adapter-sandbox mutation
 	// endpoints. It is intentionally excluded from RuntimeSummary and logging.
@@ -60,6 +61,7 @@ type RuntimeSummary struct {
 	HSTS               bool     `json:"hsts"`
 	RateLimitPerMinute int      `json:"rate_limit_per_minute"`
 	RateLimitBurst     int      `json:"rate_limit_burst"`
+	IngestInterval     string   `json:"ingest_interval"`
 }
 
 // Load retains the original convenience API and fails closed on malformed
@@ -153,6 +155,10 @@ func LoadValidated() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg.IngestInterval, err = optionalDurationEnv("INGEST_INTERVAL", cfg.IngestInterval, 30*time.Second, 24*time.Hour)
+	if err != nil {
+		return nil, err
+	}
 
 	hstsDefault := strings.EqualFold(cfg.Env, "production")
 	cfg.EnableHSTS, err = boolEnv("ENABLE_HSTS", hstsDefault)
@@ -212,6 +218,7 @@ func defaults() *Config {
 		IdleTimeout:          60 * time.Second,
 		ShutdownTimeout:      15 * time.Second,
 		InitialIngestTimeout: 2 * time.Minute,
+		IngestInterval:       0,
 	}
 }
 
@@ -229,13 +236,14 @@ func (c *Config) SafeSummary() RuntimeSummary {
 		HSTS:               c.EnableHSTS,
 		RateLimitPerMinute: c.RateLimitPerMinute,
 		RateLimitBurst:     c.RateLimitBurst,
+		IngestInterval:     c.IngestInterval.String(),
 	}
 }
 
 // String and GoString keep formatted logging limited to the safe summary.
 func (c Config) String() string {
 	summary := c.SafeSummary()
-	return fmt.Sprintf("{environment:%q listen_address:%q public_url:%q cors_origins:%q storage_mode:%q hsts:%t rate_limit_per_minute:%d rate_limit_burst:%d}",
+	return fmt.Sprintf("{environment:%q listen_address:%q public_url:%q cors_origins:%q storage_mode:%q hsts:%t rate_limit_per_minute:%d rate_limit_burst:%d ingest_interval:%q}",
 		summary.Environment,
 		summary.ListenAddress,
 		summary.PublicURL,
@@ -244,6 +252,7 @@ func (c Config) String() string {
 		summary.HSTS,
 		summary.RateLimitPerMinute,
 		summary.RateLimitBurst,
+		summary.IngestInterval,
 	)
 }
 
@@ -351,6 +360,20 @@ func durationEnv(key string, defaultValue, min, max time.Duration) (time.Duratio
 	value, err := time.ParseDuration(raw)
 	if err != nil || value < min || value > max {
 		return 0, fmt.Errorf("%s must be a duration between %s and %s", key, min, max)
+	}
+	return value, nil
+}
+
+// optionalDurationEnv accepts an explicit zero to disable a periodic job.
+// Any enabled interval remains bounded so a typo cannot create a hot loop.
+func optionalDurationEnv(key string, defaultValue, min, max time.Duration) (time.Duration, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return defaultValue, nil
+	}
+	value, err := time.ParseDuration(raw)
+	if err != nil || (value != 0 && (value < min || value > max)) {
+		return 0, fmt.Errorf("%s must be 0 or a duration between %s and %s", key, min, max)
 	}
 	return value, nil
 }

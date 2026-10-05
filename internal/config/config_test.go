@@ -17,6 +17,7 @@ func TestLoadValidatedProductionSecuritySettings(t *testing.T) {
 	t.Setenv("REQUEST_TIMEOUT", "12s")
 	t.Setenv("RATE_LIMIT_PER_MINUTE", "300")
 	t.Setenv("RATE_LIMIT_BURST", "40")
+	t.Setenv("INGEST_INTERVAL", "5m")
 
 	cfg, err := LoadValidated()
 	if err != nil {
@@ -30,6 +31,9 @@ func TestLoadValidatedProductionSecuritySettings(t *testing.T) {
 	}
 	if cfg.RequestTimeout != 12*time.Second {
 		t.Fatalf("RequestTimeout = %s", cfg.RequestTimeout)
+	}
+	if cfg.IngestInterval != 5*time.Minute {
+		t.Fatalf("IngestInterval = %s", cfg.IngestInterval)
 	}
 	wantOrigins := []string{"https://planner.gc.ca", "https://investor.example"}
 	if !reflect.DeepEqual(cfg.CORSOrigins, wantOrigins) {
@@ -77,6 +81,7 @@ func TestLoadValidatedRejectsUnsafeOrMalformedSettings(t *testing.T) {
 		"mixed wildcard origins":     {"CORS_ORIGINS", "*,https://planner.gc.ca"},
 		"credentialed CORS origin":   {"CORS_ORIGINS", "https://user:password@planner.gc.ca"},
 		"short adapter admin secret": {"ADAPTER_ADMIN_SECRET", "too-short"},
+		"ingestion hot loop":         {"INGEST_INTERVAL", "1s"},
 	}
 
 	for name, test := range tests {
@@ -145,6 +150,7 @@ func clearConfigEnvironment(t *testing.T) {
 		"IDLE_TIMEOUT",
 		"SHUTDOWN_TIMEOUT",
 		"INITIAL_INGEST_TIMEOUT",
+		"INGEST_INTERVAL",
 		"ADAPTER_ADMIN_SECRET",
 	} {
 		t.Setenv(key, "")

@@ -55,17 +55,17 @@ export default function NationalPlanningWorkbench({ projects }: NationalPlanning
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           objective,
-          budget_envelopes: {
-            cib_cad: cibEnvelopeB * 1e9,
-            sif_cad: sifEnvelopeB * 1e9,
-            itc_cad: itcEnvelopeB * 1e9,
-            indigenous_loan_guarantee_cad: indigEnvelopeB * 1e9,
+          envelopes: {
+            cib_concessionary_cad: cibEnvelopeB * 1e9,
+            sif_grants_cad: sifEnvelopeB * 1e9,
+            itc_tax_credits_cad: itcEnvelopeB * 1e9,
+            indigenous_loans_cad: indigEnvelopeB * 1e9,
           },
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        setLiveOptimizerStatus(`Live Go Engine: HTTP 200 OK · ${(data.allocations || []).length} assets allocated · Multiplier: ${data.multiplier ? data.multiplier.toFixed(1) + "x" : "Calculated"}`);
+        setLiveOptimizerStatus(`Live Go Engine: HTTP 200 OK · ${(data.allocated_projects || []).length} assets allocated · Multiplier: ${typeof data.crowding_in_multiplier === "number" ? data.crowding_in_multiplier.toFixed(1) + "x" : "Calculated"}`);
       } else {
         setLiveOptimizerStatus("Live Engine offline · Executed via Deterministic Local MILP Engine");
       }
@@ -84,12 +84,12 @@ export default function NationalPlanningWorkbench({ projects }: NationalPlanning
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          scenario_id: selectedShock,
+          scenario: selectedShock,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        setLiveWargameStatus(`Live Go Engine: HTTP 200 OK · ${(data.stalled_projects || []).length} assets impacted · Frozen CAPEX: $${((data.frozen_capex_cad || warGameResults.frozenCapex) / 1e9).toFixed(1)}B`);
+        setLiveWargameStatus(`Live Go Engine: HTTP 200 OK · ${(data.stalled_projects || []).length} assets impacted · Frozen CAPEX: $${((data.total_frozen_capex_cad || warGameResults.frozenCapex) / 1e9).toFixed(1)}B`);
       } else {
         setLiveWargameStatus("Live Engine offline · Executed via Deterministic Local War Game Engine");
       }

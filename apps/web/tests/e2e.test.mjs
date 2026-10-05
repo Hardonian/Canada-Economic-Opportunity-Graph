@@ -336,4 +336,40 @@ test('E2E Test 11: Mark Carney Briefing Suite: National Airports System Concessi
   assert.ok(dossierContent.includes('Brookfield'), 'dossier must reference Brookfield');
 });
 
+test('E2E Test 12: Product Control Plane, Universal Gateway, and Deployment Wiring', async () => {
+  const gatewayPath = path.join(__dirname, '../app/api/v1/[...path]/route.ts');
+  const operationsPath = path.join(__dirname, '../app/operations/page.tsx');
+  const operationsLibPath = path.join(__dirname, '../lib/operations.ts');
+  const systemHandlerPath = path.join(rootDir, 'internal/api/system_handler.go');
+  const planningUIPath = path.join(__dirname, '../components/NationalPlanningWorkbench.tsx');
+  const helmDeploymentPath = path.join(rootDir, 'deploy/helm/templates/deployment.yaml');
 
+  for (const requiredPath of [gatewayPath, operationsPath, operationsLibPath, systemHandlerPath]) {
+    assert.ok(fs.existsSync(requiredPath), `${requiredPath} must exist`);
+  }
+
+  const gateway = fs.readFileSync(gatewayPath, 'utf8');
+  assert.ok(gateway.includes('requestUpstreamAPI'), 'gateway must use the shared upstream transport');
+  assert.ok(gateway.includes('MAX_PROXY_BODY_BYTES'), 'gateway must bound request bodies');
+  assert.ok(gateway.includes('forbidden_origin'), 'gateway must reject cross-site mutations');
+  assert.ok(gateway.includes('application/json'), 'gateway mutations must require JSON bodies');
+  assert.ok(!gateway.includes('x-admin-secret'), 'gateway must never forward adapter administration credentials');
+  assert.ok(!gateway.includes('x-clearance-level'), 'gateway must not trust browser-supplied security clearance');
+
+  const systemHandler = fs.readFileSync(systemHandlerPath, 'utf8');
+  assert.ok(systemHandler.includes('AggregateHealth'), 'system status must read the live connector registry');
+  assert.ok(systemHandler.includes('SchedulerEnabled'), 'system status must expose scheduled-ingestion readiness');
+
+  const planningUI = fs.readFileSync(planningUIPath, 'utf8');
+  assert.ok(planningUI.includes('cib_concessionary_cad'), 'planning UI must send the Go optimizer envelope schema');
+  assert.ok(planningUI.includes('allocated_projects'), 'planning UI must read the Go optimizer response schema');
+  assert.ok(planningUI.includes('total_frozen_capex_cad'), 'planning UI must read the Go war-game response schema');
+
+  const helmDeployment = fs.readFileSync(helmDeploymentPath, 'utf8');
+  for (const envName of ['ENV', 'STORAGE_MODE', 'STORAGE_DIR', 'INGEST_INTERVAL', 'COG_API_BASE']) {
+    assert.ok(helmDeployment.includes(`name: ${envName}`), `Helm must configure ${envName}`);
+  }
+  assert.ok(helmDeployment.includes('-wal-data'), 'API deployment and PVC must share the WAL claim name');
+  assert.ok(!helmDeployment.includes('name: ENVIRONMENT'), 'Helm must not use ignored ENVIRONMENT variable');
+  assert.ok(!helmDeployment.includes('name: DATA_DIR'), 'Helm must not use ignored DATA_DIR variable');
+});
