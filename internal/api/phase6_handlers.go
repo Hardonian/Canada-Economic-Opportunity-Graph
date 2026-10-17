@@ -106,11 +106,15 @@ func (s *Server) handleFinanceMonteCarlo(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	const maxMonteCarloIterations = 10000
 	iterations := 1000
 	if itStr := r.URL.Query().Get("iterations"); itStr != "" {
-		if parsed, parseErr := strconv.Atoi(itStr); parseErr == nil && parsed > 0 {
-			iterations = parsed
+		parsed, parseErr := strconv.Atoi(itStr)
+		if parseErr != nil || parsed <= 0 || parsed > maxMonteCarloIterations {
+			writeError(w, r, http.StatusBadRequest, "invalid_iterations", "iterations must be between 1 and 10000.")
+			return
 		}
+		iterations = parsed
 	}
 
 	sim := projectfinance.NewFinanceSimulator()
