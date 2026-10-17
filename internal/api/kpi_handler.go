@@ -31,11 +31,17 @@ func (s *Server) handleKPIList(w http.ResponseWriter, r *http.Request) {
 
 // handleKPIFeeds returns the latest streaming commodity and macroeconomic indicator ticks.
 func (s *Server) handleKPIFeeds(w http.ResponseWriter, r *http.Request) {
+	const maxRecentTicksLimit = 500
+
 	limitStr := r.URL.Query().Get("limit")
 	limit := 20
 	if limitStr != "" {
 		if parsed, err := strconv.Atoi(limitStr); err == nil && parsed > 0 {
-			limit = parsed
+			if parsed > maxRecentTicksLimit {
+				limit = maxRecentTicksLimit
+			} else {
+				limit = parsed
+			}
 		}
 	}
 
