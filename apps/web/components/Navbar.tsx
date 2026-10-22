@@ -111,8 +111,8 @@ export default function Navbar() {
             <span className="hidden xl:inline text-text-subtle/50">•</span>
             <span className="hidden xl:inline text-text-muted text-[10px]">
               {lang === "en" 
-                ? "Canadian economic intelligence • independent product" 
-                : "Intelligence économique canadienne • produit indépendant"}
+                ? "Economic Opportunity Graph • Open Geospatial & Capital Mesh" 
+                : "Graphe des possibilités économiques • Maillage géospatial et financier"}
             </span>
           </div>
 
