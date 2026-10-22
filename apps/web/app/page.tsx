@@ -26,6 +26,29 @@ export default async function HomePage() {
   const accelerating = projects.filter((p) => (p.scores?.buildability || 0) >= 50);
   const sectorCount = new Set(projects.map((project) => project.sector)).size;
   const snapshotMode = radarData.source_mode !== "LIVE_UPSTREAM_API";
+  const currentContext = [
+    {
+      label: "MONETARY POLICY",
+      value: "2.25%",
+      detail: "Bank of Canada overnight target held on 2 September 2026",
+      href: "https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/",
+      tone: "border-sky-400/30 bg-sky-400/8 text-sky-200",
+    },
+    {
+      label: "NORTHERN ONTARIO",
+      value: "$1B",
+      detail: "Federal commitment for Ring of Fire enabling roads over three years",
+      href: "https://www.canada.ca/en/innovation-science-economic-development/news/2026/10/prime-minister-carney-and-premier-ford-launch-new-action-plan-to-protect-workers-from-tariffs-and-strengthen-ontario-industries.html",
+      tone: "border-[#e56b5d]/40 bg-[#e56b5d]/10 text-[#ffb3a9]",
+    },
+    {
+      label: "PROJECT COVERAGE",
+      value: `${stats.total_projects}`,
+      detail: `reviewed projects across ${sectorCount} strategic sectors`,
+      href: "/projects",
+      tone: "border-[#d6b56a]/40 bg-[#d6b56a]/10 text-[#f4d894]",
+    },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
@@ -37,7 +60,7 @@ export default async function HomePage() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#050B08] border border-primary/40 text-xs font-mono text-aurora shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101b27] border border-primary/40 text-xs font-mono text-aurora shadow-sm">
               <span className={`h-2 w-2 rounded-full bg-aurora shadow-[0_0_8px_#00F5A0] ${snapshotMode ? "" : "animate-pulse"}`}></span>
               FLAGSHIP MACRO RADAR — CANADIAN ECONOMIC INTELLIGENCE
             </div>
@@ -140,6 +163,28 @@ export default async function HomePage() {
           </div>
         </div>
       </div>
+
+      <section className="rounded-2xl border border-border/80 bg-card/80 p-5 sm:p-6 shadow-xl shadow-black/20" aria-labelledby="current-context-heading">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+          <div>
+            <div className="text-[10px] font-mono font-bold tracking-[0.18em] text-[#e56b5d]">CANADA NOW // OFFICIAL CONTEXT</div>
+            <h2 id="current-context-heading" className="mt-1 text-xl font-black tracking-tight text-text-main">Recent signals shaping the opportunity map</h2>
+          </div>
+          <p className="text-[11px] text-text-muted sm:text-right">Checked 22 October 2026 · official sources linked</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {currentContext.map((item) => (
+            <Link key={item.label} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noreferrer" : undefined} className={`group rounded-xl border p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.05] ${item.tone}`}>
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-[10px] font-mono font-bold tracking-[0.14em] opacity-80">{item.label}</span>
+                <ArrowUpRight className="h-4 w-4 opacity-60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+              <div className="mt-2 text-3xl font-black font-tabular text-text-main">{item.value}</div>
+              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">{item.detail}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* Four Pillars of Sovereign Canadian Capital Section */}
       <div className="space-y-4">

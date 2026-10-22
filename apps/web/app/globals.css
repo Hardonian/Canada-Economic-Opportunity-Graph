@@ -4,22 +4,22 @@
 
 :root {
   color-scheme: dark;
-  --background: #050b08;
-  --foreground: #f7faf8;
-  --surface: #0c1812;
-  --panel: #12231b;
-  --panel-hover: #193126;
-  --border-strong: #5c7d6d;
-  --border-subtle: #314b40;
-  --text-muted: #d0ddd6;
-  --text-subtle: #a8c4b8;
-  --aurora: #00f5a0;
-  --aurora-on-dark: #00d488;
-  --gold: #f6c453;
-  --gold-on-dark: #e8b840;
-  --maple: #ff5d73;
-  --focus: #7df8ca;
-  --focus-ring: #050b08;
+  --background: #0b1520;
+  --foreground: #f7f4ed;
+  --surface: #122334;
+  --panel: #182d3b;
+  --panel-hover: #1f3a48;
+  --border-strong: #547082;
+  --border-subtle: #304d60;
+  --text-muted: #c3d0d2;
+  --text-subtle: #9bb2b9;
+  --aurora: #55d6be;
+  --aurora-on-dark: #67e0c8;
+  --gold: #e7b96b;
+  --gold-on-dark: #f0c77d;
+  --maple: #e56b5d;
+  --focus: #8de9d7;
+  --focus-ring: #0b1520;
 }
 
 html {
@@ -35,9 +35,9 @@ body {
   background-image:
     linear-gradient(rgba(145, 170, 158, 0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgba(145, 170, 158, 0.018) 1px, transparent 1px),
-    radial-gradient(ellipse 90% 58% at 50% -16%, rgba(0, 245, 160, 0.1), transparent 68%),
-    radial-gradient(ellipse 46% 38% at 96% 18%, rgba(246, 196, 83, 0.055), transparent 72%),
-    radial-gradient(ellipse 54% 46% at 4% 86%, rgba(255, 93, 115, 0.035), transparent 72%);
+    radial-gradient(ellipse 90% 58% at 50% -16%, rgba(85, 214, 190, 0.13), transparent 68%),
+    radial-gradient(ellipse 46% 38% at 96% 18%, rgba(231, 185, 107, 0.08), transparent 72%),
+    radial-gradient(ellipse 54% 46% at 4% 86%, rgba(229, 107, 93, 0.06), transparent 72%);
   background-attachment: fixed;
   background-size: 56px 56px, 56px 56px, auto, auto, auto;
   color: var(--foreground);
@@ -119,8 +119,8 @@ body {
 
 /* Opaque-enough panels preserve contrast over the national data-grid backdrop. */
 .glass-panel {
-  border: 1px solid rgba(92, 125, 109, 0.82);
-  background: rgba(10, 23, 17, 0.95);
+  border: 1px solid rgba(84, 112, 130, 0.82);
+  background: rgba(18, 35, 52, 0.95);
   box-shadow:
     inset 0 1px 0 rgba(247, 250, 248, 0.035),
     0 20px 48px -30px rgba(0, 0, 0, 0.9);
@@ -129,8 +129,8 @@ body {
 }
 
 .glass-card {
-  border: 1px solid rgba(92, 125, 109, 0.7);
-  background: rgba(18, 35, 27, 0.94);
+  border: 1px solid rgba(84, 112, 130, 0.7);
+  background: rgba(24, 45, 59, 0.94);
   box-shadow:
     inset 0 1px 0 rgba(247, 250, 248, 0.035),
     0 16px 34px -26px rgba(0, 0, 0, 0.95);
@@ -141,11 +141,11 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .glass-card:hover {
-    border-color: rgba(0, 245, 160, 0.72);
-    background: rgba(25, 49, 38, 0.97);
+    border-color: rgba(85, 214, 190, 0.72);
+    background: rgba(31, 58, 72, 0.97);
     box-shadow:
       inset 0 1px 0 rgba(247, 250, 248, 0.05),
-      0 18px 36px -24px rgba(0, 245, 160, 0.3);
+      0 18px 36px -24px rgba(85, 214, 190, 0.28);
     transform: translateY(-2px);
   }
 }
@@ -403,4 +403,3 @@ body {
 .institutional-popup .leaflet-popup-tip {
   background: rgba(4, 8, 6, 0.95) !important;
 }
-
