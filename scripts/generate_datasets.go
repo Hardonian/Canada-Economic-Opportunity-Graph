@@ -29,9 +29,9 @@ import (
 )
 
 const (
-	datasetVersion      = "2026-09-16-1"
-	datasetTime         = "2026-09-16T00:00:00Z"
-	collectionTimestamp = "2026-09-16T20:14:29.6423758Z"
+	datasetVersion      = "2026-10-27-1"
+	datasetTime         = "2026-10-27T00:00:00Z"
+	collectionTimestamp = "2026-10-27T00:43:58Z"
 )
 
 func main() {
