@@ -24,30 +24,30 @@ const TotalNASModernizationTargetCapexCAD int64 = 18_000_000_000
 
 // AirportConcessionProfile defines baseline operational and infrastructure parameters for a hub.
 type AirportConcessionProfile struct {
-	Code                         AirportHubCode `json:"code"`
-	Name                         string         `json:"name"`
-	Province                     string         `json:"province"`
-	AnnualPassengersBaseline     int64          `json:"annual_passengers_baseline"`
-	TargetPassengers2050         int64          `json:"target_passengers_2050"`
-	BaselineRevenueCAD           int64          `json:"baseline_revenue_cad"`
-	BaselineEBITDACAD            int64          `json:"baseline_ebitda_cad"`
-	TargetModernizationCapexCAD  int64          `json:"target_modernization_capex_cad"`
-	KeyProjects                  []string       `json:"key_projects"`
-	DecarbonizationInitiatives   []string       `json:"decarbonization_initiatives"`
-	TargetPensionInvestors       []string       `json:"target_pension_investors"`
+	Code                        AirportHubCode `json:"code"`
+	Name                        string         `json:"name"`
+	Province                    string         `json:"province"`
+	AnnualPassengersBaseline    int64          `json:"annual_passengers_baseline"`
+	TargetPassengers2050        int64          `json:"target_passengers_2050"`
+	BaselineRevenueCAD          int64          `json:"baseline_revenue_cad"`
+	BaselineEBITDACAD           int64          `json:"baseline_ebitda_cad"`
+	TargetModernizationCapexCAD int64          `json:"target_modernization_capex_cad"`
+	KeyProjects                 []string       `json:"key_projects"`
+	DecarbonizationInitiatives  []string       `json:"decarbonization_initiatives"`
+	TargetPensionInvestors      []string       `json:"target_pension_investors"`
 }
 
 // SimulationParams specifies inputs for the NAS ground lease concession model.
 type SimulationParams struct {
-	ConcessionHorizonYears       int                    `json:"concession_horizon_years"`        // 30 to 50 years, default 40
-	FederalRoyaltyRatePercent    float64                `json:"federal_royalty_rate_percent"`    // e.g., 10.0% of gross revenue
-	PensionEquitySharePercent    float64                `json:"pension_equity_share_percent"`    // e.g., 50.0%
-	CommercialDebtSharePercent   float64                `json:"commercial_debt_share_percent"`   // e.g., 45.0%
-	FederalSubordinatedSharePct  float64                `json:"federal_subordinated_share_pct"`  // e.g., 5.0%
-	PassengerCAGRPercent         float64                `json:"passenger_cagr_percent"`          // e.g., 2.8%
-	InflationPercent             float64                `json:"inflation_percent"`               // e.g., 2.0%
-	DiscountRatePercent          float64                `json:"discount_rate_percent"`           // e.g., 5.5%
-	CustomCapexCAD               map[AirportHubCode]int64 `json:"custom_capex_cad,omitempty"`
+	ConcessionHorizonYears      int                      `json:"concession_horizon_years"`       // 30 to 50 years, default 40
+	FederalRoyaltyRatePercent   float64                  `json:"federal_royalty_rate_percent"`   // e.g., 10.0% of gross revenue
+	PensionEquitySharePercent   float64                  `json:"pension_equity_share_percent"`   // e.g., 50.0%
+	CommercialDebtSharePercent  float64                  `json:"commercial_debt_share_percent"`  // e.g., 45.0%
+	FederalSubordinatedSharePct float64                  `json:"federal_subordinated_share_pct"` // e.g., 5.0%
+	PassengerCAGRPercent        float64                  `json:"passenger_cagr_percent"`         // e.g., 2.8%
+	InflationPercent            float64                  `json:"inflation_percent"`              // e.g., 2.0%
+	DiscountRatePercent         float64                  `json:"discount_rate_percent"`          // e.g., 5.5%
+	CustomCapexCAD              map[AirportHubCode]int64 `json:"custom_capex_cad,omitempty"`
 }
 
 // DecarbonizationCapexAllocations details green infrastructure spend within the concession.
@@ -61,50 +61,50 @@ type DecarbonizationCapexAllocations struct {
 
 // AirportConcessionResult models financial and operational outputs for an individual airport hub.
 type AirportConcessionResult struct {
-	Profile                             AirportConcessionProfile        `json:"profile"`
-	ModeledCapexCAD                     int64                           `json:"modeled_capex_cad"`
-	UpfrontFederalProceedsCAD           int64                           `json:"upfront_federal_proceeds_cad"`
-	CumulativeFederalRoyaltiesCAD       int64                           `json:"cumulative_federal_royalties_cad"`
-	AverageAnnualFederalRoyaltyCAD      int64                           `json:"average_annual_federal_royalty_cad"`
-	PensionEquityInvestmentCAD          int64                           `json:"pension_equity_investment_cad"`
-	CommercialDebtCAD                   int64                           `json:"commercial_debt_cad"`
-	FederalSubordinatedNoteCAD          int64                           `json:"federal_subordinated_note_cad"`
-	ProjectBaseIRRPercent               float64                         `json:"project_base_irr_percent"`
-	PensionEquityIRRPercent             float64                         `json:"pension_equity_irr_percent"`
-	AverageDSCR                         float64                         `json:"average_dscr"`
-	GreenCapex                          DecarbonizationCapexAllocations `json:"green_capex"`
+	Profile                              AirportConcessionProfile        `json:"profile"`
+	ModeledCapexCAD                      int64                           `json:"modeled_capex_cad"`
+	UpfrontFederalProceedsCAD            int64                           `json:"upfront_federal_proceeds_cad"`
+	CumulativeFederalRoyaltiesCAD        int64                           `json:"cumulative_federal_royalties_cad"`
+	AverageAnnualFederalRoyaltyCAD       int64                           `json:"average_annual_federal_royalty_cad"`
+	PensionEquityInvestmentCAD           int64                           `json:"pension_equity_investment_cad"`
+	CommercialDebtCAD                    int64                           `json:"commercial_debt_cad"`
+	FederalSubordinatedNoteCAD           int64                           `json:"federal_subordinated_note_cad"`
+	ProjectBaseIRRPercent                float64                         `json:"project_base_irr_percent"`
+	PensionEquityIRRPercent              float64                         `json:"pension_equity_irr_percent"`
+	AverageDSCR                          float64                         `json:"average_dscr"`
+	GreenCapex                           DecarbonizationCapexAllocations `json:"green_capex"`
 	AnnualDecarbonizedEmissionsAbatedTpy float64                         `json:"annual_decarbonized_emissions_abated_tpy"`
 }
 
 // NationalConcessionSimulation represents the complete macroeconomic and fiscal simulation of the NAS program.
 type NationalConcessionSimulation struct {
-	Params                       SimulationParams         `json:"params"`
-	TotalNASModernizationCapexCAD int64                   `json:"total_nas_modernization_capex_cad"` // $18.0B base
-	TotalUpfrontFederalProceedsCAD int64                   `json:"total_upfront_federal_proceeds_cad"`
-	TotalCumulativeRoyaltiesCAD  int64                   `json:"total_cumulative_royalties_cad"`
-	TotalPensionEquityCAD        int64                   `json:"total_pension_equity_cad"`
-	TotalCommercialDebtCAD       int64                   `json:"total_commercial_debt_cad"`
-	TotalGreenCapexMobilizedCAD  int64                   `json:"total_green_capex_mobilized_cad"`
-	CrowdingInMultiplier         float64                 `json:"crowding_in_multiplier"` // Private Capital / Upfront Concession Subordination
-	PortfolioWeightedIRRPercent  float64                 `json:"portfolio_weighted_irr_percent"`
-	PortfolioAverageDSCR         float64                 `json:"portfolio_average_dscr"`
-	Maple8AllocationsCAD         map[string]int64        `json:"maple_8_allocations_cad"`
-	AirportResults               []AirportConcessionResult `json:"airport_results"`
-	CalculatedAt                 time.Time                `json:"calculated_at"`
-	AuditHash                    string                   `json:"audit_hash"`
+	Params                         SimulationParams          `json:"params"`
+	TotalNASModernizationCapexCAD  int64                     `json:"total_nas_modernization_capex_cad"` // $18.0B base
+	TotalUpfrontFederalProceedsCAD int64                     `json:"total_upfront_federal_proceeds_cad"`
+	TotalCumulativeRoyaltiesCAD    int64                     `json:"total_cumulative_royalties_cad"`
+	TotalPensionEquityCAD          int64                     `json:"total_pension_equity_cad"`
+	TotalCommercialDebtCAD         int64                     `json:"total_commercial_debt_cad"`
+	TotalGreenCapexMobilizedCAD    int64                     `json:"total_green_capex_mobilized_cad"`
+	CrowdingInMultiplier           float64                   `json:"crowding_in_multiplier"` // Private Capital / Upfront Concession Subordination
+	PortfolioWeightedIRRPercent    float64                   `json:"portfolio_weighted_irr_percent"`
+	PortfolioAverageDSCR           float64                   `json:"portfolio_average_dscr"`
+	Maple8AllocationsCAD           map[string]int64          `json:"maple_8_allocations_cad"`
+	AirportResults                 []AirportConcessionResult `json:"airport_results"`
+	CalculatedAt                   time.Time                 `json:"calculated_at"`
+	AuditHash                      string                    `json:"audit_hash"`
 }
 
 // DefaultCanonicalAirports returns the 5 flagship NAS hubs totaling $18B CAD target modernization capex.
 func DefaultCanonicalAirports() []AirportConcessionProfile {
 	return []AirportConcessionProfile{
 		{
-			Code:                     HubYYZ,
-			Name:                     "Toronto Pearson International Airport",
-			Province:                 "ON",
-			AnnualPassengersBaseline: 45_000_000,
-			TargetPassengers2050:     68_000_000,
-			BaselineRevenueCAD:       1_650_000_000,
-			BaselineEBITDACAD:        780_000_000,
+			Code:                        HubYYZ,
+			Name:                        "Toronto Pearson International Airport",
+			Province:                    "ON",
+			AnnualPassengersBaseline:    45_000_000,
+			TargetPassengers2050:        68_000_000,
+			BaselineRevenueCAD:          1_650_000_000,
+			BaselineEBITDACAD:           780_000_000,
 			TargetModernizationCapexCAD: 7_500_000_000,
 			KeyProjects: []string{
 				"Union Station West Pearson Transit Hub integration",
@@ -124,13 +124,13 @@ func DefaultCanonicalAirports() []AirportConcessionProfile {
 			},
 		},
 		{
-			Code:                     HubYVR,
-			Name:                     "Vancouver International Airport",
-			Province:                 "BC",
-			AnnualPassengersBaseline: 26_000_000,
-			TargetPassengers2050:     39_000_000,
-			BaselineRevenueCAD:       720_000_000,
-			BaselineEBITDACAD:        350_000_000,
+			Code:                        HubYVR,
+			Name:                        "Vancouver International Airport",
+			Province:                    "BC",
+			AnnualPassengersBaseline:    26_000_000,
+			TargetPassengers2050:        39_000_000,
+			BaselineRevenueCAD:          720_000_000,
+			BaselineEBITDACAD:           350_000_000,
 			TargetModernizationCapexCAD: 3_800_000_000,
 			KeyProjects: []string{
 				"Trans-Pacific Air Cargo Logistics City expansion",
@@ -149,13 +149,13 @@ func DefaultCanonicalAirports() []AirportConcessionProfile {
 			},
 		},
 		{
-			Code:                     HubYUL,
-			Name:                     "Montréal-Pierre Elliott Trudeau International Airport",
-			Province:                 "QC",
-			AnnualPassengersBaseline: 21_500_000,
-			TargetPassengers2050:     33_000_000,
-			BaselineRevenueCAD:       620_000_000,
-			BaselineEBITDACAD:        295_000_000,
+			Code:                        HubYUL,
+			Name:                        "Montréal-Pierre Elliott Trudeau International Airport",
+			Province:                    "QC",
+			AnnualPassengersBaseline:    21_500_000,
+			TargetPassengers2050:        33_000_000,
+			BaselineRevenueCAD:          620_000_000,
+			BaselineEBITDACAD:           295_000_000,
 			TargetModernizationCapexCAD: 3_500_000_000,
 			KeyProjects: []string{
 				"Direct subterranean Réseau express métropolitain (REM) station completion",
@@ -174,13 +174,13 @@ func DefaultCanonicalAirports() []AirportConcessionProfile {
 			},
 		},
 		{
-			Code:                     HubYYC,
-			Name:                     "Calgary International Airport",
-			Province:                 "AB",
-			AnnualPassengersBaseline: 18_500_000,
-			TargetPassengers2050:     27_000_000,
-			BaselineRevenueCAD:       460_000_000,
-			BaselineEBITDACAD:        220_000_000,
+			Code:                        HubYYC,
+			Name:                        "Calgary International Airport",
+			Province:                    "AB",
+			AnnualPassengersBaseline:    18_500_000,
+			TargetPassengers2050:        27_000_000,
+			BaselineRevenueCAD:          460_000_000,
+			BaselineEBITDACAD:           220_000_000,
 			TargetModernizationCapexCAD: 2_000_000_000,
 			KeyProjects: []string{
 				"Banff-Calgary Airport express passenger rail terminal integration",
@@ -198,13 +198,13 @@ func DefaultCanonicalAirports() []AirportConcessionProfile {
 			},
 		},
 		{
-			Code:                     HubYEG,
-			Name:                     "Edmonton International Airport",
-			Province:                 "AB",
-			AnnualPassengersBaseline: 8_200_000,
-			TargetPassengers2050:     14_500_000,
-			BaselineRevenueCAD:       280_000_000,
-			BaselineEBITDACAD:        130_000_000,
+			Code:                        HubYEG,
+			Name:                        "Edmonton International Airport",
+			Province:                    "AB",
+			AnnualPassengersBaseline:    8_200_000,
+			TargetPassengers2050:        14_500_000,
+			BaselineRevenueCAD:          280_000_000,
+			BaselineEBITDACAD:           130_000_000,
 			TargetModernizationCapexCAD: 1_200_000_000,
 			KeyProjects: []string{
 				"Airport City Sustainability Campus cargo logistics hub",
@@ -352,17 +352,17 @@ func SimulateConcessions(params SimulationParams) *NationalConcessionSimulation 
 		abatedEmissions := float64(capex) * 0.00018 // Metric tonnes CO2e abated annually via SAF, rail, and microgrid
 
 		res := AirportConcessionResult{
-			Profile:                             airport,
-			ModeledCapexCAD:                     capex,
-			UpfrontFederalProceedsCAD:           upfrontProceeds,
-			CumulativeFederalRoyaltiesCAD:       cumulativeRoyaltiesCAD,
-			AverageAnnualFederalRoyaltyCAD:      avgAnnualRoyaltyCAD,
-			PensionEquityInvestmentCAD:          pensionEquity,
-			CommercialDebtCAD:                   commercialDebt,
-			FederalSubordinatedNoteCAD:          fedSubNote,
-			ProjectBaseIRRPercent:               math.Round(baseIRR*10) / 10,
-			PensionEquityIRRPercent:             math.Round(pensionEquityIRR*10) / 10,
-			AverageDSCR:                         math.Round(avgDSCR*100) / 100,
+			Profile:                        airport,
+			ModeledCapexCAD:                capex,
+			UpfrontFederalProceedsCAD:      upfrontProceeds,
+			CumulativeFederalRoyaltiesCAD:  cumulativeRoyaltiesCAD,
+			AverageAnnualFederalRoyaltyCAD: avgAnnualRoyaltyCAD,
+			PensionEquityInvestmentCAD:     pensionEquity,
+			CommercialDebtCAD:              commercialDebt,
+			FederalSubordinatedNoteCAD:     fedSubNote,
+			ProjectBaseIRRPercent:          math.Round(baseIRR*10) / 10,
+			PensionEquityIRRPercent:        math.Round(pensionEquityIRR*10) / 10,
+			AverageDSCR:                    math.Round(avgDSCR*100) / 100,
 			GreenCapex: DecarbonizationCapexAllocations{
 				SAFHydrantAndBunkeringCAD:    safCapex,
 				RailAndTransitIntermodalCAD:  transitCapex,
@@ -406,12 +406,12 @@ func SimulateConcessions(params SimulationParams) *NationalConcessionSimulation 
 
 	// Maple 8 Allocation breakdown based on historical Canadian infrastructure commitments
 	maple8 := map[string]int64{
-		"CPPIB (Canada Pension Plan Investment Board)":       int64(float64(totalPensionEquity) * 0.28),
-		"CDPQ (Caisse de dépôt et placement du Québec)":      int64(float64(totalPensionEquity) * 0.22),
+		"CPPIB (Canada Pension Plan Investment Board)":      int64(float64(totalPensionEquity) * 0.28),
+		"CDPQ (Caisse de dépôt et placement du Québec)":     int64(float64(totalPensionEquity) * 0.22),
 		"Brookfield Infrastructure Partners":                int64(float64(totalPensionEquity) * 0.18),
 		"OMERS Infrastructure":                              int64(float64(totalPensionEquity) * 0.14),
 		"PSP Investments":                                   int64(float64(totalPensionEquity) * 0.08),
-		"AIMCo (Alberta Investment Management Corporation)":  int64(float64(totalPensionEquity) * 0.05),
+		"AIMCo (Alberta Investment Management Corporation)": int64(float64(totalPensionEquity) * 0.05),
 		"BCI (British Columbia Investment Management Corp)": int64(float64(totalPensionEquity) * 0.05),
 	}
 
@@ -428,19 +428,19 @@ func SimulateConcessions(params SimulationParams) *NationalConcessionSimulation 
 	auditHash := hex.EncodeToString(hasher.Sum(nil))
 
 	return &NationalConcessionSimulation{
-		Params:                        params,
+		Params:                         params,
 		TotalNASModernizationCapexCAD:  totalCapex,
 		TotalUpfrontFederalProceedsCAD: totalUpfrontProceeds,
-		TotalCumulativeRoyaltiesCAD:   totalRoyalties,
-		TotalPensionEquityCAD:         totalPensionEquity,
-		TotalCommercialDebtCAD:        totalCommercialDebt,
-		TotalGreenCapexMobilizedCAD:   totalGreenCapex,
-		CrowdingInMultiplier:          math.Round(crowdingIn*10) / 10,
-		PortfolioWeightedIRRPercent:   math.Round(portfolioIRR*10) / 10,
-		PortfolioAverageDSCR:          math.Round(portfolioDSCR*100) / 100,
-		Maple8AllocationsCAD:          maple8,
-		AirportResults:                results,
-		CalculatedAt:                  time.Now().UTC(),
-		AuditHash:                     auditHash,
+		TotalCumulativeRoyaltiesCAD:    totalRoyalties,
+		TotalPensionEquityCAD:          totalPensionEquity,
+		TotalCommercialDebtCAD:         totalCommercialDebt,
+		TotalGreenCapexMobilizedCAD:    totalGreenCapex,
+		CrowdingInMultiplier:           math.Round(crowdingIn*10) / 10,
+		PortfolioWeightedIRRPercent:    math.Round(portfolioIRR*10) / 10,
+		PortfolioAverageDSCR:           math.Round(portfolioDSCR*100) / 100,
+		Maple8AllocationsCAD:           maple8,
+		AirportResults:                 results,
+		CalculatedAt:                   time.Now().UTC(),
+		AuditHash:                      auditHash,
 	}
 }

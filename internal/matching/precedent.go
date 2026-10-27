@@ -122,7 +122,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageOperating,
 			},
 			CanadianExposureCAD: 85_000_000_000,
-			ActiveInvestments:    42,
+			ActiveInvestments:   42,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "cppib-bruce-power",
@@ -178,7 +178,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageOperating,
 			},
 			CanadianExposureCAD: 110_000_000_000,
-			ActiveInvestments:    55,
+			ActiveInvestments:   55,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "cdpq-rem-montreal",
@@ -233,7 +233,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageConstruction,
 			},
 			CanadianExposureCAD: 35_000_000_000,
-			ActiveInvestments:    48,
+			ActiveInvestments:   48,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "cib-oneida-bess",
@@ -297,7 +297,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageOperating,
 			},
 			CanadianExposureCAD: 70_000_000_000,
-			ActiveInvestments:    30,
+			ActiveInvestments:   30,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "otpp-cubico-renewables",
@@ -341,7 +341,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageConstruction,
 			},
 			CanadianExposureCAD: 15_000_000_000,
-			ActiveInvestments:    12,
+			ActiveInvestments:   12,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "cgf-entropy-ccus",
@@ -384,7 +384,7 @@ func CanonicalInvestorProfiles() []*domain.InvestorProfile {
 				domain.StageOperating,
 			},
 			CanadianExposureCAD: 25_000_000_000,
-			ActiveInvestments:    15,
+			ActiveInvestments:   15,
 			PublicDealHistory: []domain.DealPrecedent{
 				{
 					DealID:      "gic-nas-airports-hub",

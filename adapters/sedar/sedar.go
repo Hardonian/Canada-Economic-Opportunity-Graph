@@ -32,20 +32,20 @@ var (
 
 // FilingRecord represents a raw filing metadata entry from SEDAR+.
 type FilingRecord struct {
-	FilingID        string   `json:"filing_id"`
-	IssuerName      string   `json:"issuer_name"`
-	Ticker          string   `json:"ticker"`
-	Exchange        string   `json:"exchange"` // TSX, TSXV, CSE
-	DocumentType    string   `json:"document_type"` // NI_43_101, MDA, PROSPECTUS, MATERIAL_CHANGE
-	ProjectName     string   `json:"project_name"`
-	Sector          string   `json:"sector"`
-	Province        string   `json:"province"`
-	Headline        string   `json:"headline"`
-	FilingDate      string   `json:"filing_date"`
-	DocumentURL     string   `json:"document_url"`
-	DeclaredCapexCAD int64   `json:"declared_capex_cad,omitempty"`
-	Summary         string   `json:"summary"`
-	Keywords        []string `json:"keywords"`
+	FilingID         string   `json:"filing_id"`
+	IssuerName       string   `json:"issuer_name"`
+	Ticker           string   `json:"ticker"`
+	Exchange         string   `json:"exchange"`      // TSX, TSXV, CSE
+	DocumentType     string   `json:"document_type"` // NI_43_101, MDA, PROSPECTUS, MATERIAL_CHANGE
+	ProjectName      string   `json:"project_name"`
+	Sector           string   `json:"sector"`
+	Province         string   `json:"province"`
+	Headline         string   `json:"headline"`
+	FilingDate       string   `json:"filing_date"`
+	DocumentURL      string   `json:"document_url"`
+	DeclaredCapexCAD int64    `json:"declared_capex_cad,omitempty"`
+	Summary          string   `json:"summary"`
+	Keywords         []string `json:"keywords"`
 }
 
 // SEDARAdapter extracts public company market disclosures and capital items.

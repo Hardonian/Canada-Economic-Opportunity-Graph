@@ -120,23 +120,23 @@ func TestTransitionEngine_EvaluatePortfolio(t *testing.T) {
 
 	projects := []*domain.Project{
 		{
-			ID:        "darlington-smr",
-			Name:      "Darlington New Nuclear Project — Unit 1",
-			Sector:    domain.SectorNuclearEnergy,
-			CapexCAD:  7_700_000_000,
+			ID:       "darlington-smr",
+			Name:     "Darlington New Nuclear Project — Unit 1",
+			Sector:   domain.SectorNuclearEnergy,
+			CapexCAD: 7_700_000_000,
 		},
 		{
-			ID:        "crawford-nickel",
-			Name:      "Crawford Nickel Project",
-			Summary:   "carbon capture direct mineral sequestration",
-			Sector:    domain.SectorCriticalMinerals,
-			CapexCAD:  3_500_000_000,
+			ID:       "crawford-nickel",
+			Name:     "Crawford Nickel Project",
+			Summary:  "carbon capture direct mineral sequestration",
+			Sector:   domain.SectorCriticalMinerals,
+			CapexCAD: 3_500_000_000,
 		},
 		{
-			ID:        "airport-leasing-hubs",
-			Name:      "Canadian International Airports — Global Investor Leasing Hubs",
-			Sector:    domain.SectorTransportation,
-			CapexCAD:  18_000_000_000,
+			ID:       "airport-leasing-hubs",
+			Name:     "Canadian International Airports — Global Investor Leasing Hubs",
+			Sector:   domain.SectorTransportation,
+			CapexCAD: 18_000_000_000,
 		},
 	}
 

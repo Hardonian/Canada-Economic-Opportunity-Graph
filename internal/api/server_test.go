@@ -585,9 +585,9 @@ func TestDealPrecedents_CanonicalProfiles(t *testing.T) {
 	}
 
 	var resp struct {
-		ProjectID  string                    `json:"project_id"`
+		ProjectID  string                     `json:"project_id"`
 		Precedents []*matching.PrecedentMatch `json:"precedents"`
-		Status     string                    `json:"status"`
+		Status     string                     `json:"status"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("failed to decode response: %v", err)

@@ -38,13 +38,13 @@ const (
 
 // TransitionCredibilityIndex quantifies the 0–100 credibility of an asset's decarbonization plan.
 type TransitionCredibilityIndex struct {
-	OverallScore               float64           `json:"overall_score"`
+	OverallScore                float64           `json:"overall_score"`
 	DecarbonizationPathwayScore float64           `json:"decarbonization_pathway_score"` // 0–25: interim 2030 and 2050 net-zero targets
-	Scope3DisclosureScore      float64           `json:"scope3_disclosure_score"`       // 0–20: upstream/downstream boundary coverage
-	CapexAlignmentScore        float64           `json:"capex_alignment_score"`         // 0–25: proportion of capex allocated to abatement
-	LockInMitigationScore      float64           `json:"lock_in_mitigation_score"`       // 0–15: avoidance of emissions lock-in
-	ThirdPartyAssuranceScore   float64           `json:"third_party_assurance_score"`    // 0–15: verified by independent engineering/audit
-	Rating                     CredibilityRating `json:"rating"`
+	Scope3DisclosureScore       float64           `json:"scope3_disclosure_score"`       // 0–20: upstream/downstream boundary coverage
+	CapexAlignmentScore         float64           `json:"capex_alignment_score"`         // 0–25: proportion of capex allocated to abatement
+	LockInMitigationScore       float64           `json:"lock_in_mitigation_score"`      // 0–15: avoidance of emissions lock-in
+	ThirdPartyAssuranceScore    float64           `json:"third_party_assurance_score"`   // 0–15: verified by independent engineering/audit
+	Rating                      CredibilityRating `json:"rating"`
 }
 
 // AbatementMetrics models emissions reduction and marginal abatement economics.
@@ -78,19 +78,19 @@ type TransitionAssessment struct {
 
 // PortfolioTransitionSummary aggregates taxonomy metrics across an indexed portfolio.
 type PortfolioTransitionSummary struct {
-	TotalProjects                     int                     `json:"total_projects"`
-	GreenProjectsCount                int                     `json:"green_projects_count"`
-	TransitionProjectsCount           int                     `json:"transition_projects_count"`
-	EnablingProjectsCount             int                     `json:"enabling_projects_count"`
-	PhaseOutProjectsCount             int                     `json:"phase_out_projects_count"`
-	TotalGreenCapexCAD                int64                   `json:"total_green_capex_cad"`
-	TotalTransitionCapexCAD           int64                   `json:"total_transition_capex_cad"`
-	AggregateAnnualAbatementTpy       float64                 `json:"aggregate_annual_abatement_tpy"`
-	AggregateLifetimeAbatementTonnes  float64                 `json:"aggregate_lifetime_abatement_tonnes"`
-	WeightedAverageCredibilityIndex   float64                 `json:"weighted_average_credibility_index"`
-	WeightedAverageMAC                float64                 `json:"weighted_average_marginal_abatement_cost_cad"`
-	Assessments                       []*TransitionAssessment `json:"assessments"`
-	AuditHash                         string                  `json:"audit_hash"`
+	TotalProjects                    int                     `json:"total_projects"`
+	GreenProjectsCount               int                     `json:"green_projects_count"`
+	TransitionProjectsCount          int                     `json:"transition_projects_count"`
+	EnablingProjectsCount            int                     `json:"enabling_projects_count"`
+	PhaseOutProjectsCount            int                     `json:"phase_out_projects_count"`
+	TotalGreenCapexCAD               int64                   `json:"total_green_capex_cad"`
+	TotalTransitionCapexCAD          int64                   `json:"total_transition_capex_cad"`
+	AggregateAnnualAbatementTpy      float64                 `json:"aggregate_annual_abatement_tpy"`
+	AggregateLifetimeAbatementTonnes float64                 `json:"aggregate_lifetime_abatement_tonnes"`
+	WeightedAverageCredibilityIndex  float64                 `json:"weighted_average_credibility_index"`
+	WeightedAverageMAC               float64                 `json:"weighted_average_marginal_abatement_cost_cad"`
+	Assessments                      []*TransitionAssessment `json:"assessments"`
+	AuditHash                        string                  `json:"audit_hash"`
 }
 
 // TransitionEngine executes GFANZ and Sustainable Finance Action Council (SFAC) taxonomy evaluations.
