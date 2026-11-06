@@ -81,6 +81,12 @@ export default async function HomePage() {
 
           <div className="flex items-center gap-3 shrink-0">
             <Link
+              href="/command"
+              className="px-4 py-2.5 rounded-xl bg-gold text-[#211700] font-bold text-xs hover:bg-[#ffe09a] transition-all shadow-lg shadow-amber-950/40 flex items-center gap-1.5"
+            >
+              Mission Control <Compass className="h-4 w-4" />
+            </Link>
+            <Link
               href="/projects"
               className="px-4 py-2.5 rounded-xl bg-primary text-[#050B08] font-bold text-xs hover:bg-aurora-mint transition-all shadow-lg shadow-emerald-950/50 flex items-center gap-1.5"
             >

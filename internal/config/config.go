@@ -49,6 +49,11 @@ type Config struct {
 	// AdapterAdminSecret protects the small set of adapter-sandbox mutation
 	// endpoints. It is intentionally excluded from RuntimeSummary and logging.
 	AdapterAdminSecret string
+	// Deal-room secrets are intentionally never included in RuntimeSummary.
+	// The room service starts only when both values are configured.
+	DealRoomEncryptionKey    string
+	DealRoomGatewaySecret    string
+	DealRoomMaxDocumentBytes int64
 }
 
 // RuntimeSummary is safe to emit to application logs.
@@ -84,6 +89,8 @@ func LoadValidated() (*Config, error) {
 	cfg.StorageMode = strings.ToLower(strings.TrimSpace(getEnv("STORAGE_MODE", cfg.StorageMode)))
 	cfg.StorageDir = strings.TrimSpace(getEnv("STORAGE_DIR", cfg.StorageDir))
 	cfg.AdapterAdminSecret = strings.TrimSpace(os.Getenv("ADAPTER_ADMIN_SECRET"))
+	cfg.DealRoomEncryptionKey = strings.TrimSpace(os.Getenv("COG_DEALROOM_ENCRYPTION_KEY"))
+	cfg.DealRoomGatewaySecret = strings.TrimSpace(os.Getenv("COG_DEALROOM_GATEWAY_SECRET"))
 	if strings.TrimSpace(os.Getenv("DATABASE_URL")) != "" {
 		return nil, fmt.Errorf("DATABASE_URL is not supported by this snapshot runtime; unset it instead of assuming writes are durable")
 	}
@@ -114,6 +121,11 @@ func LoadValidated() (*Config, error) {
 		return nil, err
 	}
 	cfg.MaxRequestBodyBytes = int64(maxBody)
+	dealRoomLimit, err := intEnv("COG_DEALROOM_MAX_DOCUMENT_BYTES", int(cfg.DealRoomMaxDocumentBytes), 1<<20, 50<<20)
+	if err != nil {
+		return nil, err
+	}
+	cfg.DealRoomMaxDocumentBytes = int64(dealRoomLimit)
 	cfg.RateLimitPerMinute, err = intEnv("RATE_LIMIT_PER_MINUTE", cfg.RateLimitPerMinute, 0, 1_000_000)
 	if err != nil {
 		return nil, err
@@ -188,6 +200,17 @@ func LoadValidated() (*Config, error) {
 	if cfg.AdapterAdminSecret != "" && len(cfg.AdapterAdminSecret) < 32 {
 		return nil, fmt.Errorf("ADAPTER_ADMIN_SECRET must be at least 32 characters when configured")
 	}
+	if (cfg.DealRoomEncryptionKey == "") != (cfg.DealRoomGatewaySecret == "") {
+		return nil, fmt.Errorf("COG_DEALROOM_ENCRYPTION_KEY and COG_DEALROOM_GATEWAY_SECRET must be configured together")
+	}
+	if cfg.DealRoomEncryptionKey != "" {
+		if cfg.StorageMode != "persistent" {
+			return nil, fmt.Errorf("deal room requires STORAGE_MODE=persistent")
+		}
+		if len(cfg.DealRoomEncryptionKey) < 32 || len(cfg.DealRoomGatewaySecret) < 32 {
+			return nil, fmt.Errorf("deal room encryption and gateway secrets must each be at least 32 characters")
+		}
+	}
 	if err := validateHTTPOrigin(cfg.PublicURL); err != nil {
 		return nil, fmt.Errorf("PUBLIC_URL: %w", err)
 	}
@@ -197,29 +220,36 @@ func LoadValidated() (*Config, error) {
 
 func defaults() *Config {
 	return &Config{
-		Env:                  "development",
-		BindAddress:          "0.0.0.0",
-		Port:                 defaultPort,
-		StorageMode:          "snapshot",
-		StorageDir:           "data/store",
-		LogLevel:             "info",
-		CORSOrigin:           "*",
-		CORSOrigins:          []string{"*"},
-		PublicURL:            "http://localhost:8080",
-		MaxHeaderBytes:       defaultMaxHeaderBytes,
-		MaxRequestBodyBytes:  defaultMaxRequestBody,
-		RateLimitPerMinute:   defaultRateLimitPerMinute,
-		RateLimitBurst:       defaultRateLimitBurst,
-		RequestTimeout:       15 * time.Second,
-		ReadinessTimeout:     2 * time.Second,
-		ReadHeaderTimeout:    5 * time.Second,
-		ReadTimeout:          20 * time.Second,
-		WriteTimeout:         30 * time.Second,
-		IdleTimeout:          60 * time.Second,
-		ShutdownTimeout:      15 * time.Second,
-		InitialIngestTimeout: 2 * time.Minute,
-		IngestInterval:       0,
+		Env:                      "development",
+		BindAddress:              "0.0.0.0",
+		Port:                     defaultPort,
+		StorageMode:              "snapshot",
+		StorageDir:               "data/store",
+		LogLevel:                 "info",
+		CORSOrigin:               "*",
+		CORSOrigins:              []string{"*"},
+		PublicURL:                "http://localhost:8080",
+		MaxHeaderBytes:           defaultMaxHeaderBytes,
+		MaxRequestBodyBytes:      defaultMaxRequestBody,
+		DealRoomMaxDocumentBytes: 25 << 20,
+		RateLimitPerMinute:       defaultRateLimitPerMinute,
+		RateLimitBurst:           defaultRateLimitBurst,
+		RequestTimeout:           15 * time.Second,
+		ReadinessTimeout:         2 * time.Second,
+		ReadHeaderTimeout:        5 * time.Second,
+		ReadTimeout:              20 * time.Second,
+		WriteTimeout:             30 * time.Second,
+		IdleTimeout:              60 * time.Second,
+		ShutdownTimeout:          15 * time.Second,
+		InitialIngestTimeout:     2 * time.Minute,
+		IngestInterval:           0,
 	}
+}
+
+// DealRoomEnabled indicates that private persistence and the trusted web-tier
+// gateway are both configured. The service fails closed otherwise.
+func (c Config) DealRoomEnabled() bool {
+	return c.DealRoomEncryptionKey != "" && c.DealRoomGatewaySecret != ""
 }
 
 func (c *Config) ListenAddress() string {

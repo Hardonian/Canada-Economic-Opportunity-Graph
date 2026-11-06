@@ -273,16 +273,16 @@ export default function InvestigatePage() {
       {/* Sovereign Intelligence Banner (Classification & Caveat) */}
       <div className="border-b border-red-500/30 bg-red-950/40 px-4 py-1.5 text-center text-xs font-mono font-bold tracking-widest text-red-400 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-red-500 animate-pulse" />
-          <span>TOP SECRET // CANADIAN EYES ONLY // DISSEMINATION CONTROLLED</span>
+          <ShieldAlert className="h-4 w-4 text-amber-400" />
+          <span>DEMONSTRATION SCENARIO GRAPH // NOT A CLASSIFIED SYSTEM</span>
         </div>
         <div className="hidden sm:flex items-center gap-4 text-[11px] text-red-300">
-          <span>ICA SECTION 25.3 NATIONAL SECURITY SURVEILLANCE MESH</span>
-          <span>AUDIT HASH: #SOV-CA-2026-991A</span>
+          <span>ENTITY &amp; RELATIONSHIP ANALYSIS PATTERN</span>
+          <span>DEMO GRAPH MODE</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-          <span className="text-[10px]">LIVE WORKBENCH</span>
+          <span className="h-2 w-2 rounded-full bg-aurora" />
+          <span className="text-[10px]">SCENARIO WORKBENCH</span>
         </div>
       </div>
 
@@ -294,13 +294,13 @@ export default function InvestigatePage() {
           </div>
           <div>
             <h1 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-              Investigation Workbench & Knowledge Mesh
+              Investigation Workbench &amp; Knowledge Graph
               <span className="rounded border border-primary/40 bg-primary/20 px-1.5 py-0.2 font-mono text-[9px] text-aurora">
-                GOTHAM 4.0 PARITY
+                DEMO GRAPH
               </span>
             </h1>
             <p className="text-[11px] text-text-muted">
-              Interactive entity-link graph visualizer for beneficial ownership unraveling, SASAC foreign interference detection, and corridor choke-point analysis.
+              Interactive entity-link graph demonstrating a review workflow for source-linked records, ownership research, and corridor dependency analysis. Scenario nodes are illustrative; results are never findings or government action.
             </p>
           </div>
         </div>
@@ -715,13 +715,13 @@ export default function InvestigatePage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => alert("ICA Section 25.3 Formal Cabinet Referral Initiated. Case ref: #SOV-CABINET-2026.")}
-                  className="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-lg"
+                <Link
+                  href="/command"
+                  className="w-full py-2.5 rounded-xl bg-primary hover:bg-aurora-mint text-[#050b08] font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Lock className="h-4 w-4" />
-                  Issue Section 25.3 Order in Council Divestment
-                </button>
+                  Review through Mission Control
+                </Link>
               </div>
             )}
           </div>

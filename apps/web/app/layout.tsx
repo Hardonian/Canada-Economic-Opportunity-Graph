@@ -9,10 +9,10 @@ import AdSenseAutoAds from "@/components/AdSenseAutoAds";
 
 export const metadata: Metadata = {
   title: {
-    default: "CanadaOpportunityGraph | Independent Canadian Capital Intelligence",
+    default: "CanadaOpportunityGraph | Canada’s Economic Operating System",
     template: "%s | CanadaOpportunityGraph",
   },
-  description: "Independent, open-source intelligence for planning around Canadian infrastructure, capital, procurement, and economic development. CEGS reference implementation.",
+  description: "A transparent Canadian operating system for public economic intelligence, accountable execution, and secure multi-tenant deal rooms. CEGS reference implementation.",
   keywords: ["Canada infrastructure", "critical minerals", "nuclear power", "clean energy", "procurement", "CEGS", "economic graph"],
 };
 

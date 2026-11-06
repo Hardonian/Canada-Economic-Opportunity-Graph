@@ -13,6 +13,7 @@
     "test": "node --test tests/e2e.test.mjs"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^4.31.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.16.0",
     "next": "^15.5.27",

@@ -20,6 +20,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/cegs"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/connector"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/dealroom"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/domain"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/eventsse"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/export"
@@ -58,11 +59,14 @@ type Options struct {
 	EnableHSTS          bool
 	TrustedProxyCIDRs   []string
 	MaxRequestBodyBytes int64
-	RateLimitPerMinute  int
-	RateLimitBurst      int
-	RequestTimeout      time.Duration
-	ReadinessTimeout    time.Duration
-	Logger              Logger
+	// MaxDealRoomDocumentBytes is deliberately isolated from general mutation
+	// payloads. Only authenticated encrypted-document uploads may use it.
+	MaxDealRoomDocumentBytes int64
+	RateLimitPerMinute       int
+	RateLimitBurst           int
+	RequestTimeout           time.Duration
+	ReadinessTimeout         time.Duration
+	Logger                   Logger
 	// AdapterRegistry exposes the community adapter sandbox via REST endpoints.
 	// When nil, the sandbox endpoints respond with 503.
 	AdapterRegistry *adaptersandbox.Registry
@@ -80,40 +84,46 @@ type Options struct {
 	ConnectorRegistry *connector.Registry
 	// RuntimeInfo contains non-secret deployment facts for the operational
 	// control plane. It must never contain credentials or internal URLs.
-	RuntimeInfo RuntimeInfo
+	RuntimeInfo           RuntimeInfo
+	DealRoom              *dealroom.Store
+	DealRoomGatewaySecret string
 }
 
 func DefaultOptions() Options {
 	return Options{
-		AllowedOrigins:      []string{"*"},
-		MaxRequestBodyBytes: 4 << 10,
-		RateLimitPerMinute:  600,
-		RateLimitBurst:      100,
-		RequestTimeout:      15 * time.Second,
-		ReadinessTimeout:    2 * time.Second,
+		AllowedOrigins:           []string{"*"},
+		MaxRequestBodyBytes:      4 << 10,
+		MaxDealRoomDocumentBytes: 25 << 20,
+		RateLimitPerMinute:       600,
+		RateLimitBurst:           100,
+		RequestTimeout:           15 * time.Second,
+		ReadinessTimeout:         2 * time.Second,
 	}
 }
 
 type Server struct {
-	store              database.Store
-	mux                *http.ServeMux
-	allowedOrigins     map[string]struct{}
-	allowAnyOrigin     bool
-	enableHSTS         bool
-	trustedProxies     []*net.IPNet
-	maxRequestBody     int64
-	requestTimeout     time.Duration
-	readinessTimeout   time.Duration
-	limiter            *rateLimiter
-	logger             Logger
-	adapterRegistry    *adaptersandbox.Registry
-	adapterAdminSecret string
-	attStore           *verifier.AttestationStore
-	verifierNet        *verifier.Network
-	connectorRegistry  *connector.Registry
-	runtimeInfo        RuntimeInfo
-	kpiFeedEngine      *indicators.LiveFeedEngine
-	kpiEvaluator       *indicators.ProjectEvaluator
+	store                    database.Store
+	mux                      *http.ServeMux
+	allowedOrigins           map[string]struct{}
+	allowAnyOrigin           bool
+	enableHSTS               bool
+	trustedProxies           []*net.IPNet
+	maxRequestBody           int64
+	maxDealRoomDocumentBytes int64
+	requestTimeout           time.Duration
+	readinessTimeout         time.Duration
+	limiter                  *rateLimiter
+	logger                   Logger
+	adapterRegistry          *adaptersandbox.Registry
+	adapterAdminSecret       string
+	attStore                 *verifier.AttestationStore
+	verifierNet              *verifier.Network
+	connectorRegistry        *connector.Registry
+	runtimeInfo              RuntimeInfo
+	dealRoom                 *dealroom.Store
+	dealRoomGatewaySecret    string
+	kpiFeedEngine            *indicators.LiveFeedEngine
+	kpiEvaluator             *indicators.ProjectEvaluator
 }
 
 func NewServer(store database.Store) *Server {
@@ -125,7 +135,10 @@ func NewServer(store database.Store) *Server {
 }
 
 func NewServerWithOptions(store database.Store, options Options) (*Server, error) {
-	if options.MaxRequestBodyBytes <= 0 {
+	if options.MaxDealRoomDocumentBytes == 0 {
+		options.MaxDealRoomDocumentBytes = DefaultOptions().MaxDealRoomDocumentBytes
+	}
+	if options.MaxRequestBodyBytes <= 0 || options.MaxDealRoomDocumentBytes <= 0 {
 		return nil, fmt.Errorf("max request body bytes must be positive")
 	}
 	if options.RequestTimeout <= 0 || options.ReadinessTimeout <= 0 {
@@ -136,22 +149,28 @@ func NewServerWithOptions(store database.Store, options Options) (*Server, error
 	}
 
 	s := &Server{
-		store:              store,
-		mux:                http.NewServeMux(),
-		allowedOrigins:     make(map[string]struct{}, len(options.AllowedOrigins)),
-		enableHSTS:         options.EnableHSTS,
-		maxRequestBody:     options.MaxRequestBodyBytes,
-		requestTimeout:     options.RequestTimeout,
-		readinessTimeout:   options.ReadinessTimeout,
-		logger:             options.Logger,
-		adapterRegistry:    options.AdapterRegistry,
-		adapterAdminSecret: options.AdapterAdminSecret,
-		attStore:           options.VerifierStore,
-		verifierNet:        options.VerifierNetwork,
-		connectorRegistry:  options.ConnectorRegistry,
-		runtimeInfo:        options.RuntimeInfo,
-		kpiFeedEngine:      indicators.NewLiveFeedEngine(),
-		kpiEvaluator:       indicators.NewProjectEvaluator(),
+		store:                    store,
+		mux:                      http.NewServeMux(),
+		allowedOrigins:           make(map[string]struct{}, len(options.AllowedOrigins)),
+		enableHSTS:               options.EnableHSTS,
+		maxRequestBody:           options.MaxRequestBodyBytes,
+		maxDealRoomDocumentBytes: options.MaxDealRoomDocumentBytes,
+		requestTimeout:           options.RequestTimeout,
+		readinessTimeout:         options.ReadinessTimeout,
+		logger:                   options.Logger,
+		adapterRegistry:          options.AdapterRegistry,
+		adapterAdminSecret:       options.AdapterAdminSecret,
+		attStore:                 options.VerifierStore,
+		verifierNet:              options.VerifierNetwork,
+		connectorRegistry:        options.ConnectorRegistry,
+		runtimeInfo:              options.RuntimeInfo,
+		dealRoom:                 options.DealRoom,
+		dealRoomGatewaySecret:    options.DealRoomGatewaySecret,
+		kpiFeedEngine:            indicators.NewLiveFeedEngine(),
+		kpiEvaluator:             indicators.NewProjectEvaluator(),
+	}
+	if s.dealRoom != nil && len(s.dealRoomGatewaySecret) < 32 {
+		return nil, fmt.Errorf("deal room gateway secret must be at least 32 characters when the deal room is enabled")
 	}
 	for _, origin := range options.AllowedOrigins {
 		origin = strings.TrimSpace(origin)
@@ -382,13 +401,20 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 		writeError(w, r, http.StatusRequestURITooLong, "query_too_long", "The query string is too long.")
 		return false
 	}
-	if r.ContentLength > s.maxRequestBody {
+	requestLimit := s.maxRequestBody
+	if isDealRoomDocumentUpload(r) {
+		requestLimit = s.maxDealRoomDocumentBytes
+	}
+	if r.ContentLength > requestLimit {
 		writeError(w, r, http.StatusRequestEntityTooLarge, "request_body_too_large", "The request body is too large.")
 		return false
 	}
-	bodyAllowed := (r.Method == http.MethodPost || r.Method == http.MethodPut) &&
+	bodyAllowed := isDealRoomMutation(r) || ((r.Method == http.MethodPost || r.Method == http.MethodPut) &&
 		(strings.HasPrefix(r.URL.Path, "/api/v1/planning/") || strings.HasPrefix(r.URL.Path, "/api/v1/graphql") || strings.HasPrefix(r.URL.Path, "/api/v1/adapters/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridors/") || strings.HasPrefix(r.URL.Path, "/api/v1/corridor/") || strings.HasPrefix(r.URL.Path, "/api/v1/palantir/") || strings.HasPrefix(r.URL.Path, "/api/v1/finance/") ||
-			strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/"))
+			strings.HasPrefix(r.URL.Path, "/api/v1/ontology/") || strings.HasPrefix(r.URL.Path, "/api/v1/lakehouse/") || strings.HasPrefix(r.URL.Path, "/api/v1/graph/") || strings.HasPrefix(r.URL.Path, "/api/v1/ai/") || strings.HasPrefix(r.URL.Path, "/api/v1/security/") || strings.HasPrefix(r.URL.Path, "/api/v1/counter-intel/")))
+	if r.Body != nil && (r.Method == http.MethodPost || r.Method == http.MethodPut) {
+		r.Body = http.MaxBytesReader(w, r.Body, requestLimit)
+	}
 	if !bodyAllowed && (r.ContentLength != 0 || len(r.TransferEncoding) > 0) {
 		writeError(w, r, http.StatusBadRequest, "request_body_not_allowed", "Request bodies are not accepted by this read-only API.")
 		return false
@@ -412,6 +438,15 @@ func (s *Server) validateRequest(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
+func isDealRoomMutation(r *http.Request) bool {
+	return (r.Method == http.MethodPost || r.Method == http.MethodPut) && strings.HasPrefix(r.URL.Path, "/api/v1/deal-rooms/") ||
+		(r.Method == http.MethodPost && r.URL.Path == "/api/v1/deal-rooms")
+}
+
+func isDealRoomDocumentUpload(r *http.Request) bool {
+	return r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/api/v1/deal-rooms/") && strings.HasSuffix(r.URL.Path, "/documents")
+}
+
 func appendVary(header http.Header, value string) {
 	for _, existing := range header.Values("Vary") {
 		for _, item := range strings.Split(existing, ",") {
@@ -431,6 +466,19 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/openapi.json", s.handleOpenAPI)
 	s.mux.HandleFunc("GET /api/v1/system/status", s.handleSystemStatus)
 	s.mux.HandleFunc("GET /api/v1/ingestion/dlq", s.handleIngestionDLQ)
+
+	// Private deal rooms. These routes reject direct callers unless the request
+	// carries an HMAC assertion minted by the authenticated web tier.
+	s.mux.HandleFunc("GET /api/v1/deal-rooms", s.handleDealRooms)
+	s.mux.HandleFunc("POST /api/v1/deal-rooms", s.handleDealRooms)
+	s.mux.HandleFunc("GET /api/v1/deal-rooms/{id}", s.handleDealRoom)
+	s.mux.HandleFunc("POST /api/v1/deal-rooms/{id}/members", s.handleDealRoomMembers)
+	s.mux.HandleFunc("GET /api/v1/deal-rooms/{id}/documents", s.handleDealRoomDocuments)
+	s.mux.HandleFunc("POST /api/v1/deal-rooms/{id}/documents", s.handleDealRoomDocuments)
+	s.mux.HandleFunc("GET /api/v1/deal-rooms/{id}/documents/{documentID}", s.handleDealRoomDocumentDownload)
+	s.mux.HandleFunc("GET /api/v1/deal-rooms/{id}/comments", s.handleDealRoomComments)
+	s.mux.HandleFunc("POST /api/v1/deal-rooms/{id}/comments", s.handleDealRoomComments)
+	s.mux.HandleFunc("GET /api/v1/deal-rooms/{id}/audit", s.handleDealRoomAudit)
 
 	// Flagship Capital Radar
 	s.mux.HandleFunc("GET /api/v1/radar", s.handleRadar)

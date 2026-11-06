@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/config"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/connector"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/database"
+	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/dealroom"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/ingestion"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/merkle"
 	"github.com/Hardonian/CEO-G-Canada-Economic-Opportunity-Graph/internal/reconciliation"
@@ -116,22 +118,37 @@ func main() {
 	// Decentralized Verifier node network & persistent attestation store
 	verifierNet := verifier.NewNetwork(5)
 	verifierStore := verifier.NewAttestationStore()
+	var dealRoomStore *dealroom.Store
+	if cfg.DealRoomEnabled() {
+		dealRoomStore, err = dealroom.NewStore(filepath.Join(cfg.StorageDir, "dealrooms"), cfg.DealRoomEncryptionKey)
+		if err != nil {
+			log.Fatalf("[FATAL] Failed to initialize encrypted deal-room storage: %v", err)
+		}
+		if _, retentionErr := dealRoomStore.PurgeExpired(time.Now().UTC()); retentionErr != nil {
+			log.Printf("[WARN] Initial deal-room retention pass failed: %v", retentionErr)
+		}
+		log.Printf("[INFO] Encrypted multi-tenant deal room initialized")
+		go runDealRoomRetention(processContext, dealRoomStore, time.Hour)
+	}
 
 	server, err := api.NewServerWithOptions(store, api.Options{
-		AllowedOrigins:      cfg.CORSOrigins,
-		EnableHSTS:          cfg.EnableHSTS,
-		TrustedProxyCIDRs:   cfg.TrustedProxyCIDRs,
-		MaxRequestBodyBytes: cfg.MaxRequestBodyBytes,
-		RateLimitPerMinute:  cfg.RateLimitPerMinute,
-		RateLimitBurst:      cfg.RateLimitBurst,
-		RequestTimeout:      cfg.RequestTimeout,
-		ReadinessTimeout:    cfg.ReadinessTimeout,
-		Logger:              log.Default(),
-		AdapterRegistry:     adapterSandboxReg,
-		AdapterAdminSecret:  cfg.AdapterAdminSecret,
-		VerifierStore:       verifierStore,
-		VerifierNetwork:     verifierNet,
-		ConnectorRegistry:   reg,
+		AllowedOrigins:           cfg.CORSOrigins,
+		EnableHSTS:               cfg.EnableHSTS,
+		TrustedProxyCIDRs:        cfg.TrustedProxyCIDRs,
+		MaxRequestBodyBytes:      cfg.MaxRequestBodyBytes,
+		MaxDealRoomDocumentBytes: cfg.DealRoomMaxDocumentBytes,
+		RateLimitPerMinute:       cfg.RateLimitPerMinute,
+		RateLimitBurst:           cfg.RateLimitBurst,
+		RequestTimeout:           cfg.RequestTimeout,
+		ReadinessTimeout:         cfg.ReadinessTimeout,
+		Logger:                   log.Default(),
+		AdapterRegistry:          adapterSandboxReg,
+		AdapterAdminSecret:       cfg.AdapterAdminSecret,
+		VerifierStore:            verifierStore,
+		VerifierNetwork:          verifierNet,
+		ConnectorRegistry:        reg,
+		DealRoom:                 dealRoomStore,
+		DealRoomGatewaySecret:    cfg.DealRoomGatewaySecret,
 		RuntimeInfo: api.RuntimeInfo{
 			Environment:       cfg.Env,
 			StorageMode:       cfg.StorageMode,
@@ -214,6 +231,26 @@ func runScheduledIngestion(ctx context.Context, interval time.Duration, pipeline
 				root,
 				time.Since(cycleStart),
 			)
+		}
+	}
+}
+
+func runDealRoomRetention(ctx context.Context, store *dealroom.Store, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			removed, err := store.PurgeExpired(time.Now().UTC())
+			if err != nil {
+				log.Printf("[WARN] Deal-room retention pass failed: %v", err)
+				continue
+			}
+			if removed > 0 {
+				log.Printf("[INFO] Deal-room retention purged %d expired room(s)", removed)
+			}
 		}
 	}
 }

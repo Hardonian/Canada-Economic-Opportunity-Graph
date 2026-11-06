@@ -9,6 +9,7 @@ import {
   Calculator,
   Coins,
   Compass,
+  Crosshair,
   Cpu,
   Database,
   FileCode2,
@@ -23,6 +24,8 @@ import {
   Search,
   ShieldCheck,
   Target,
+  FolderLock,
+  Workflow,
   Menu,
   Network,
   X,
@@ -46,15 +49,18 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   const navItems = [
+    { href: "/command", label: lang === "en" ? "Mission Control" : "Centre de mission", icon: Crosshair, badge: "CORE" },
     { href: "/briefing", label: lang === "en" ? "Executive Brief" : "Note exécutive", icon: Landmark, badge: lang === "en" ? "ANALYSIS" : "ANALYSE" },
-    { href: "/briefing/memo", label: lang === "en" ? "Cabinet Memo" : "Mémoire Cabinet", icon: FileText },
-    { href: "/investigate", label: lang === "en" ? "Investigate" : "Enquête", icon: Network, badge: "GOTHAM" },
+    { href: "/briefing/memo", label: lang === "en" ? "Decision Memo" : "Mémoire décisionnel", icon: FileText },
+    { href: "/investigate", label: lang === "en" ? "Investigate" : "Enquête", icon: Network, badge: "GRAPH" },
     { href: "/", label: lang === "en" ? "Capital Radar" : "Radar du capital", icon: Radar },
     { href: "/analytics", label: lang === "en" ? "KPI Analytics" : "Analytique KPI", icon: BarChart3, badge: "LIVE" },
     { href: "/syndication", label: lang === "en" ? "Syndication & PPA" : "Syndication et PPA", icon: Coins, badge: "NEW" },
     { href: "/corridors", label: lang === "en" ? "Corridors & Ports" : "Couloirs et ports", icon: Compass },
     { href: "/finance", label: lang === "en" ? "Project Finance & Tax" : "Finances et taxes", icon: Calculator },
     { href: "/planning", label: lang === "en" ? "Planning" : "Planification", icon: Target },
+    { href: "/execution", label: lang === "en" ? "Execution Suite" : "Suite d’exécution", icon: Workflow, badge: "NEW" },
+    { href: "/deal-room", label: lang === "en" ? "Deal Room" : "Salle de transaction", icon: FolderLock, badge: "PRIVATE" },
     { href: "/projects", label: lang === "en" ? "Projects" : "Projets", icon: FolderGit2 },
     { href: "/map", label: lang === "en" ? "Geospatial Map" : "Carte géospatiale", icon: MapPin },
     { href: "/capital", label: lang === "en" ? "Capital Stack" : "Structure du capital", icon: Layers },
@@ -71,13 +77,13 @@ export default function Navbar() {
       data-site-header="true"
       className="sticky top-0 z-50 border-b border-border bg-background/95 shadow-[0_10px_32px_-24px_rgba(0,0,0,0.95)] backdrop-blur-xl"
     >
-      {/* Canadian Government Federal Identity Program (FIP) Bar */}
+      {/* Canadian economic intelligence identity strip — not a government signature. */}
       <div data-print-hide="true" className="border-b border-borderSubtle bg-[#08130e] relative">
         {/* Top Canada Flag Red Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D8292F]" />
         
         <div className="mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-3 px-4 text-[11px] font-mono sm:px-6 lg:px-8 py-1">
-          {/* FIP Bilingual Signature & Flag */}
+          {/* Bilingual Canadian product signature */}
           <div className="flex min-w-0 items-center gap-3">
             {/* Canadian Flag */}
             <div className="flex shrink-0 items-center shadow-sm rounded-sm overflow-hidden border border-white/20">
@@ -94,27 +100,27 @@ export default function Navbar() {
 
             <div className="flex items-center gap-2">
               <span className="font-bold text-white tracking-tight">
-                {lang === "en" ? "Government of Canada" : "Gouvernement du Canada"}
+                {lang === "en" ? "CanadaOpportunityGraph" : "GrapheOpportunitésCanada"}
               </span>
               <span className="text-text-subtle/60 hidden md:inline">/</span>
               <span className="text-text-subtle hidden md:inline text-[10px]">
-                {lang === "en" ? "Gouvernement du Canada" : "Government of Canada"}
+                {lang === "en" ? "Graphe d’opportunités économiques" : "Economic opportunity graph"}
               </span>
             </div>
 
             <span className="hidden xl:inline text-text-subtle/50">•</span>
             <span className="hidden xl:inline text-text-muted text-[10px]">
               {lang === "en" 
-                ? "Economic Opportunity Graph • Open Geospatial & Capital Mesh" 
-                : "Graphe d'opportunité économique • Maillage géospatial et financier"}
+                ? "Canadian economic intelligence • independent product" 
+                : "Intelligence économique canadienne • produit indépendant"}
             </span>
           </div>
 
-          {/* Right Controls: FIP Language & Standard Status */}
+          {/* Right controls: language and open standard status */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <span className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-[10px] text-aurora">
               <ShieldCheck aria-hidden="true" className="h-3 w-3" />
-              CEGS 1.0
+              CEGS v0.1
             </span>
 
             {/* Official Bilingual Language Switcher */}
